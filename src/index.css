@@ -1,0 +1,147 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 210 20% 98%; /* #F5F5F5 Gris Clair KOF-GO */
+  --foreground: 240 100% 10%; /* #000000 Noir (pour texte principal sur fond clair) */
+  
+  --card: 0 0% 100%; /* #FFFFFF Blanc (pour les cartes) */
+  --card-foreground: 240 100% 10%; /* #000000 Noir (texte sur les cartes) */
+
+  --popover: 0 0% 100%; /* #FFFFFF Blanc */
+  --popover-foreground: 240 100% 10%; /* #000000 Noir */
+
+  --primary: 210 100% 20%; /* #003366 Bleu KOF-GO */
+  --primary-foreground: 0 0% 100%; /* #FFFFFF Blanc (texte sur boutons primaires) */
+
+  --secondary: 240 0% 20%; /* #333333 Gris Foncé KOF-GO */
+  --secondary-foreground: 0 0% 100%; /* #FFFFFF Blanc (texte sur éléments secondaires foncés) */
+
+  --muted: 210 17% 93%; /* #E8E8E8 Variante de gris clair */
+  --muted-foreground: 240 0% 40%; /* #666666 Gris moyen pour texte muté */
+
+  --accent: 45 100% 50%; /* #FFD700 Or KOF-GO */
+  --accent-foreground: 240 100% 10%; /* #000000 Noir (texte sur accents or) */
+
+  --destructive: 0 72% 51%; /* Rouge pour erreurs */
+  --destructive-foreground: 0 0% 100%; /* Blanc */
+
+  --border: 210 14% 89%; /* #D9D9D9 Gris clair pour bordures */
+  --input: 210 14% 89%; /* #D9D9D9 Fond des inputs */
+  --ring: 210 100% 20%; /* #003366 Bleu KOF-GO pour focus rings */
+
+  --radius: 0.5rem; /* rounded-lg */
+}
+
+.dark {
+  --background: 240 0% 13%; /* #212121 Un gris très foncé pour le mode sombre */
+  --foreground: 210 20% 98%; /* #F5F5F5 Texte clair en mode sombre */
+  
+  --card: 240 0% 20%; /* #333333 Gris Foncé KOF-GO pour les cartes en mode sombre */
+  --card-foreground: 210 20% 98%; /* #F5F5F5 Texte clair sur les cartes en mode sombre */
+
+  --popover: 240 0% 13%; /* #212121 */
+  --popover-foreground: 210 20% 98%; /* #F5F5F5 */
+
+  --primary: 210 100% 30%; /* #004C99 Bleu KOF-GO un peu plus clair pour contraste en sombre */
+  --primary-foreground: 0 0% 100%; /* #FFFFFF */
+
+  --secondary: 240 0% 27%; /* #454545 Gris un peu plus clair que le fond pour éléments secondaires */
+  --secondary-foreground: 0 0% 100%; /* #FFFFFF */
+
+  --muted: 240 0% 27%; /* #454545 */
+  --muted-foreground: 210 15% 65%; /* #99A3AD Texte muté plus clair */
+
+  --accent: 45 100% 55%; /* #FFDE2A Or KOF-GO un peu plus vif */
+  --accent-foreground: 240 100% 10%; /* #000000 */
+
+  --border: 240 0% 27%; /* #454545 Bordures en mode sombre */
+  --input: 240 0% 27%; /* #454545 Fond des inputs en mode sombre */
+  --ring: 210 100% 30%; /* #004C99 */
+}
+
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Montserrat', 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', 'Inter', sans-serif; /* Police principale pour les titres */
+  letter-spacing: -0.025em; 
+  font-weight: 700; /* Assurer que les titres sont en gras par défaut */
+}
+
+.font-serif { /* Classe utilitaire pour la police Merriweather si besoin */
+  font-family: 'Merriweather', serif;
+}
+
+.gradient-text-kofgo {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.7);
+  border-radius: 10px;
+  border: 2px solid hsl(var(--background));
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
+
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring) / 0.8);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px hsl(var(--ring) / 0.2);
+}
+
+.floating-animation {
+  animation: float 8s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-10px) rotate(3deg); }
+  50% { transform: translateY(0px) rotate(0deg); }
+  75% { transform: translateY(10px) rotate(-3deg); }
+}
+
+.ql-align-left {
+  text-align: left;
+}
+.ql-align-center {
+  text-align: center;
+}
+.ql-align-right {
+  text-align: right;
+}
+.ql-align-justify {
+  text-align: justify;
+}
+
