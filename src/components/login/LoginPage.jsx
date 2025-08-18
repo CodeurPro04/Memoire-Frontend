@@ -20,8 +20,10 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       const response = await api.post("/patient/login", { email, password });
-      loginUser(response.data.patient, "patient");
-      navigate("/");
+      const patient = response.data.patient;
+      const accessToken = response.data.access_token; // ← récupéré depuis Laravel
+      loginUser(patient, "patient", accessToken); // ← stocke le token dans le contexte
+      navigate("/profil-patient"); // redirection vers la page profil
     } catch (err) {
       setError(err.response?.data?.message || "Erreur serveur");
     }

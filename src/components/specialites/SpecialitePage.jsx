@@ -1,13 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   HeartPulse,
   Brain,
-  Activity, // remplacement pour Pneumologie
-  UserCheck, // remplacement pour Dentisterie
+  Activity,
+  UserCheck,
   Eye,
   Baby,
-  Zap, // remplacement pour Hépatologie
+  Zap,
   Stethoscope,
   Microscope,
   Bone,
@@ -15,92 +15,62 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import api from "@/api/axios";
+
+// Mapping des icônes par spécialité
+const iconMap = {
+  Cardiologue: <HeartPulse className="h-6 w-6 text-red-500" />,
+  Neurologue: <Brain className="h-6 w-6 text-blue-500" />,
+  Orthopédie: <Bone className="h-6 w-6 text-amber-500" />,
+  Dentisterie: <UserCheck className="h-6 w-6 text-teal-500" />,
+  Ophtalmologue: <Eye className="h-6 w-6 text-indigo-500" />,
+  Pédiatre: <Baby className="h-6 w-6 text-pink-500" />,
+  Pneumologue: <Activity className="h-6 w-6 text-emerald-500" />,
+  Hépatologue: <Zap className="h-6 w-6 text-purple-500" />,
+  Généraliste: <Stethoscope className="h-6 w-6 text-green-500" />,
+  Dermatologue: <HeartPulse className="h-6 w-6 text-orange-500" />, // exemple couleur différente
+  Gynécologue: <HeartPulse className="h-6 w-6 text-pink-600" />, // exemple couleur différente
+  "Biologie médicale": <Microscope className="h-6 w-6 text-cyan-500" />,
+};
 
 const SpecialitesPage = () => {
   const navigate = useNavigate();
+  const [specialites, setSpecialites] = useState([]);
 
-  const specialites = [
-    {
-      id: 1,
-      nom: "Cardiologie",
-      icon: <HeartPulse className="h-6 w-6 text-red-500" />,
-      description: "Soins du cœur et du système cardiovasculaire",
-      medecins: 24,
-      bgColor: "bg-red-50",
-    },
-    {
-      id: 2,
-      nom: "Neurologie",
-      icon: <Brain className="h-6 w-6 text-blue-500" />,
-      description: "Troubles du système nerveux et du cerveau",
-      medecins: 18,
-      bgColor: "bg-blue-50",
-    },
-    {
-      id: 3,
-      nom: "Orthopédie",
-      icon: <Bone className="h-6 w-6 text-amber-500" />,
-      description: "Problèmes musculo-squelettiques et traumatologie",
-      medecins: 32,
-      bgColor: "bg-amber-50",
-    },
-    {
-      id: 4,
-      nom: "Dentisterie",
-      icon: <UserCheck className="h-6 w-6 text-teal-500" />,
-      description: "Soins dentaires et bucco-dentaires",
-      medecins: 28,
-      bgColor: "bg-teal-50",
-    },
-    {
-      id: 5,
-      nom: "Ophtalmologie",
-      icon: <Eye className="h-6 w-6 text-indigo-500" />,
-      description: "Santé oculaire et correction visuelle",
-      medecins: 17,
-      bgColor: "bg-indigo-50",
-    },
-    {
-      id: 6,
-      nom: "Pédiatrie",
-      icon: <Baby className="h-6 w-6 text-pink-500" />,
-      description: "Soins médicaux pour enfants et adolescents",
-      medecins: 35,
-      bgColor: "bg-pink-50",
-    },
-    {
-      id: 7,
-      nom: "Pneumologie",
-      icon: <Activity className="h-6 w-6 text-emerald-500" />,
-      description: "Maladies respiratoires et pulmonaires",
-      medecins: 14,
-      bgColor: "bg-emerald-50",
-    },
-    {
-      id: 8,
-      nom: "Hépatologie",
-      icon: <Zap className="h-6 w-6 text-purple-500" />,
-      description: "Troubles du foie et des voies biliaires",
-      medecins: 9,
-      bgColor: "bg-purple-50",
-    },
-    {
-      id: 9,
-      nom: "Médecine générale",
-      icon: <Stethoscope className="h-6 w-6 text-green-500" />,
-      description: "Soins primaires et suivi médical global",
-      medecins: 42,
-      bgColor: "bg-green-50",
-    },
-    {
-      id: 10,
-      nom: "Biologie médicale",
-      icon: <Microscope className="h-6 w-6 text-cyan-500" />,
-      description: "Analyses médicales et diagnostics biologiques",
-      medecins: 12,
-      bgColor: "bg-cyan-50",
-    },
-  ];
+  useEffect(() => {
+    const fetchSpecialites = async () => {
+      try {
+        const response = await api.get("/medecins");
+        const medecins = response.data;
+
+        // Compter le nombre de médecins par spécialité
+        const countBySpecialite = medecins.reduce((acc, m) => {
+          const specialiteName = m.specialite || "Médecine générale"; // fallback
+          if (!acc[specialiteName]) acc[specialiteName] = 0;
+          acc[specialiteName]++;
+          return acc;
+        }, {});
+
+        // Transformer en tableau pour la grille
+        const data = Object.keys(countBySpecialite).map((nom, idx) => ({
+          id: idx + 1,
+          nom,
+          icon: iconMap[nom] || (
+            <Stethoscope className="h-6 w-6 text-gray-500" />
+          ),
+          description: `Soins spécialisés en ${nom}`,
+          medecins: countBySpecialite[nom],
+          bgColor: "bg-gray-50", // tu peux personnaliser couleur par spécialité si tu veux
+        }));
+
+        setSpecialites(data);
+      } catch (err) {
+        console.error("Erreur lors du chargement des spécialités :", err);
+      }
+    };
+
+    fetchSpecialites();
+  }, []);
 
   const handleSpecialtyClick = (specialty) => {
     navigate(`/trouver-medecin?specialite=${encodeURIComponent(specialty)}`);
@@ -109,7 +79,7 @@ const SpecialitesPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-blue-600 to-teal-500 text-white py-24 overflow-hidden py-28">
+      <div className="relative bg-gradient-to-r from-blue-600 to-teal-500 text-white py-28 overflow-hidden">
         <div className="container mx-auto px-6 text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -168,6 +138,7 @@ const SpecialitesPage = () => {
           ))}
         </div>
       </div>
+
       {/* ===== CTA FINAL ===== */}
       <div className="bg-gradient-to-r from-blue-600 to-teal-500 text-white py-16">
         <div className="container mx-auto px-6 text-center">

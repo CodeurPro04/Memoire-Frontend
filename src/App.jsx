@@ -21,6 +21,8 @@ import SingupPage from "@/components/signup/SingupPage";
 import SingupMedcin from "@/components/signup/SingupMedcin";
 import DocteursPage from "@/components/medécin/DocteursPage";
 import MedecinProfilePage from "@/components/medécin/MedecinProfilePage";
+import ProfilPage from "@/components/medécin/ProfilPage";
+import ProfilePage from "@/components/patient/ProfilePage";
 import SpecialitePage from "@/components/specialites/SpecialitePage";
 import InfosPage from "@/components/infos/InfosPage";
 import RealisationsPage from "@/pages/RealisationsPage";
@@ -79,6 +81,8 @@ function App() {
           <Route path="/register-medcin" element={<SingupMedcin />} />
           <Route path="/trouver-medecin" element={<DocteursPage />} />
           <Route path="/profil-medecin/:id" element={<MedecinProfilePage />} />
+          <Route path="/profil-medecin" element={<ProfilPage />} />
+          <Route path="/profil-patient" element={<ProfilePage />} />
           <Route path="/specialites" element={<SpecialitePage />} />
           <Route path="/comment-ca-marche" element={<InfosPage />} />
           <Route path="/realisations" element={<RealisationsPage />} />

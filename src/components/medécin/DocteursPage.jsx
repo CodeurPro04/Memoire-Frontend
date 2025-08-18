@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,11 +12,14 @@ import {
   Filter,
   Clock,
   Award,
+  User,
+  Mail,
+  Phone,
 } from "lucide-react";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectTrigger,
@@ -25,10 +28,15 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AuthContext } from "@/context/AuthContext";
+import api from "@/api/axios";
+import defaultAvatar from "@/assets/default-avatar.png";
+import SafeAvatar from "@/components/common/SafeAvatar";
 
 const TrouverMedecinPremium = () => {
-  const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
   const [specialty, setSpecialty] = useState("");
   const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(true);
@@ -40,158 +48,55 @@ const TrouverMedecinPremium = () => {
     experience: "all",
     rating: "all",
   });
+  const [medecins, setMedecins] = useState([]);
 
-  // Données premium avec plus d'informations
-  const medecins = [
-    {
-      id: 1,
-      nom: "Charles Kouassi",
-      specialite: "Cardiologie",
-      sousSpecialite: "Cardiologie Interventionnelle",
-      ville: "Abidjan, Plateau",
-      quartier: "Angré 8ème Tranche",
-      image: "/medécin/med1.jpg",
-      experience: 12,
-      rating: 4.9,
-      reviews: 128,
-      languages: ["Français", "Anglais"],
-      disponibilite: "Aujourd'hui",
-      prix: 25000,
-      bio: "Cardiologue expérimentée avec une spécialisation en interventions coronariennes. Diplômée de l'Université de Paris VI.",
-      education: "MD, PhD Cardiologie",
-      hospital: "CHU de Cocody",
-    },
-    {
-      id: 2,
-      nom: "Jean Koné",
-      specialite: "Dentisterie",
-      sousSpecialite: "Orthodontie",
-      ville: "Abidjan, Cocody",
-      quartier: "Riviera Golf",
-      image: "/medécin/med2.jpg",
-      experience: 8,
-      rating: 4.7,
-      reviews: 86,
-      languages: ["Français", "Espagnol"],
-      disponibilite: "Demain",
-      prix: 18000,
-      bio: "Orthodontiste spécialisé dans les traitements invisalign pour adultes et adolescents. Approche douce et personnalisée.",
-      education: "DDS, MSc Orthodontie",
-      hospital: "Clinique Odontologique des 2 Plateaux",
-    },
-    {
-      id: 3,
-      nom: "Awa Diabaté",
-      specialite: "Pédiatrie",
-      sousSpecialite: "Néonatologie",
-      ville: "Yamoussoukro",
-      quartier: "Kouassi N'Daw",
-      image: "/medécin/med3.jpg",
-      experience: 15,
-      rating: 4.8,
-      reviews: 215,
-      languages: ["Français", "Baoulé"],
-      disponibilite: "Aujourd'hui",
-      prix: 20000,
-      bio: "Pédiatre néonatologiste avec une expertise en soins intensifs néonatals. Passionnée par la santé infantile.",
-      education: "MD, Pédiatrie",
-      hospital: "Hôpital Mère-Enfant de Yamoussoukro",
-    },
-    {
-      id: 4,
-      nom: "Kwame N'Guessan",
-      specialite: "Dermatologie",
-      sousSpecialite: "Dermatologie Esthétique",
-      ville: "Abidjan, Marcory",
-      quartier: "Zone 4",
-      image: "/medécin/med4.jpg",
-      experience: 10,
-      rating: 4.5,
-      reviews: 92,
-      languages: ["Français", "Anglais"],
-      disponibilite: "Cette semaine",
-      prix: 30000,
-      bio: "Dermatologue esthétique spécialisé dans les traitements anti-âge et les soins de la peau noire.",
-      education: "MD, Dermatologie",
-      hospital: "Institut de Dermatologie d'Abidjan",
-    },
-    {
-      id: 5,
-      nom: "Alex Bamba",
-      specialite: "Gynécologie",
-      sousSpecialite: "Obstétrique",
-      ville: "Bouaké",
-      quartier: "Air France",
-      image: "/medécin/med5.jpg",
-      experience: 18,
-      rating: 4.9,
-      reviews: 187,
-      languages: ["Français", "Dioula"],
-      disponibilite: "Demain",
-      prix: 22000,
-      bio: "Gynécologue-obstétricienne avec une approche holistique de la santé féminine à toutes les étapes de la vie.",
-      education: "MD, Gynécologie-Obstétrique",
-      hospital: "Centre Hospitalier Régional de Bouaké",
-    },
-    {
-      id: 6,
-      nom: "Yves Aké",
-      specialite: "Chirurgie",
-      sousSpecialite: "Chirurgie Orthopédique",
-      ville: "Abidjan, Treichville",
-      quartier: "Port-Bouët",
-      image: "/medécin/med6.jpg",
-      experience: 14,
-      rating: 4.6,
-      reviews: 156,
-      languages: ["Français", "Anglais"],
-      disponibilite: "Cette semaine",
-      prix: 35000,
-      bio: "Chirurgien orthopédiste spécialisé dans les prothèses articulaires et la chirurgie du sport.",
-      education: "MD, Chirurgie Orthopédique",
-      hospital: "Clinique Internationale d'Orthopédie",
-    },
-  ];
-
-  // Simuler le chargement
+  // Charger les médecins depuis l'API
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 1500);
-    return () => clearTimeout(timer);
+    const fetchMedecins = async () => {
+      try {
+        const response = await api.get("/medecins");
+        setMedecins(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Erreur lors du chargement des médecins:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchMedecins();
   }, []);
 
   // Filtres avancés
-  const filteredMedecins = medecins.filter((m) => {
+  const filteredMedecins = medecins.filter((medecin) => {
     const matchesSearch =
-      m.nom.toLowerCase().includes(search.toLowerCase()) ||
-      m.specialite.toLowerCase().includes(search.toLowerCase()) ||
-      m.ville.toLowerCase().includes(search.toLowerCase()) ||
-      m.quartier.toLowerCase().includes(search.toLowerCase());
+      medecin.nom.toLowerCase().includes(search.toLowerCase()) ||
+      medecin.prenom.toLowerCase().includes(search.toLowerCase()) ||
+      medecin.specialite.toLowerCase().includes(search.toLowerCase()) ||
+      medecin.address?.toLowerCase().includes(search.toLowerCase());
 
     const matchesSpecialty =
       specialty === "" ||
-      m.specialite.toLowerCase().includes(specialty.toLowerCase()) ||
-      m.sousSpecialite.toLowerCase().includes(specialty.toLowerCase());
+      medecin.specialite.toLowerCase().includes(specialty.toLowerCase());
 
     const matchesLocation =
       location === "" ||
-      m.ville.toLowerCase().includes(location.toLowerCase()) ||
-      m.quartier.toLowerCase().includes(location.toLowerCase());
+      medecin.address?.toLowerCase().includes(location.toLowerCase());
 
     const matchesFilters =
       (filters.availability === "all" ||
         (filters.availability === "today" &&
-          m.disponibilite === "Aujourd'hui") ||
+          medecin.disponibilite === "Aujourd'hui") ||
         (filters.availability === "tomorrow" &&
-          m.disponibilite === "Demain")) &&
+          medecin.disponibilite === "Demain")) &&
       (filters.experience === "all" ||
-        (filters.experience === "junior" && m.experience < 5) ||
+        (filters.experience === "junior" && medecin.annees_experience < 5) ||
         (filters.experience === "mid" &&
-          m.experience >= 5 &&
-          m.experience < 10) ||
-        (filters.experience === "senior" && m.experience >= 10)) &&
+          medecin.annees_experience >= 5 &&
+          medecin.annees_experience < 10) ||
+        (filters.experience === "senior" && medecin.annees_experience >= 10)) &&
       (filters.rating === "all" ||
-        (filters.rating === "4+" && m.rating >= 4) ||
-        (filters.rating === "4.5+" && m.rating >= 4.5));
+        (filters.rating === "4+" && medecin.rating >= 4) ||
+        (filters.rating === "4.5+" && medecin.rating >= 4.5));
 
     return (
       matchesSearch && matchesSpecialty && matchesLocation && matchesFilters
@@ -207,13 +112,14 @@ const TrouverMedecinPremium = () => {
   };
 
   const specialitesUniques = [...new Set(medecins.map((m) => m.specialite))];
-  const villesUniques = [...new Set(medecins.map((m) => m.ville))];
+  const villesUniques = [
+    ...new Set(medecins.map((m) => m.address?.split(",")[0]).filter(Boolean)),
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* ===== HERO SECTION ANIMÉE ===== */}
+      {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-teal-500 text-white py-24">
-        {/* Animation de fond */}
         <motion.div
           className="absolute inset-0 opacity-10"
           animate={{
@@ -261,16 +167,14 @@ const TrouverMedecinPremium = () => {
         </div>
       </div>
 
-      {/* ===== BARRE DE RECHERCHE AVANCÉE ===== */}
+      {/* Barre de recherche */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
         className="bg-white shadow-lg rounded-xl p-6 relative z-20 -mt-12 mx-4 sm:mx-8 md:mx-16 lg:mx-20"
       >
-        {/* Ligne principale des champs de recherche */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          {/* Champ de recherche texte */}
           <div className="relative col-span-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-blue-400" />
@@ -284,7 +188,6 @@ const TrouverMedecinPremium = () => {
             />
           </div>
 
-          {/* Sélecteur de spécialité */}
           <div className="relative col-span-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Stethoscope className="h-5 w-5 text-blue-400" />
@@ -307,7 +210,6 @@ const TrouverMedecinPremium = () => {
             </Select>
           </div>
 
-          {/* Sélecteur de localisation */}
           <div className="relative col-span-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <MapPin className="h-5 w-5 text-blue-400" />
@@ -330,7 +232,6 @@ const TrouverMedecinPremium = () => {
             </Select>
           </div>
 
-          {/* Bouton Filtres */}
           <Button
             onClick={() => setShowFilters(!showFilters)}
             variant="outline"
@@ -341,7 +242,6 @@ const TrouverMedecinPremium = () => {
           </Button>
         </div>
 
-        {/* Section des filtres avancés */}
         <AnimatePresence>
           {showFilters && (
             <motion.div
@@ -352,7 +252,6 @@ const TrouverMedecinPremium = () => {
               className="mt-4 pt-4 border-t border-gray-100"
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Filtre Disponibilité */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
                     Disponibilité
@@ -373,8 +272,6 @@ const TrouverMedecinPremium = () => {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {/* Filtre Expérience */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
                     Expérience
@@ -396,8 +293,6 @@ const TrouverMedecinPremium = () => {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {/* Filtre Note minimale */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
                     Note minimale
@@ -424,10 +319,10 @@ const TrouverMedecinPremium = () => {
         </AnimatePresence>
       </motion.div>
 
-      {/* ===== CONTENU PRINCIPAL ===== */}
+      {/* Contenu principal */}
       <div className="container mx-auto px-4 py-12">
         <div className="flex flex-col md:flex-row gap-8">
-          {/* SIDEBAR (pour filtres supplémentaires) */}
+          {/* Sidebar avec filtres supplémentaires */}
           <div className="md:w-1/4">
             <motion.div
               className="bg-white rounded-xl shadow-md p-6 sticky top-6"
@@ -469,7 +364,7 @@ const TrouverMedecinPremium = () => {
 
                 <div>
                   <h4 className="font-medium text-gray-700 mb-2 flex items-center gap-2">
-                    <MapPin className="w-4 h-4" /> Villes
+                    <MapPin className="w-4 h-4" /> Ville
                   </h4>
                   <div className="space-y-2">
                     {villesUniques.map((ville) => (
@@ -497,7 +392,7 @@ const TrouverMedecinPremium = () => {
             </motion.div>
           </div>
 
-          {/* LISTE DES MEDECINS */}
+          {/* Liste des médecins */}
           <div className="w-full md:w-3/4 mx-auto px-4">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
               <motion.h2
@@ -595,10 +490,15 @@ const TrouverMedecinPremium = () => {
                       <div className="p-6">
                         <div className="flex items-start space-x-4">
                           <div className="relative">
-                            <img
-                              src={medecin.image}
-                              alt={medecin.nom}
-                              className="w-20 h-20 rounded-full object-cover border-2 border-blue-100 shadow-md"
+                            <SafeAvatar
+                              src={medecin?.photo} // peut être null/undefined, c'est géré
+                              alt={`Dr. ${medecin?.prenom || ""} ${
+                                medecin?.nom || ""
+                              }`}
+                              size={80}
+                              initials={`${medecin?.prenom?.charAt(0) ?? ""}${
+                                medecin?.nom?.charAt(0) ?? ""
+                              }`}
                             />
                             <button
                               onClick={() => toggleFavorite(medecin.id)}
@@ -622,19 +522,16 @@ const TrouverMedecinPremium = () => {
                             <div className="flex justify-between items-start">
                               <div>
                                 <h3 className="text-lg font-bold text-gray-900">
-                                  Dr. {medecin.nom}
+                                  Dr. {medecin.prenom} {medecin.nom}
                                 </h3>
                                 <p className="text-blue-600 font-medium">
                                   {medecin.specialite}
                                 </p>
-                                <p className="text-sm text-gray-600">
-                                  {medecin.sousSpecialite}
-                                </p>
                               </div>
                               <div className="flex items-center bg-blue-50 px-2 py-1 rounded">
-                                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                <Star className="w-4 h-4 text-yellow-500" />
                                 <span className="ml-1 text-sm font-medium">
-                                  {medecin.rating}
+                                  4.8
                                 </span>
                               </div>
                             </div>
@@ -642,16 +539,17 @@ const TrouverMedecinPremium = () => {
                             <div className="mt-2 space-y-1">
                               <p className="flex items-center text-sm text-gray-600">
                                 <MapPin className="w-4 h-4 mr-1 text-blue-400" />
-                                {medecin.quartier}, {medecin.ville}
+                                {medecin.address || "Adresse non renseignée"}
                               </p>
                               <p className="flex items-center text-sm text-gray-600">
                                 <Clock className="w-4 h-4 mr-1 text-blue-400" />
-                                {medecin.disponibilite} •{" "}
-                                {medecin.prix.toLocaleString()} FCFA
+                                Disponible aujourd'hui • 25 000 FCFA
                               </p>
-                              <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-                                {medecin.bio}
-                              </p>
+                              {medecin.bio && (
+                                <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+                                  {medecin.bio}
+                                </p>
+                              )}
                             </div>
 
                             <div className="mt-4 flex flex-wrap gap-2">
@@ -659,13 +557,10 @@ const TrouverMedecinPremium = () => {
                                 variant="secondary"
                                 className="text-blue-600 bg-blue-50"
                               >
-                                {medecin.experience} ans exp.
+                                {medecin.annees_experience || "?"} ans exp.
                               </Badge>
-                              {medecin.languages.map((lang) => (
-                                <Badge key={lang} variant="outline">
-                                  {lang}
-                                </Badge>
-                              ))}
+                              <Badge variant="outline">Français</Badge>
+                              <Badge variant="outline">Anglais</Badge>
                             </div>
                           </div>
                         </div>
@@ -682,7 +577,7 @@ const TrouverMedecinPremium = () => {
                           </Button>
                           <Button
                             onClick={() =>
-                              alert(`Prendre rendez-vous avec ${medecin.nom}`)
+                              navigate(`/profil-medecin/${medecin.id}`)
                             }
                             className="bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2"
                           >
@@ -699,7 +594,7 @@ const TrouverMedecinPremium = () => {
         </div>
       </div>
 
-      {/* ===== CTA FINAL ===== */}
+      {/* CTA Final */}
       <div className="bg-gradient-to-r from-blue-600 to-teal-500 text-white py-16">
         <div className="container mx-auto px-6 text-center">
           <motion.div

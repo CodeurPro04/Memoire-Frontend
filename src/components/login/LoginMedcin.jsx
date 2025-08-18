@@ -26,7 +26,8 @@ const LoginMedcin = () => {
     try {
       const response = await api.post("/medecin/login", { email, password });
       const medecin = response.data.medecin;
-      loginUser(medecin, "medecin"); // ← on indique que c’est un medecin
+      const accessToken = response.data.access_token; // ← récupéré depuis Laravel
+      loginUser(medecin, "medecin", accessToken);
       navigate("/profil-medecin");
     } catch (err) {
       setError(err.response?.data?.message || "Erreur serveur");
