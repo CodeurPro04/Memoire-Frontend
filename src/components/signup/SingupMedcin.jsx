@@ -5,40 +5,61 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
 import { UserPlus } from "lucide-react";
+import api from "@/api/axios";
 
 const SingupMedcin = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [specialty, setSpecialty] = useState("");
   const [phone, setPhone] = useState("");
+  const [specialty, setSpecialty] = useState("");
+  const [address, setAddress] = useState("");
   const [error, setError] = useState("");
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    // Validation simple
+
     if (
       !firstName ||
       !lastName ||
       !email ||
       !password ||
+      !phone ||
       !specialty ||
-      !phone
+      !address
     ) {
       setError(t("signup.errorEmpty"));
       return;
     }
-    // Ici tu peux connecter ton backend pour l'inscription
-    // Redirection fictive après succès
-    navigate("/login");
+
+    try {
+      await api.post("/medecin/register", {
+        prenom: firstName,
+        nom: lastName,
+        email: email,
+        telephone: phone,
+        specialite: specialty,
+        address: address,
+        password: password,
+      });
+
+      // Si inscription réussie -> redirection
+      navigate("/login-medecin");
+    } catch (err) {
+      if (err.response && err.response.data) {
+        setError(err.response.data.message || "Erreur lors de l'inscription");
+      } else {
+        setError("Erreur serveur, réessayez.");
+      }
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-600 via-sky-800 to-sky-600 flex items-center justify-center relative overflow-hidden py-28">
-      {/* Particules animées */}
       <motion.div
         className="absolute inset-0 opacity-10"
         animate={{ rotate: 360 }}
@@ -60,10 +81,10 @@ const SingupMedcin = () => {
             className="mx-auto w-24 h-24 object-contain rounded-full shadow-lg mb-4"
           />
           <h2 className="text-3xl font-extrabold text-sky-600 dark:text-green-400 mt-4">
-            {t("signup.title")}
+            {t("signup.titleMedecin")}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-            {t("signup.subtitle")}
+            {t("signup.subtitleMedecin")}
           </p>
         </div>
 
@@ -153,18 +174,21 @@ const SingupMedcin = () => {
               />
             </div>
           </div>
+
+          {/* Adresse */}
           <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {t("signup.adresse")}
-              </label>
-              <Input
-                type="text"
-                placeholder={t("signup.adressePlaceholder")}
-                value={specialty}
-                onChange={(e) => setSpecialty(e.target.value)}
-                required
-              />
-            </div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t("signup.address")}
+            </label>
+            <Input
+              type="text"
+              placeholder={t("signup.addressPlaceholder")}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              required
+            />
+          </div>
+
           <Button
             type="submit"
             className="w-full flex items-center justify-center bg-gradient-to-r from-sky-500 via-teal-400 to-cyan-400 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-sky-500/40 transition-all duration-300"

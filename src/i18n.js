@@ -286,6 +286,8 @@ const resources = {
       "nav.language": "Langue",
       "nav.openMenu": "Ouvrir le menu",
       "nav.login": "Connexion",
+      "nav.profile":"profile",
+      "nav.logout":"Deconnexion",
 
       services: {
         mainTitle: "Nos services médicaux",

@@ -1,34 +1,41 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { useTranslation } from "react-i18next";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
 import { LogIn } from "lucide-react";
+import api from "@/api/axios";
+import { AuthContext } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const LoginMedcin = () => {
   const { t } = useTranslation();
+  const { loginUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Ici tu peux connecter ton backend ou mock
     if (!email || !password) {
-      setError(t("login.errorEmpty"));
+      setError("Veuillez remplir tous les champs");
       return;
     }
-    // Redirection fictive après succès
-    navigate("/");
+
+    try {
+      const response = await api.post("/medecin/login", { email, password });
+      const medecin = response.data.medecin;
+      loginUser(medecin, "medecin"); // ← on indique que c’est un medecin
+      navigate("/profil-medecin");
+    } catch (err) {
+      setError(err.response?.data?.message || "Erreur serveur");
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-600 via-sky-800 to-sky-600 flex items-center justify-center relative overflow-hidden py-28">
-      
-      {/* Particules animées */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 opacity-10"
         animate={{ rotate: 360 }}
         transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
@@ -58,6 +65,7 @@ const LoginMedcin = () => {
 
         <form onSubmit={handleLogin} className="space-y-6">
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t("login.email")}

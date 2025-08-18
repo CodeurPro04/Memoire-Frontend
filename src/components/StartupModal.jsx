@@ -25,7 +25,7 @@ const StartupModal = () => {
   const handleClose = () => setIsOpen(false);
   const handleRedirect = () => {
     setIsOpen(false);
-    navigate("/startup");
+    navigate("/trouver-medecin");
   };
 
   return (
@@ -91,7 +91,7 @@ const StartupModal = () => {
               <div className="p-8 md:p-10 relative z-10">
                 <div className="flex justify-center mb-8">
                   <motion.img
-                    src="/kofgologo.png"
+                    src="/logo/logo1.png"
                     alt="Logo KOFGO"
                     className="h-20 md:h-24 transition-all duration-300 hover:scale-105"
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -110,16 +110,14 @@ const StartupModal = () => {
 
                 <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-4 drop-shadow-lg">
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 drop-shadow-lg">
-                    Innovation
+                    DocOnline
                   </span>{" "}
-                  &<br />
-                  Accompagnement Start-up
+                  <br />
+                  Votre santé notre priorité
                 </h2>
 
                 <p className="text-gray-600 text-center mb-8 leading-relaxed">
-                  Découvrez notre écosystème dédié aux entrepreneurs et
-                  innovateurs. Nous transformons les idées audacieuses en succès
-                  concrets.
+                  Découvrez notre écosystème dédié aux docteurs. Consultez vos medcins désormais en ligne !
                 </p>
 
                 <div className="flex flex-col space-y-3">
@@ -127,7 +125,7 @@ const StartupModal = () => {
                     onClick={handleRedirect}
                     className="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 hover:bg-emerald-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 shadow hover:shadow-md transform hover:-translate-y-0.5"
                   >
-                    Explorer notre espace Start-up
+                    Explorer nos Docteurs
                   </button>
 
                   <button

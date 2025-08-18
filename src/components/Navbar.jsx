@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Menu,
@@ -7,7 +7,6 @@ import {
   Home,
   User,
   Stethoscope,
-  Calendar,
   Info,
   Newspaper,
   Mail,
@@ -16,10 +15,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
+import { AuthContext } from "@/context/AuthContext";
 
-const Navbar = ({ scrollToSection }) => {
+const Navbar = () => {
+  const { user, role, logoutUser } = useContext(AuthContext);
   const { t, i18n } = useTranslation();
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -90,12 +91,11 @@ const Navbar = ({ scrollToSection }) => {
                   key={link.path}
                   variant="ghost"
                   onClick={() => navigate(link.path)}
-                  className={`transition-all duration-300 px-3 py-2 rounded-lg text-sm font-medium flex items-center
-            ${
-              isActive
-                ? "text-white dark:text-green-400 font-bold bg-gradient-to-r from-sky-500 to-teal-400 dark:bg-green-900/20"
-                : "text-black dark:text-white hover:text-black dark:hover:text-green-400 hover:bg-green-100/40 dark:hover:bg-green-900/20"
-            }`}
+                  className={`transition-all duration-300 px-3 py-2 rounded-lg text-sm font-medium flex items-center ${
+                    isActive
+                      ? "text-white dark:text-green-400 font-bold bg-gradient-to-r from-sky-500 to-teal-400 dark:bg-green-900/20"
+                      : "text-black dark:text-white hover:text-black dark:hover:text-green-400 hover:bg-green-100/40 dark:hover:bg-green-900/20"
+                  }`}
                 >
                   {link.icon}
                   {t(link.labelKey)}
@@ -104,44 +104,62 @@ const Navbar = ({ scrollToSection }) => {
             })}
           </div>
 
-          {/* Connexion + langues à droite */}
+          {/* Connexion + langues */}
           <div className="hidden md:flex items-center space-x-2">
+            {/* Langues */}
             <Button
               variant={i18n.language === "fr" ? "default" : "ghost"}
               size="sm"
               onClick={() => changeLanguage("fr")}
-              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold ${
-                i18n.language === "fr"
-                  ? "bg-gradient-to-r from-sky-500 to-teal-400 text-white"
-                  : "text-black dark:text-white hover:bg-green-100/40 dark:hover:bg-green-900/20"
-              }`}
             >
-              <img src="/flags/fr.png" alt="Français" className="w-4 h-4" />
-              FR
+              <img src="/flags/fr.png" alt="FR" className="w-4 h-4" /> FR
             </Button>
-
             <Button
               variant={i18n.language === "en" ? "default" : "ghost"}
               size="sm"
               onClick={() => changeLanguage("en")}
-              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold ${
-                i18n.language === "en"
-                  ? "bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 text-white"
-                  : "text-black dark:text-white hover:bg-green-100/40 dark:hover:bg-green-900/20"
-              }`}
             >
-              <img src="/flags/eng.png" alt="English" className="w-4 h-4" />
-              EN
+              <img src="/flags/eng.png" alt="EN" className="w-4 h-4" /> EN
             </Button>
 
-            <Button
-              variant="default"
-              onClick={() => navigate("/login")}
-              className="flex items-center bg-gradient-to-r from-sky-500 to-teal-400 hover:bg-emerald-600 text-white"
-            >
-              <LogIn className="w-5 h-5 mr-2" />
-              {t("nav.login")}
-            </Button>
+            {/* Bouton Connexion / Profil / Déconnexion */}
+            {user ? (
+              <div className="flex items-center gap-2">
+                {/* Bouton Profil */}
+                <Button
+                  variant="default"
+                  onClick={() =>
+                    navigate(
+                      role === "patient" ? "/profil-patient" : "/profil-medecin"
+                    )
+                  }
+                  className="flex items-center justify-center rounded-full bg-gradient-to-r from-sky-500 to-teal-400 hover:from-teal-400 hover:to-sky-500 text-white w-10 h-10 p-2 shadow-lg transition-all duration-300"
+                >
+                  <User className="w-5 h-5" />
+                </Button>
+
+                {/* Bouton Déconnexion */}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    logoutUser();
+                    navigate("/");
+                  }}
+                  className="flex items-center justify-center rounded-full border-red-500 text-red-500 hover:bg-red-500/10 w-10 h-10 p-2 transition-all duration-300"
+                >
+                  <LogIn className="w-5 h-5 rotate-180" />{" "}
+                  {/* icône inversée pour symboliser la sortie */}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="default"
+                onClick={() => navigate("/login")}
+                className="flex items-center justify-center rounded-full bg-gradient-to-r from-sky-500 to-teal-400 hover:from-teal-400 hover:to-sky-500 text-white w-10 h-10 p-2 shadow-lg transition-all duration-300"
+              >
+                <LogIn className="w-5 h-5" />
+              </Button>
+            )}
           </div>
 
           {/* Mobile toggle */}
@@ -164,85 +182,87 @@ const Navbar = ({ scrollToSection }) => {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
           className="md:hidden bg-white dark:bg-black border-t border-black/10 dark:border-white/10"
         >
           <div className="px-4 py-4 space-y-4">
-            {/* Bloc liens */}
-            <div className="space-y-2">
-              {navLinks.map((link) => {
-                const isActive = location.pathname === link.path;
-                return (
-                  <Button
-                    key={link.path}
-                    variant="ghost"
-                    onClick={() => {
-                      navigate(link.path);
-                      setIsMenuOpen(false);
-                    }}
-                    className={`w-full justify-start px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-300
-                ${
-                  isActive
-                    ? "text-white dark:text-green-400 font-bold bg-gradient-to-r from-sky-500 to-teal-400 dark:bg-green-900/20"
-                    : "text-black dark:text-white hover:text-black dark:hover:text-green-400 hover:bg-green-100/40 dark:hover:bg-green-900/20"
-                }`}
-                  >
-                    {link.icon}
-                    {t(link.labelKey)}
-                  </Button>
-                );
-              })}
-            </div>
-
-            {/* Bloc langue */}
-            <div className="pt-3 border-t border-black/10 dark:border-white/10">
-              <p className="text-sm font-medium text-black dark:text-white mb-3 flex items-center">
-                <Globe size={16} className="mr-2" />
-                {t("nav.language")}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant={i18n.language === "fr" ? "default" : "ghost"}
-                  onClick={() => changeLanguage("fr")}
-                  className={`flex-1 flex items-center gap-2 font-semibold ${
-                    i18n.language === "fr"
-                      ? "bg-gradient-to-r from-sky-500 to-teal-400 text-white"
-                      : "text-black dark:text-white hover:bg-green-100/40 dark:hover:bg-green-900/20"
-                  }`}
-                >
-                  <img src="/flags/fr.png" alt="Français" className="w-4 h-4" />
-                  Français
-                </Button>
-
-                <Button
-                  variant={i18n.language === "en" ? "default" : "ghost"}
-                  onClick={() => changeLanguage("en")}
-                  className={`flex-1 flex items-center gap-2 font-semibold ${
-                    i18n.language === "en"
-                      ? "bg-gradient-to-r from-sky-500 to-teal-400 text-white"
-                      : "text-black dark:text-white hover:bg-green-100/40 dark:hover:bg-green-900/20"
-                  }`}
-                >
-                  <img src="/flags/eng.png" alt="English" className="w-4 h-4" />
-                  English
-                </Button>
-              </div>
-            </div>
-
-            {/* Bloc connexion */}
-            <div className="pt-3 border-t border-black/10 dark:border-white/10">
+            {navLinks.map((link) => (
               <Button
-                variant="default"
+                key={link.path}
+                variant="ghost"
                 onClick={() => {
-                  navigate("/login");
+                  navigate(link.path);
                   setIsMenuOpen(false);
                 }}
-                className="w-full flex items-center justify-center bg-gradient-to-r from-sky-500 to-teal-400 hover:bg-emerald-600 text-white"
+                className="w-full justify-start px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
               >
-                <LogIn className="w-5 h-5 mr-2" />
-                {t("nav.login")}
+                {link.icon} {t(link.labelKey)}
               </Button>
+            ))}
+
+            {/* Sélection de langue mobile */}
+            <div className="flex items-center justify-start gap-2 px-4 py-2">
+              <Button
+                variant={i18n.language === "fr" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => changeLanguage("fr")}
+              >
+                <img src="/flags/fr.png" alt="FR" className="w-4 h-4" /> FR
+              </Button>
+              <Button
+                variant={i18n.language === "en" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => changeLanguage("en")}
+              >
+                <img src="/flags/eng.png" alt="EN" className="w-4 h-4" /> EN
+              </Button>
+            </div>
+
+            {/* Connexion / Profil / Déconnexion mobile */}
+            <div className="flex flex-col gap-2 px-4 py-2">
+              {user ? (
+                <>
+                  <Button
+                    variant="default"
+                    onClick={() => {
+                      navigate(
+                        role === "patient"
+                          ? "/profil-patient"
+                          : "/profil-medecin"
+                      );
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-start gap-2 px-4 py-3 bg-gradient-to-r from-sky-500 to-teal-400 hover:from-teal-400 hover:to-sky-500 text-white rounded-lg shadow-lg transition-all duration-300"
+                  >
+                    <User className="w-5 h-5" />
+                    {t("nav.profile")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      logoutUser();
+                      navigate("/");
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-start gap-2 px-4 py-3 rounded-lg border-red-500 text-red-500 hover:bg-red-500/10 transition-all duration-300"
+                  >
+                    <LogIn className="w-5 h-5 rotate-180" />
+                    {t("nav.logout")}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="default"
+                  onClick={() => {
+                    navigate("/login");
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-start gap-2 px-4 py-3 bg-gradient-to-r from-sky-500 to-teal-400 hover:from-teal-400 hover:to-sky-500 text-white rounded-lg shadow-lg transition-all duration-300"
+                >
+                  <LogIn className="w-5 h-5" />
+                  {t("nav.login")}
+                </Button>
+              )}
             </div>
           </div>
         </motion.div>

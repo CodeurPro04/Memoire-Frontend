@@ -1,34 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
 import { LogIn } from "lucide-react";
+import api from "@/api/axios";
+import { AuthContext } from "@/context/AuthContext";
 
 const LoginPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { loginUser } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Ici tu peux connecter ton backend ou mock
-    if (!email || !password) {
-      setError(t("login.errorEmpty"));
-      return;
+    try {
+      const response = await api.post("/patient/login", { email, password });
+      loginUser(response.data.patient, "patient");
+      navigate("/");
+    } catch (err) {
+      setError(err.response?.data?.message || "Erreur serveur");
     }
-    // Redirection fictive après succès
-    navigate("/");
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-600 via-sky-800 to-sky-600 flex items-center justify-center relative overflow-hidden py-28">
-      
-      {/* Particules animées */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 opacity-10"
         animate={{ rotate: 360 }}
         transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
@@ -58,6 +59,7 @@ const LoginPage = () => {
 
         <form onSubmit={handleLogin} className="space-y-6">
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               {t("login.email")}

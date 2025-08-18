@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/Input";
 import { UserPlus } from "lucide-react";
+import api from "@/api/axios";
 
 const SingupPage = () => {
   const { t } = useTranslation();
@@ -17,14 +18,33 @@ const SingupPage = () => {
   const [address, setAddress] = useState("");
   const [error, setError] = useState("");
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
+
     if (!firstName || !lastName || !email || !password || !phone || !address) {
       setError(t("signup.errorEmpty"));
       return;
     }
-    // Ici, appeler ton backend pour créer le client
-    navigate("/login");
+
+    try {
+      await api.post("/patient/register", {
+        nom: lastName,
+        prenom: firstName,
+        email: email,
+        telephone: phone,
+        address: address,
+        password: password,
+      });
+
+      // Si inscription réussie -> redirection
+      navigate("/login");
+    } catch (err) {
+      if (err.response && err.response.data) {
+        setError(err.response.data.message || "Erreur lors de l'inscription");
+      } else {
+        setError("Erreur serveur, réessayez.");
+      }
+    }
   };
 
   return (
