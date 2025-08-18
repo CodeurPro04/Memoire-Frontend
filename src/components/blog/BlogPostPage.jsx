@@ -78,7 +78,7 @@ const BlogPostPage = () => {
             <p className="text-red-600 dark:text-red-400 text-xl">{error}</p>
             <Button
               onClick={() => navigate("/blog")}
-              className="mt-6 bg-gradient-to-r from-emerald-500 to-teal-400"
+              className="mt-6 bg-gradient-to-r from-sky-500 to-teal-400"
             >
               Retour au blog
             </Button>
@@ -110,7 +110,7 @@ const BlogPostPage = () => {
             <Button
               onClick={() => navigate(-1)}
               variant="ghost"
-              className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+              className="flex items-center gap-2 text-sky-600 dark:text-sky-400 hover:bg-sky-500/10"
             >
               <ArrowLeft className="w-5 h-5" />
               Retour aux articles
@@ -118,7 +118,7 @@ const BlogPostPage = () => {
           </div>
 
           <div className="max-w-3xl mx-auto text-center">
-            <span className="inline-block mb-4 px-4 py-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium rounded-full border border-emerald-400/30">
+            <span className="inline-block mb-4 px-4 py-2 bg-sky-500/10 text-sky-600 dark:text-emerald-400 text-sm font-medium rounded-full border border-emerald-400/30">
               {post.category_name || post.category}
             </span>
 

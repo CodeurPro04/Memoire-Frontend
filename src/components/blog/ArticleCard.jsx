@@ -12,7 +12,7 @@ const ArticleCard = ({ article }) => {
             alt={article.title}
             className="w-full h-full object-cover"
           />
-          <div className="absolute top-4 left-4 bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 text-white px-2 py-1 rounded-full text-xs">
+          <div className="absolute top-4 left-4 bg-gradient-to-r from-sky-500 via-sky-400 to-teal-400 text-white px-2 py-1 rounded-full text-xs">
             {article.category}
           </div>
         </div>
@@ -47,7 +47,7 @@ const ArticleCard = ({ article }) => {
             <span className="text-sm">{article.author}</span>
           </div>
           
-          <Button variant="ghost" className="text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+          <Button variant="ghost" className="text-sky-500 hover:bg-sky-50 dark:hover:bg-sky-900/20">
             Lire
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>

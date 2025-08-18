@@ -25,7 +25,7 @@ const LoginMedcin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-600 via-sky-800 to-sky-600 flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-sky-600 via-sky-800 to-sky-600 flex items-center justify-center relative overflow-hidden py-28">
       
       {/* Particules animées */}
       <motion.div 

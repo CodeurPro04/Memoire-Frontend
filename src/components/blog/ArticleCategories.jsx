@@ -13,7 +13,7 @@ const ArticleCategories = ({
           onClick={() => setActiveCategory(category)}
           className={`px-6 py-2 rounded-full border transition-colors ${
             activeCategory === category 
-              ? 'bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 text-white' 
+              ? 'bg-gradient-to-r from-sky-500 via-sky-400 to-teal-400 text-white' 
               : 'border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
           }`}
           initial={{ opacity: 0, y: 20 }}

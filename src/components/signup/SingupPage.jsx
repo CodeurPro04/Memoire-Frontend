@@ -28,9 +28,9 @@ const SingupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-600 via-sky-800 to-sky-600 flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-sky-600 via-sky-800 to-sky-600 flex items-center justify-center relative overflow-hidden py-28">
       {/* Particules animées */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 opacity-10"
         animate={{ rotate: 360 }}
         transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
@@ -61,7 +61,8 @@ const SingupPage = () => {
         <form onSubmit={handleSignup} className="space-y-4">
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* Première ligne : prénom + nom */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {t("signup.firstName")}
@@ -74,7 +75,6 @@ const SingupPage = () => {
                 required
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {t("signup.lastName")}
@@ -89,56 +89,60 @@ const SingupPage = () => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("signup.email")}
-            </label>
-            <Input
-              type="email"
-              placeholder={t("signup.emailPlaceholder")}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+          {/* Deuxième ligne : email + téléphone */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t("signup.email")}
+              </label>
+              <Input
+                type="email"
+                placeholder={t("signup.emailPlaceholder")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t("signup.phone")}
+              </label>
+              <Input
+                type="text"
+                placeholder={t("signup.phonePlaceholder")}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("signup.password")}
-            </label>
-            <Input
-              type="password"
-              placeholder={t("signup.passwordPlaceholder")}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("signup.phone")}
-            </label>
-            <Input
-              type="text"
-              placeholder={t("signup.phonePlaceholder")}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("signup.address")}
-            </label>
-            <Input
-              type="text"
-              placeholder={t("signup.addressPlaceholder")}
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              required
-            />
+          {/* Troisième ligne : mot de passe + adresse */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t("signup.password")}
+              </label>
+              <Input
+                type="password"
+                placeholder={t("signup.passwordPlaceholder")}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t("signup.address")}
+              </label>
+              <Input
+                type="text"
+                placeholder={t("signup.addressPlaceholder")}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           <Button

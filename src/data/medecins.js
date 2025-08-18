@@ -2,7 +2,7 @@
 export const medecins = [
   {
     id: 1,
-    nom: "Dr. Marie Kouassi",
+    nom: "Marie Kouassi",
     specialite: "Cardiologie",
     sousSpecialite: "Cardiologie Interventionnelle",
     ville: "Abidjan, Plateau",
@@ -20,7 +20,7 @@ export const medecins = [
   },
   {
     id: 2,
-    nom: "Dr. Jean Koné",
+    nom: "Jean Koné",
     specialite: "Dentisterie",
     sousSpecialite: "Orthodontie",
     ville: "Abidjan, Cocody",
@@ -38,7 +38,7 @@ export const medecins = [
   },
   {
     id: 3,
-    nom: "Dr. Awa Diabaté",
+    nom: "Awa Diabaté",
     specialite: "Pédiatrie",
     sousSpecialite: "Néonatologie",
     ville: "Yamoussoukro",
@@ -56,7 +56,7 @@ export const medecins = [
   },
   {
     id: 4,
-    nom: "Dr. Kwame N'Guessan",
+    nom: "Kwame N'Guessan",
     specialite: "Dermatologie",
     sousSpecialite: "Dermatologie Esthétique",
     ville: "Abidjan, Marcory",
@@ -74,7 +74,7 @@ export const medecins = [
   },
   {
     id: 5,
-    nom: "Dr. Fatou Bamba",
+    nom: "Fatou Bamba",
     specialite: "Gynécologie",
     sousSpecialite: "Obstétrique",
     ville: "Bouaké",
@@ -92,7 +92,7 @@ export const medecins = [
   },
   {
     id: 6,
-    nom: "Dr. Yves Aké",
+    nom: "Yves Aké",
     specialite: "Chirurgie",
     sousSpecialite: "Chirurgie Orthopédique",
     ville: "Abidjan, Treichville",

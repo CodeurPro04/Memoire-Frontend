@@ -20,7 +20,14 @@ const SingupMedcin = () => {
   const handleSignup = (e) => {
     e.preventDefault();
     // Validation simple
-    if (!firstName || !lastName || !email || !password || !specialty || !phone) {
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !password ||
+      !specialty ||
+      !phone
+    ) {
       setError(t("signup.errorEmpty"));
       return;
     }
@@ -30,10 +37,9 @@ const SingupMedcin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-600 via-sky-800 to-sky-600 flex items-center justify-center relative overflow-hidden">
-      
+    <div className="min-h-screen bg-gradient-to-br from-sky-600 via-sky-800 to-sky-600 flex items-center justify-center relative overflow-hidden py-28">
       {/* Particules animées */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 opacity-10"
         animate={{ rotate: 360 }}
         transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
@@ -64,7 +70,8 @@ const SingupMedcin = () => {
         <form onSubmit={handleSignup} className="space-y-4">
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* Ligne 1 : Prénom + Nom */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {t("signup.firstName")}
@@ -77,7 +84,6 @@ const SingupMedcin = () => {
                 required
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {t("signup.lastName")}
@@ -92,58 +98,73 @@ const SingupMedcin = () => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("signup.email")}
-            </label>
-            <Input
-              type="email"
-              placeholder={t("signup.emailPlaceholder")}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+          {/* Ligne 2 : Email + Téléphone */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t("signup.email")}
+              </label>
+              <Input
+                type="email"
+                placeholder={t("signup.emailPlaceholder")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t("signup.phone")}
+              </label>
+              <Input
+                type="text"
+                placeholder={t("signup.phonePlaceholder")}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("signup.password")}
-            </label>
-            <Input
-              type="password"
-              placeholder={t("signup.passwordPlaceholder")}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+          {/* Ligne 3 : Mot de passe + Spécialité */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t("signup.password")}
+              </label>
+              <Input
+                type="password"
+                placeholder={t("signup.passwordPlaceholder")}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t("signup.specialty")}
+              </label>
+              <Input
+                type="text"
+                placeholder={t("signup.specialtyPlaceholder")}
+                value={specialty}
+                onChange={(e) => setSpecialty(e.target.value)}
+                required
+              />
+            </div>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("signup.specialty")}
-            </label>
-            <Input
-              type="text"
-              placeholder={t("signup.specialtyPlaceholder")}
-              value={specialty}
-              onChange={(e) => setSpecialty(e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t("signup.phone")}
-            </label>
-            <Input
-              type="text"
-              placeholder={t("signup.phonePlaceholder")}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-            />
-          </div>
-
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t("signup.adresse")}
+              </label>
+              <Input
+                type="text"
+                placeholder={t("signup.adressePlaceholder")}
+                value={specialty}
+                onChange={(e) => setSpecialty(e.target.value)}
+                required
+              />
+            </div>
           <Button
             type="submit"
             className="w-full flex items-center justify-center bg-gradient-to-r from-sky-500 via-teal-400 to-cyan-400 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-sky-500/40 transition-all duration-300"

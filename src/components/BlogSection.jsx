@@ -45,7 +45,7 @@ const BlogSection = () => {
             id: post.id,
             title: post.title || "Sans titre",
             excerpt: post.excerpt || "",
-            image_url: post.image_url || "/default-blog-image.jpg",
+            image_url: post.image_url || "/blog_default.webp",
             category: post.category_name || "Non catégorisé",
             author: post.author || "Auteur inconnu",
             date: post.published_at

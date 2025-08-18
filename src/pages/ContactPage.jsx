@@ -159,7 +159,7 @@ const ContactPage = () => {
     <div className="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 overflow-hidden">
       {/* Hero Section with Animated Background */}
       <section
-        className="relative py-32 px-6 bg-gradient-to-r from-gray-900 to-emerald-900 text-white overflow-hidden"
+        className="relative py-32 px-6 bg-gradient-to-r from-blue-600 to-teal-500 text-white overflow-hidden"
         id="HomeContact"
       >
         <div className="absolute inset-0 z-0 overflow-hidden">
@@ -207,13 +207,13 @@ const ContactPage = () => {
             transition={{ duration: 0.8 }}
           >
             Contactez{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 drop-shadow-lg">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-teal-400 to-cyan-400 drop-shadow-lg">
               DocOnline
             </span>
           </motion.h1>
 
           <motion.p
-            className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-10"
+            className="text-xl md:text-2xl text-white max-w-3xl mx-auto mb-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
@@ -241,7 +241,7 @@ const ContactPage = () => {
 
               {isSubmitted ? (
                 <motion.div
-                  className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 p-6 rounded-xl mb-8 flex items-start gap-4"
+                  className="bg-emerald-50 dark:bg-emerald-900/20 text-sky-600 dark:text-sky-400 p-6 rounded-xl mb-8 flex items-start gap-4"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
@@ -270,7 +270,7 @@ const ContactPage = () => {
                         placeholder="Nom et Prenom*"
                         value={formData.name}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:border-transparent"
                         required
                       />
                     </div>
@@ -291,7 +291,7 @@ const ContactPage = () => {
                         placeholder="Email*"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:border-transparent"
                         required
                       />
                     </div>
@@ -312,7 +312,7 @@ const ContactPage = () => {
                         placeholder="Numero de telephone"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -326,7 +326,7 @@ const ContactPage = () => {
                       name="subject"
                       value={formData.subject}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:border-transparent"
                       required
                     >
                       <option value="">Sélectionnez un sujet</option>
@@ -349,14 +349,14 @@ const ContactPage = () => {
                       rows="5"
                       value={formData.message}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:border-transparent"
                       required
                     ></textarea>
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 hover:bg-emerald-700 py-6 text-lg font-medium transition-all duration-300 transform hover:scale-[1.02]"
+                    className="w-full bg-gradient-to-r from-sky-500 via-sky-400 to-teal-400 hover:bg-sky-700 py-6 text-lg font-medium transition-all duration-300 transform hover:scale-[1.02]"
                   >
                     Envoyer le message
                     <Send className="ml-2 h-5 w-5" />
@@ -381,14 +381,14 @@ const ContactPage = () => {
 
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-full mt-1">
-                    <Mail className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  <div className="p-3 bg-sky-100 dark:bg-emerald-900/20 rounded-full mt-1">
+                    <Mail className="h-5 w-5 text-sky-600 dark:text-sky-400" />
                   </div>
                   <div>
                     <h4 className="font-medium mb-1">Email</h4>
                     <a
                       href="mailto:contact@kofgo-consulting.com"
-                      className="text-emerald-600 dark:text-emerald-400 hover:underline"
+                      className="text-sky-600 dark:text-sky-400 hover:underline"
                     >
                       contact@doconline.com
                     </a>
@@ -399,14 +399,14 @@ const ContactPage = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-full mt-1">
-                    <Phone className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  <div className="p-3 bg-sky-100 dark:bg-sky-900/20 rounded-full mt-1">
+                    <Phone className="h-5 w-5 text-sky-600 dark:text-sky-400" />
                   </div>
                   <div>
                     <h4 className="font-medium mb-1">Téléphones</h4>
                     <a
                       href="tel:+225 07 04 84 28 43"
-                      className="text-emerald-600 dark:text-emerald-400 hover:underline"
+                      className="text-sky-600 dark:text-sky-400 hover:underline"
                     >
                       Côte d'Ivoire: +225 07 00 00 00 43 <br />
                       France/International: +33 7 00 00 00 43
@@ -418,8 +418,8 @@ const ContactPage = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-full mt-1">
-                    <MapPin className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  <div className="p-3 bg-sky-100 dark:bg-sky-900/20 rounded-full mt-1">
+                    <MapPin className="h-5 w-5 text-sky-600 dark:text-sky-400" />
                   </div>
                   <div>
                     <h4 className="font-medium mb-1">Nos bureaux</h4>
@@ -440,7 +440,7 @@ const ContactPage = () => {
                       href="https://maps.app.goo.gl/VrLfGmPhzx4KLj6x7"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-emerald-600 dark:text-emerald-400 p-0 h-auto mt-2 inline-flex items-center text-sm hover:underline"
+                      className="text-sky-600 dark:text-sky-400 p-0 h-auto mt-2 inline-flex items-center text-sm hover:underline"
                     >
                       Voir sur la carte
                       <ChevronRight className="ml-1 h-4 w-4" />
@@ -450,7 +450,7 @@ const ContactPage = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800 p-8">
+            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-200 dark:border-sky-800 p-8">
               <h3 className="text-2xl font-bold mb-6 drop-shadow-lg">
                 Horaires d'ouverture
               </h3>
@@ -468,12 +468,12 @@ const ContactPage = () => {
                   <motion.div
                     key={index}
                     className={`flex justify-between items-center p-3 rounded-lg ${
-                      item.current ? "bg-emerald-50 dark:bg-emerald-900/20" : ""
+                      item.current ? "bg-sky-50 dark:bg-sky-900/20" : ""
                     }`}
                     whileHover={{ x: 5 }}
                   >
                     <div className="flex items-center gap-3">
-                      <Clock className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                      <Clock className="h-5 w-5 text-sky-600 dark:text-sky-400" />
                       <span className="font-medium">{item.day}</span>
                     </div>
                     <span className="text-gray-600 dark:text-gray-400">
@@ -484,7 +484,7 @@ const ContactPage = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 rounded-3xl shadow-xl p-8 text-white">
+            <div className="bg-gradient-to-r from-sky-500 via-sky-400 to-teal-400 rounded-3xl shadow-xl p-8 text-white">
               <h3 className="text-2xl font-bold mb-4 drop-shadow-lg">
                 Vous préférez un rendez-vous ?
               </h3>
@@ -492,7 +492,7 @@ const ContactPage = () => {
                 Planifiez une consultation en ligne avec l'un de nos experts.
               </p>
               <Button
-                className="bg-white text-emerald-600 hover:bg-gray-100 w-full py-6 text-lg font-medium transition-all duration-300 transform hover:scale-[1.02]"
+                className="bg-white text-sky-600 hover:bg-gray-100 w-full py-6 text-lg font-medium transition-all duration-300 transform hover:scale-[1.02]"
                 onClick={() => setIsOpen(true)}
               >
                 Prendre rendez-vous
@@ -559,7 +559,7 @@ const ContactPage = () => {
                           required
                           onChange={handleChange}
                           value={formData.name}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                          className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
                         />
                       </div>
 
@@ -574,11 +574,11 @@ const ContactPage = () => {
                           type="email"
                           id="email"
                           name="email"
-                          placeholder="votre@email.com"
+                          placeholder="Email@gmail.com"
                           required
                           onChange={handleChange}
                           value={formData.email}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                          className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
                         />
                       </div>
 
@@ -593,11 +593,11 @@ const ContactPage = () => {
                           type="tel"
                           id="phone"
                           name="phone"
-                          placeholder="06 12 34 56 78"
+                          placeholder="00 00 00 00 43"
                           required
                           onChange={handleChange}
                           value={formData.phone}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                          className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
                         />
                       </div>
 
@@ -616,7 +616,7 @@ const ContactPage = () => {
                             required
                             onChange={handleChange}
                             value={formData.date}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                            className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
                           />
                         </div>
 
@@ -634,7 +634,7 @@ const ContactPage = () => {
                             required
                             onChange={handleChange}
                             value={formData.time}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                            className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
                           />
                         </div>
                       </div>
@@ -653,7 +653,7 @@ const ContactPage = () => {
                           placeholder="Décrivez votre demande..."
                           onChange={handleChange}
                           value={formData.message}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                          className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
                         ></textarea>
                       </div>
                     </div>
@@ -669,7 +669,7 @@ const ContactPage = () => {
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition"
+                        className="px-4 py-2 bg-gradient-to-r from-sky-500 via-sky-400 to-teal-400 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition"
                       >
                         Confirmer le rendez-vous
                       </button>
@@ -810,6 +810,40 @@ const ContactPage = () => {
         </div>
       </section>
 */}
+      {/* ===== CTA FINAL ===== */}
+      <div className="bg-gradient-to-r from-blue-600 to-teal-500 text-white py-16">
+        <div className="container mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="max-w-3xl mx-auto"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Prêt à prendre rendez-vous avec un spécialiste ?
+            </h2>
+            <p className="text-xl opacity-90 mb-8">
+              Notre équipe est disponible 24h/24 pour vous aider à trouver le
+              professionnel de santé qu'il vous faut.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <motion.div whileHover={{ scale: 1.05 }}>
+                <Button className="bg-white text-blue-600 px-8 py-4 rounded-lg shadow-lg hover:bg-blue-50 text-lg font-semibold">
+                  Trouver un médecin
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }}>
+                <Button
+                  variant="outline"
+                  className="border-white text-black px-8 py-4 rounded-lg hover:bg-white hover:text-blue-600 text-lg font-semibold"
+                >
+                  Contactez-nous
+                </Button>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
       <MapSection />
     </div>
   );

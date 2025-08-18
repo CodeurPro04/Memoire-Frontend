@@ -80,7 +80,7 @@ const MedecinProfilePage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       {/* Header Profil Premium */}
-      <div className="relative bg-gradient-to-r from-blue-600 to-teal-500 text-white py-24 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-blue-600 to-teal-500 text-white overflow-hidden py-28">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==')]"></div>
         </div>
@@ -197,7 +197,7 @@ const MedecinProfilePage = () => {
                     <Button
                       onClick={() => setChatOpen(false)}
                       variant="outline"
-                      className="border-gray-300 text-gray-700"
+                      className="hover:bg-red-500/90 hover:text-white border-gray-300 text-gray-700"
                     >
                       Annuler
                     </Button>
@@ -267,10 +267,10 @@ const MedecinProfilePage = () => {
           </div>
 
           {/* Sidebar RDV */}
-          <div className="space-y-8">
-            <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 sticky top-8">
+          <div id="rdvForm" className="space-y-8">
+            <div className="relative bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
               <h2 className="text-xl font-bold mb-6 text-gray-800">Prendre rendez-vous</h2>
-              <div id="rdvForm" className="space-y-4">
+              <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Date du rendez-vous *</label>
                   <Input

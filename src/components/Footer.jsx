@@ -546,7 +546,7 @@ const Footer = () => {
           <div>
             <img
               src="/logo/logo1.png"
-              alt="KofGo Logo"
+              alt="DocOnline Logo"
               className="w-32 h-32 mb-4"
             />
             <p className="text-sm mb-4">{t("footer.tagline")}</p>

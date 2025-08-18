@@ -23,7 +23,7 @@ const MapSection = () => {
             window.open("https://www.google.com/maps/dir/?api=1&destination=Abidjan", "_blank")
           }
         >
-          <MapPin className="mr-2 h-5 w-5 text-emerald-600" />
+          <MapPin className="mr-2 h-5 w-5 text-sky-600" />
           Itinéraire vers nos bureaux
         </Button>
       </div>

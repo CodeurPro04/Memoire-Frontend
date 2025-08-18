@@ -1,4 +1,4 @@
-import React, { useState, useEffect  } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -45,7 +45,7 @@ const TrouverMedecinPremium = () => {
   const medecins = [
     {
       id: 1,
-      nom: "Dr. Marie Kouassi",
+      nom: "Charles Kouassi",
       specialite: "Cardiologie",
       sousSpecialite: "Cardiologie Interventionnelle",
       ville: "Abidjan, Plateau",
@@ -63,7 +63,7 @@ const TrouverMedecinPremium = () => {
     },
     {
       id: 2,
-      nom: "Dr. Jean Koné",
+      nom: "Jean Koné",
       specialite: "Dentisterie",
       sousSpecialite: "Orthodontie",
       ville: "Abidjan, Cocody",
@@ -81,7 +81,7 @@ const TrouverMedecinPremium = () => {
     },
     {
       id: 3,
-      nom: "Dr. Awa Diabaté",
+      nom: "Awa Diabaté",
       specialite: "Pédiatrie",
       sousSpecialite: "Néonatologie",
       ville: "Yamoussoukro",
@@ -99,7 +99,7 @@ const TrouverMedecinPremium = () => {
     },
     {
       id: 4,
-      nom: "Dr. Kwame N'Guessan",
+      nom: "Kwame N'Guessan",
       specialite: "Dermatologie",
       sousSpecialite: "Dermatologie Esthétique",
       ville: "Abidjan, Marcory",
@@ -117,7 +117,7 @@ const TrouverMedecinPremium = () => {
     },
     {
       id: 5,
-      nom: "Dr. Fatou Bamba",
+      nom: "Alex Bamba",
       specialite: "Gynécologie",
       sousSpecialite: "Obstétrique",
       ville: "Bouaké",
@@ -135,7 +135,7 @@ const TrouverMedecinPremium = () => {
     },
     {
       id: 6,
-      nom: "Dr. Yves Aké",
+      nom: "Yves Aké",
       specialite: "Chirurgie",
       sousSpecialite: "Chirurgie Orthopédique",
       ville: "Abidjan, Treichville",
@@ -254,8 +254,7 @@ const TrouverMedecinPremium = () => {
               className="inline-block"
             >
               <Button className="bg-white text-blue-600 px-8 py-6 rounded-xl shadow-xl hover:bg-blue-50 text-lg font-semibold flex items-center gap-2">
-                Prendre rendez-vous maintenant{" "}
-                <ArrowRight className="w-5 h-5" />
+                Commencer <ArrowRight className="w-5 h-5" />
               </Button>
             </motion.div>
           </motion.div>
@@ -499,45 +498,47 @@ const TrouverMedecinPremium = () => {
           </div>
 
           {/* LISTE DES MEDECINS */}
-          <div className="md:w-3/4">
-            <div className="flex justify-between items-center mb-8">
+          <div className="w-full md:w-3/4 mx-auto px-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
               <motion.h2
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="text-2xl font-bold text-blue-600"
+                className="text-xl md:text-2xl font-bold text-blue-600 break-words"
               >
                 {filteredMedecins.length} Médecin
                 {filteredMedecins.length !== 1 ? "s" : ""} trouvé
                 {filteredMedecins.length !== 1 ? "s" : ""}
               </motion.h2>
 
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="w-auto"
-              >
-                <TabsList className="bg-blue-50">
-                  <TabsTrigger
-                    value="all"
-                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-                  >
-                    Tous
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="available"
-                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-                  >
-                    Disponibles
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="favorites"
-                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
-                  >
-                    Favoris
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+              <div className="w-full md:w-auto overflow-x-auto">
+                <Tabs
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className="w-full"
+                >
+                  <TabsList className="bg-blue-50 min-w-max">
+                    <TabsTrigger
+                      value="all"
+                      className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                    >
+                      Tous
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="available"
+                      className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                    >
+                      Disponibles
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="favorites"
+                      className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                    >
+                      Favoris
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
             </div>
 
             {loading ? (
@@ -621,7 +622,7 @@ const TrouverMedecinPremium = () => {
                             <div className="flex justify-between items-start">
                               <div>
                                 <h3 className="text-lg font-bold text-gray-900">
-                                  {medecin.nom}
+                                  Dr. {medecin.nom}
                                 </h3>
                                 <p className="text-blue-600 font-medium">
                                   {medecin.specialite}

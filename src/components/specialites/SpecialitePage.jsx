@@ -109,7 +109,7 @@ const SpecialitesPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-blue-600 to-teal-500 text-white py-24 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-blue-600 to-teal-500 text-white py-24 overflow-hidden py-28">
         <div className="container mx-auto px-6 text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -166,6 +166,40 @@ const SpecialitesPage = () => {
               </div>
             </motion.div>
           ))}
+        </div>
+      </div>
+      {/* ===== CTA FINAL ===== */}
+      <div className="bg-gradient-to-r from-blue-600 to-teal-500 text-white py-16">
+        <div className="container mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="max-w-3xl mx-auto"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Prêt à prendre rendez-vous avec un spécialiste ?
+            </h2>
+            <p className="text-xl opacity-90 mb-8">
+              Notre équipe est disponible 24h/24 pour vous aider à trouver le
+              professionnel de santé qu'il vous faut.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <motion.div whileHover={{ scale: 1.05 }}>
+                <Button className="bg-white text-blue-600 px-8 py-4 rounded-lg shadow-lg hover:bg-blue-50 text-lg font-semibold">
+                  Trouver un médecin
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }}>
+                <Button
+                  variant="outline"
+                  className="border-white text-black px-8 py-4 rounded-lg hover:bg-white hover:text-blue-600 text-lg font-semibold"
+                >
+                  Contactez-nous
+                </Button>
+              </motion.div>
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>
