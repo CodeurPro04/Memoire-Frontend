@@ -35,6 +35,7 @@ import defaultAvatar from "@/assets/default-avatar.png";
 import SafeAvatar from "@/components/common/SafeAvatar";
 
 const TrouverMedecinPremium = () => {
+  const today = new Date().toLocaleDateString("fr-FR", { weekday: "long" });
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [specialty, setSpecialty] = useState("");
@@ -537,14 +538,33 @@ const TrouverMedecinPremium = () => {
                             </div>
 
                             <div className="mt-2 space-y-1">
+                              {/* Adresse */}
                               <p className="flex items-center text-sm text-gray-600">
                                 <MapPin className="w-4 h-4 mr-1 text-blue-400" />
                                 {medecin.address || "Adresse non renseignée"}
                               </p>
-                              <p className="flex items-center text-sm text-gray-600">
-                                <Clock className="w-4 h-4 mr-1 text-blue-400" />
-                                Disponible aujourd'hui • 25 000 FCFA
+
+                              {/* Disponibilité et prix */}
+                              <p className="flex items-center text-sm text-gray-600 gap-2">
+                                <Clock className="w-4 h-4" />
+                                {(() => {
+                                  const todayLower = today.toLowerCase();
+                                  const todayHours =
+                                    medecin.working_hours?.find(
+                                      (wh) =>
+                                        wh.day.toLowerCase() === todayLower
+                                    );
+                                  return todayHours
+                                    ? `Disponible Aujourd'hui: ${todayHours.hours}`
+                                    : "Indisponible";
+                                })()}
+                                •
+                                {medecin.consultation_price !== null
+                                  ? `${medecin.consultation_price.toLocaleString()} FCFA`
+                                  : "Prix non renseigné"}
                               </p>
+
+                              {/* Bio */}
                               {medecin.bio && (
                                 <p className="text-sm text-gray-500 mt-2 line-clamp-2">
                                   {medecin.bio}
@@ -553,14 +573,23 @@ const TrouverMedecinPremium = () => {
                             </div>
 
                             <div className="mt-4 flex flex-wrap gap-2">
+                              {/* Années d'expérience */}
                               <Badge
                                 variant="secondary"
                                 className="text-blue-600 bg-blue-50"
                               >
-                                {medecin.annees_experience || "?"} ans exp.
+                                {medecin.experience_years || "?"} ans exp.
                               </Badge>
-                              <Badge variant="outline">Français</Badge>
-                              <Badge variant="outline">Anglais</Badge>
+
+                              {/* Langues parlées */}
+                              {medecin.languages &&
+                                medecin.languages
+                                  .split(",")
+                                  .map((langue, index) => (
+                                    <Badge key={index} variant="outline">
+                                      {langue.trim()}
+                                    </Badge>
+                                  ))}
                             </div>
                           </div>
                         </div>

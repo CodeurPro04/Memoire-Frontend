@@ -22,6 +22,9 @@ import {
   Upload,
   Plus,
   Trash2,
+  ShieldCheck,
+  Globe,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +36,8 @@ import { toast } from "sonner";
 import defaultAvatar from "@/assets/default-avatar.png";
 
 const ProfilMedecin = () => {
+  const today = new Date().toLocaleDateString("fr-FR", { weekday: "long" });
+  const [appointments, setAppointments] = useState([]);
   const { role } = useContext(AuthContext);
   const [medecin, setMedecin] = useState(null);
   const [editMode, setEditMode] = useState(false);
@@ -44,7 +49,7 @@ const ProfilMedecin = () => {
   const [newHours, setNewHours] = useState("");
   const fileInputRef = useRef(null);
 
-  // Format d'heure par défaut
+  // Horaires par défaut si aucun horaire n'est défini
   const defaultHours = [
     { day: "Lundi", hours: "09:00 - 12:30 | 14:00 - 18:00" },
     { day: "Mardi", hours: "09:00 - 12:30 | 14:00 - 18:00" },
@@ -55,20 +60,31 @@ const ProfilMedecin = () => {
 
   useEffect(() => {
     if (role === "medecin") {
+      // Récupération profil médecin
       api
         .get("/medecin/profile")
         .then((res) => {
           setMedecin(res.data);
           setFormData(res.data);
-          setWorkingHours(res.data.workingHours || defaultHours);
+
+          // ⚡ Correction : backend renvoie working_hours
+          const horaires = res.data.working_hours || defaultHours;
+          setWorkingHours(horaires);
         })
         .catch((err) => console.error("Erreur chargement profil :", err));
 
+      // Récupération rendez-vous
+      api
+        .get("/medecin/appointments")
+        .then((res) => setAppointments(res.data))
+        .catch((err) => console.error("Erreur chargement rendez-vous :", err));
+
+      // Messages mock
       setMessages([
         {
           id: 1,
           from: "Patient A",
-          content: "Bonjour docteur, j'ai une question...",
+          content: "Bonjour docteur...",
           time: "10:30",
           read: false,
         },
@@ -90,23 +106,61 @@ const ProfilMedecin = () => {
     }
   }, [role]);
 
+  // Mise à jour des champs du formulaire
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Gestion du statut d'un rendez-vous
+  const handleStatusChange = (id, status) => {
+    const route =
+      status === "confirmé"
+        ? `/medecin/appointments/${id}/confirm`
+        : `/medecin/appointments/${id}/reject`;
+
+    api
+      .patch(route)
+      .then(() => {
+        setAppointments((prev) =>
+          prev.map((app) => (app.id === id ? { ...app, status } : app))
+        );
+        toast.success(`Rendez-vous ${status}`);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error("Erreur lors de la mise à jour du rendez-vous");
+      });
+  };
+
   const handleSave = async () => {
     try {
-      const updatedData = { ...formData, workingHours };
-      const res = await api.put("/medecin/profile", updatedData);
-      setMedecin(res.data);
+      // Sauvegarde du profil général (email, téléphone, etc.)
+      const profileRes = await api.put("/medecin/profile", formData);
+
+      // Sauvegarde des horaires
+      const hoursRes = await api.put("/medecin/working-hours", {
+        working_hours: workingHours,
+      });
+
+      // Mettre à jour les states avec les réponses du backend
+      setMedecin({
+        ...profileRes.data,
+        workingHours: hoursRes.data.working_hours,
+      });
+      setFormData({
+        ...formData,
+        workingHours: hoursRes.data.working_hours,
+      });
+
       setEditMode(false);
-      toast.success("Profil mis à jour avec succès");
+      toast.success("Profil et horaires mis à jour !");
     } catch (error) {
-      toast.error("Erreur lors de la mise à jour");
       console.error("Erreur de mise à jour :", error);
+      toast.error("Erreur lors de la mise à jour");
     }
   };
 
+  // Gestion de l'image de profil
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -118,10 +172,9 @@ const ProfilMedecin = () => {
     }
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current.click();
-  };
+  const triggerFileInput = () => fileInputRef.current.click();
 
+  // Ajout et suppression d'horaires
   const addWorkingDay = () => {
     if (newDay && newHours) {
       setWorkingHours([...workingHours, { day: newDay, hours: newHours }]);
@@ -136,6 +189,7 @@ const ProfilMedecin = () => {
     setWorkingHours(updatedHours);
   };
 
+  // Loader tant que le profil n'est pas chargé
   if (!medecin) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -150,7 +204,7 @@ const ProfilMedecin = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header avec photo de profil */}
-      <div className="bg-gradient-to-r from-blue-600 to-teal-600 px-4 md:px-6 text-white py-16 md:py-28">
+      <div className="bg-gradient-to-r from-blue-600 to-teal-600 px-4 md:px-6 text-white md:py-28 py-28">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-6 md:gap-8">
           <div className="relative group">
             <div className="w-24 h-24 md:w-32 md:h-32 border-4 border-white/90 shadow-xl rounded-full overflow-hidden">
@@ -194,24 +248,65 @@ const ProfilMedecin = () => {
             </Badge>
           </div>
 
-          <div className="flex-1 text-center md:text-left">
-            <h1 className="text-2xl md:text-3xl font-bold">
+          <div className="flex-1 text-center md:text-left space-y-2">
+            {/* Nom complet */}
+            <h1 className="text-2xl md:text-3xl font-bold text-white dark:text-white">
               Dr. {medecin.prenom} {medecin.nom}
             </h1>
-            <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-2 md:mt-3">
+
+            {/* Badges d'informations */}
+            <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-2">
+              {/* Années d'expérience */}
               <Badge
                 variant="secondary"
-                className="bg-white/10 hover:bg-white/20"
+                className="bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 flex items-center gap-1 px-3 py-1 rounded-full"
               >
-                <Award className="w-4 h-4 mr-1" />
-                {medecin.annees_experience || 0} ans d'expérience
+                <Award className="w-4 h-4" />
+                {medecin.experience_years || 0} ans d'expérience
               </Badge>
+
+              {/* Disponibilité */}
               <Badge
                 variant="secondary"
-                className="bg-white/10 hover:bg-white/20"
+                className={`flex items-center gap-1 px-3 py-1 rounded-full ${
+                  medecin.working_hours?.length > 0
+                    ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
+                    : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200"
+                }`}
               >
-                <Clock className="w-4 h-4 mr-1" />
-                Disponible aujourd'hui
+                <Clock className="w-4 h-4" />
+                {(() => {
+                  const todayLower = today.toLowerCase();
+                  const todayHours = medecin.working_hours?.find(
+                    (wh) => wh.day.toLowerCase() === todayLower
+                  );
+                  return todayHours
+                    ? `Disponible Aujourd'hui: ${todayHours.hours}`
+                    : "Indisponible";
+                })()}
+              </Badge>
+            </div>
+
+            {/* Langues parlées et assurances */}
+            <div className="flex flex-wrap gap-2 mt-2 justify-center md:justify-start">
+              {medecin.languages &&
+                medecin.languages.split(",").map((langue, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 flex items-center gap-1 px-3 py-1 rounded-full"
+                  >
+                    {langue.trim()}
+                  </Badge>
+                ))}
+
+              {/* Badge Assurances acceptées */}
+              <Badge
+                variant="secondary"
+                className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 flex items-center gap-1 px-3 py-1 rounded-full"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Assurances acceptées : {medecin.insurance_accepted === 1 ? "Oui" : "Non"}
               </Badge>
             </div>
           </div>
@@ -285,6 +380,95 @@ const ProfilMedecin = () => {
                   </CardContent>
                 </Card>
 
+                <TabsContent value="agenda" className="mt-6">
+                  <Card className="border-0 shadow-lg">
+                    <CardHeader className="bg-blue-50 rounded-t-lg">
+                      <CardTitle className="flex items-center gap-2 text-blue-700 text-lg font-semibold">
+                        <Calendar className="w-5 h-5" /> Mes Rendez-vous
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {appointments.length === 0 ? (
+                        <p className="text-gray-500 italic text-center">
+                          Aucun rendez-vous pour le moment.
+                        </p>
+                      ) : (
+                        appointments.map((app) => {
+                          const statusColor =
+                            app.status === "en attente"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : app.status === "confirmé"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800";
+
+                          return (
+                            <div
+                              key={app.id}
+                              className="p-4 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+                            >
+                              <div className="flex-1 space-y-1">
+                                <p>
+                                  <strong>Patient :</strong> {app.patient}
+                                </p>
+                                <p>
+                                  <strong>Téléphone :</strong>{" "}
+                                  {app.phone || "Non renseigné"}
+                                </p>
+                                <p>
+                                  <strong>Adresse :</strong>{" "}
+                                  {app.address || "Non renseignée"}
+                                </p>
+                                <p>
+                                  <strong>Date :</strong>{" "}
+                                  {new Date(app.date).toLocaleString("fr-FR", {
+                                    weekday: "long",
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </p>
+                                <p>
+                                  <strong>Type :</strong>{" "}
+                                  {app.consultation_type}
+                                </p>
+                                <p>
+                                  <strong>Status :</strong>{" "}
+                                  <Badge className={statusColor}>
+                                    {app.status}
+                                  </Badge>
+                                </p>
+                              </div>
+
+                              {app.status === "en attente" && (
+                                <div className="flex gap-2 mt-2 md:mt-0">
+                                  <Button
+                                    className="bg-green-600 hover:bg-green-700 text-white transition-colors duration-200"
+                                    onClick={() =>
+                                      handleStatusChange(app.id, "confirmé")
+                                    }
+                                  >
+                                    Confirmer
+                                  </Button>
+                                  <Button
+                                    className="bg-red-600 hover:bg-red-700 text-white transition-colors duration-200"
+                                    onClick={() =>
+                                      handleStatusChange(app.id, "refusé")
+                                    }
+                                  >
+                                    Refuser
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
                 {/* Horaires de consultation */}
                 <Card className="border-0 shadow-sm">
                   <CardHeader>
@@ -297,14 +481,30 @@ const ProfilMedecin = () => {
                       {workingHours.map((item, idx) => (
                         <div
                           key={idx}
-                          className="flex justify-between items-center py-2 border-b last:border-b-0"
+                          className="flex justify-between items-center py-2 border-b last:border-b-0 gap-3"
                         >
-                          <span className="font-medium text-gray-700">
-                            {item.day}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-gray-600">{item.hours}</span>
-                            {editMode && (
+                          {editMode ? (
+                            <>
+                              <Input
+                                value={item.day}
+                                onChange={(e) => {
+                                  const updated = [...workingHours];
+                                  updated[idx].day = e.target.value;
+                                  setWorkingHours(updated);
+                                }}
+                                placeholder="Jour (ex: Lundi)"
+                                className="md:col-span-1 w-32"
+                              />
+                              <Input
+                                value={item.hours}
+                                onChange={(e) => {
+                                  const updated = [...workingHours];
+                                  updated[idx].hours = e.target.value;
+                                  setWorkingHours(updated);
+                                }}
+                                placeholder="Heures (ex: 09:00 - 12:00)"
+                                className="md:col-span-1 flex-1"
+                              />
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -313,12 +513,22 @@ const ProfilMedecin = () => {
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
-                            )}
-                          </div>
+                            </>
+                          ) : (
+                            <>
+                              <span className="font-medium text-gray-700">
+                                {item.day}
+                              </span>
+                              <span className="text-gray-600">
+                                {item.hours}
+                              </span>
+                            </>
+                          )}
                         </div>
                       ))}
                     </div>
 
+                    {/* Ajout d’un nouvel horaire */}
                     {editMode && (
                       <div className="mt-4 space-y-3">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -331,7 +541,7 @@ const ProfilMedecin = () => {
                           <Input
                             value={newHours}
                             onChange={(e) => setNewHours(e.target.value)}
-                            placeholder="Heures (ex: 09:00-12:00)"
+                            placeholder="Heures (ex: 09:00 - 12:00)"
                             className="md:col-span-1"
                           />
                           <Button
@@ -347,13 +557,32 @@ const ProfilMedecin = () => {
                         </p>
                       </div>
                     )}
+
+                    {/* Boutons principaux pour tout le profil */}
+                    {editMode && (
+                      <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => setEditMode(false)}
+                          className="border-gray-300"
+                        >
+                          Annuler
+                        </Button>
+                        <Button
+                          onClick={handleSave} // ici on sauvegarde tout, y compris workingHours
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          <Save className="w-4 h-4 mr-2" /> Enregistrer
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
 
               {/* Colonne latérale */}
               <div className="space-y-4 md:space-y-6">
-                {/* Informations de contact */}
+                {/* Informations de contact et professionnelles */}
                 <Card className="border-0 shadow-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-blue-600">
@@ -361,6 +590,7 @@ const ProfilMedecin = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3 md:space-y-4">
+                    {/* Email */}
                     <div>
                       <label className="text-sm font-medium text-gray-500 mb-1 block">
                         Email
@@ -374,12 +604,13 @@ const ProfilMedecin = () => {
                         />
                       ) : (
                         <p className="flex items-center gap-2 text-gray-700">
-                          <Mail className="w-5 h-5 text-blue-400" />{" "}
-                          {medecin.email}
+                          <Mail className="w-5 h-5 text-blue-400" />
+                          {medecin.email || "Non renseigné"}
                         </p>
                       )}
                     </div>
 
+                    {/* Téléphone */}
                     <div>
                       <label className="text-sm font-medium text-gray-500 mb-1 block">
                         Téléphone
@@ -399,6 +630,7 @@ const ProfilMedecin = () => {
                       )}
                     </div>
 
+                    {/* Adresse */}
                     <div>
                       <label className="text-sm font-medium text-gray-500 mb-1 block">
                         Adresse
@@ -418,6 +650,7 @@ const ProfilMedecin = () => {
                       )}
                     </div>
 
+                    {/* Spécialité */}
                     <div>
                       <label className="text-sm font-medium text-gray-500 mb-1 block">
                         Spécialité
@@ -432,7 +665,129 @@ const ProfilMedecin = () => {
                       ) : (
                         <p className="flex items-center gap-2 text-gray-700">
                           <Stethoscope className="w-5 h-5 text-blue-400" />
-                          {medecin.specialite}
+                          {medecin.specialite || "Non renseignée"}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Années d'expérience */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">
+                        Années d'expérience
+                      </label>
+                      {editMode ? (
+                        <Input
+                          name="years_experience"
+                          value={formData.years_experience || ""}
+                          onChange={handleChange}
+                          className="bg-gray-50"
+                          type="number"
+                          min={0}
+                        />
+                      ) : (
+                        <p className="flex items-center gap-2 text-gray-700">
+                          <Calendar className="w-5 h-5 text-blue-400" />
+                          {medecin.experience_years || "Non renseigné"}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Langues */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">
+                        Langues parlées
+                      </label>
+                      {editMode ? (
+                        <Input
+                          name="languages"
+                          value={formData.languages || ""}
+                          onChange={handleChange}
+                          className="bg-gray-50"
+                          placeholder="Ex: Français, Anglais"
+                        />
+                      ) : (
+                        <p className="flex items-center gap-2 text-gray-700">
+                          <Globe className="w-5 h-5 text-blue-400" />
+                          {medecin.languages || "Non renseigné"}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Parcours professionnel */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">
+                        Parcours Professionnel
+                      </label>
+                      {editMode ? (
+                        <Textarea
+                          name="professional_background"
+                          value={formData.professional_background || ""}
+                          onChange={handleChange}
+                          className="bg-gray-50"
+                          placeholder="Expérience clinique et formations"
+                        />
+                      ) : (
+                        <p className="flex items-start gap-2 text-gray-700 whitespace-pre-line">
+                          <Briefcase className="w-5 h-5 text-blue-400 mt-1" />
+                          {medecin.professional_background || "Non renseigné"}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Prix consultation */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">
+                        Prix consultation standard
+                      </label>
+                      {editMode ? (
+                        <Input
+                          name="consultation_price"
+                          value={formData.consultation_price || ""}
+                          onChange={handleChange}
+                          className="bg-gray-50"
+                          type="number"
+                          min={0}
+                        />
+                      ) : (
+                        <p className="flex items-center gap-2 text-gray-700">
+                          <CreditCard className="w-5 h-5 text-blue-400" />
+                          {medecin.consultation_price !== null
+                            ? `${medecin.consultation_price} FCFA`
+                            : "Non renseigné"}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Assurances acceptées */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">
+                        Assurances acceptées
+                      </label>
+
+                      {editMode ? (
+                        <select
+                          name="insurance_accepted"
+                          value={formData.insurance_accepted ? "oui" : "non"}
+                          onChange={(e) => {
+                            const value = e.target.value === "oui" ? 1 : 0;
+                            setFormData({
+                              ...formData,
+                              insurance_accepted: value,
+                            });
+                          }}
+                          className="bg-gray-50 w-full p-2 border rounded"
+                        >
+                          <option value="oui">Oui</option>
+                          <option value="non">Non</option>
+                        </select>
+                      ) : (
+                        <p className="flex items-center gap-2 text-gray-700">
+                          <ShieldCheck className="w-5 h-5 text-blue-400" />
+                          {medecin.insurance_accepted === 1
+                            ? "Oui"
+                            : medecin.insurance_accepted === 0
+                            ? "Non"
+                            : "Non renseigné"}
                         </p>
                       )}
                     </div>
@@ -505,7 +860,7 @@ const ProfilMedecin = () => {
             )}
           </TabsContent>
 
-          {/* Onglet Messages */}
+          {/* Onglet Messages 
           <TabsContent value="messages" className="mt-6">
             <Card className="border-0 shadow-sm">
               <CardHeader>
@@ -564,7 +919,7 @@ const ProfilMedecin = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </div>
     </div>

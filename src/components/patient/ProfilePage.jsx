@@ -265,7 +265,7 @@ const ProfilPatient = () => {
             </Card>
           </TabsContent>
 
-          {/* Onglet Messages */}
+          {/* Onglet Messages 
           <TabsContent value="messages">
             <Card className="border-0 shadow-sm mt-6">
               <CardHeader>
@@ -300,7 +300,7 @@ const ProfilPatient = () => {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+          </TabsContent> */}
 
           <TabsContent value="agenda">
             <Card className="border-0 shadow-sm mt-6">
@@ -316,30 +316,44 @@ const ProfilPatient = () => {
                   <p className="text-gray-600">Aucun rendez-vous planifié.</p>
                 ) : (
                   <div className="space-y-3">
-                    {appointments.map((app) => (
-                      <div
-                        key={app.id}
-                        className="flex justify-between items-center py-2 border-b last:border-b-0"
-                      >
-                        <div>
-                          <p className="font-medium text-gray-700">
-                            {app.medecin_id
-                              ? `${app.doctor}`
-                              : "Médecin supprimé"}
-                          </p>
-                          <p className="text-gray-600 text-sm">
-                            {new Date(app.date).toLocaleDateString("fr-FR")}
-                            {app.time ? ` à ${app.time}` : ""} —{" "}
-                            <span className="italic">
-                              {app.consultation_type}
-                            </span>
-                          </p>
+                    {appointments.map((app) => {
+                      const statusNormalized = app.status?.trim().toLowerCase(); // enlever espaces + mettre en minuscule
+
+                      let statusBg = "bg-gray-200 text-gray-700";
+                      if (statusNormalized === "confirmé")
+                        statusBg = "bg-green-100 text-green-800";
+                      else if (statusNormalized === "en attente")
+                        statusBg = "bg-yellow-100 text-yellow-800";
+                      else if (statusNormalized === "annulé")
+                        statusBg = "bg-red-100 text-red-800";
+
+                      return (
+                        <div
+                          key={app.id}
+                          className="flex justify-between items-center py-2 border-b last:border-b-0"
+                        >
+                          <div>
+                            <p className="font-medium text-gray-700">
+                              {app.medecin_id
+                                ? `${app.doctor}`
+                                : "Médecin supprimé"}
+                            </p>
+                            <p className="text-gray-600 text-sm">
+                              {new Date(app.date).toLocaleDateString("fr-FR")}
+                              {app.time ? ` à ${app.time}` : ""} —{" "}
+                              <span className="italic">
+                                {app.consultation_type}
+                              </span>
+                            </p>
+                          </div>
+                          <span
+                            className={`text-sm font-semibold px-3 py-1 rounded-full ${statusBg}`}
+                          >
+                            {app.status}
+                          </span>
                         </div>
-                        <span className="text-gray-500 text-sm">
-                          {app.status}
-                        </span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>

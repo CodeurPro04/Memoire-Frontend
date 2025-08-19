@@ -107,7 +107,6 @@ const HomePage = () => {
         <AboutSection />
         <ServicesSection />
         <PartnersSection />
-        <BlogSection />
         <TestimonialsSection />
         <div id="NewsLetter"><ContactSection /></div>
       </motion.div>

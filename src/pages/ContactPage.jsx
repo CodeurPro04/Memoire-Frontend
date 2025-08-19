@@ -38,7 +38,7 @@ const ContactPage = () => {
 
     try {
       const response = await fetch(
-        "https://kofgo-consulting.com/api/contact.php",
+        "",
         {
           method: "POST",
           headers: {
@@ -90,7 +90,7 @@ const ContactPage = () => {
   const [categories, setCategories] = useState([]);
   useEffect(() => {
     axios
-      .get("https://www.kofgo-consulting.com/api/get_categories.php") // Adapte l'URL si besoin
+      .get("") // Adapte l'URL si besoin
       .then((res) => {
         if (res.data.success) {
           setCategories(res.data.categories);
@@ -106,7 +106,7 @@ const ContactPage = () => {
 
     try {
       const response = await fetch(
-        "https://www.kofgo-consulting.com/api/rendezvous.php",
+        "",
         {
           method: "POST",
           headers: {
@@ -170,7 +170,7 @@ const ContactPage = () => {
             loop
             playsInline
           >
-            <source src="/contact.mov" type="video/mp4" />
+            <source src="" type="video/mp4" />
             Votre navigateur ne prend pas en charge les vidéos HTML5.
           </video>
         </div>
@@ -316,7 +316,6 @@ const ContactPage = () => {
                       />
                     </div>
                   </div>
-
                   <div>
                     <label htmlFor="subject" className="block mb-2 font-medium">
                       Sujet
@@ -330,14 +329,33 @@ const ContactPage = () => {
                       required
                     >
                       <option value="">Sélectionnez un sujet</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={`${cat.name}`}>
-                          {cat.name}
-                        </option>
-                      ))}
+                      <option value="Cardiologie">Cardiologie</option>
+                      <option value="Dermatologie">Dermatologie</option>
+                      <option value="Endocrinologie">Endocrinologie</option>
+                      <option value="Gastro-entérologie">
+                        Gastro-entérologie
+                      </option>
+                      <option value="Gynécologie">Gynécologie</option>
+                      <option value="Hématologie">Hématologie</option>
+                      <option value="Médecine générale">
+                        Médecine générale
+                      </option>
+                      <option value="Neurologie">Neurologie</option>
+                      <option value="Ophtalmologie">Ophtalmologie</option>
+                      <option value="Orthopédie">Orthopédie</option>
+                      <option value="Pédiatrie">Pédiatrie</option>
+                      <option value="Psychiatrie">Psychiatrie</option>
+                      <option value="Rhumatologie">Rhumatologie</option>
+                      <option value="Urologie">Urologie</option>
+                      <option value="Chirurgie générale">
+                        Chirurgie générale
+                      </option>
+                      <option value="Immunologie">Immunologie</option>
+                      <option value="Oncologie">Oncologie</option>
+                      <option value="Infectiologie">Infectiologie</option>
+                      <option value="Radiologie">Radiologie</option>
                     </select>
                   </div>
-
                   <div>
                     <label htmlFor="message" className="block mb-2 font-medium">
                       Message
@@ -483,7 +501,7 @@ const ContactPage = () => {
                 ))}
               </div>
             </div>
-
+            {/* Modale 
             <div className="bg-gradient-to-r from-sky-500 via-sky-400 to-teal-400 rounded-3xl shadow-xl p-8 text-white">
               <h3 className="text-2xl font-bold mb-4 drop-shadow-lg">
                 Vous préférez un rendez-vous ?
@@ -498,6 +516,7 @@ const ContactPage = () => {
                 Prendre rendez-vous
               </Button>
             </div>
+            */}
 
             {/* Modale */}
             <Dialog

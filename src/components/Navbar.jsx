@@ -46,11 +46,6 @@ const Navbar = () => {
       icon: <Info className="w-5 h-5 mr-2" />,
     },
     {
-      path: "/blog",
-      labelKey: "nav.blog",
-      icon: <Newspaper className="w-5 h-5 mr-2" />,
-    },
-    {
       path: "/contact",
       labelKey: "nav.contact",
       icon: <Mail className="w-5 h-5 mr-2" />,

@@ -286,8 +286,8 @@ const resources = {
       "nav.language": "Langue",
       "nav.openMenu": "Ouvrir le menu",
       "nav.login": "Connexion",
-      "nav.profile":"profile",
-      "nav.logout":"Deconnexion",
+      "nav.profile": "profile",
+      "nav.logout": "Deconnexion",
 
       services: {
         mainTitle: "Nos services médicaux",
@@ -559,19 +559,32 @@ const resources = {
 
       "testimonials.sectionTitle": "La Voix de Nos Clients Satisfaits",
       "testimonials.sectionSubtitle":
-        "Histoires de réussite, Nos clients témoignent .",
+        "Histoires de réussite, Nos clients témoignent.",
+
       "testimonials.client1.name": "Amina Diallo",
-      "testimonials.client1.position": "CEO, Innovatech Solutions",
+      "testimonials.client1.position": "Entrepreneure, SantéPlus",
       "testimonials.client1.content":
-        "Grâce à l'accompagnement de KOF-GO CONSULTING dans notre projet de transformation digitale (secteur de la finance), nous avons réussi à moderniser nos systèmes en un temps record, augmentant ainsi notre efficacité opérationnelle de 30% et améliorant significativement la satisfaction de nos clients.",
+        "DocOnline m'a permis de consulter un médecin rapidement depuis chez moi. Les conseils étaient précis et professionnels, ce qui m'a évité de longues attentes en clinique.",
+
       "testimonials.client2.name": "Thomas Lefevre",
-      "testimonials.client2.position": "Directeur Marketing, Alpha Corp",
+      "testimonials.client2.position": "Cadre, Alpha Tech",
       "testimonials.client2.content":
-        "L'accompagnement dans notre transformation numérique a été exceptionnel. Processus fluide, équipe réactive et résultats concrets.",
+        "La plateforme est intuitive et les médecins sont très réactifs. J'ai pu obtenir un diagnostic fiable en quelques minutes seulement, un vrai gain de temps pour ma vie professionnelle chargée.",
+
       "testimonials.client3.name": "Chen Zhao",
-      "testimonials.client3.position": "Fondateur, Epsilon Start-up",
+      "testimonials.client3.position": "Fondateur, Bien-être Start-up",
       "testimonials.client3.content":
-        "En tant que jeune entreprise, nous avions besoin d'une guidance experte. KofGo nous a fourni les outils et la stratégie pour naviguer les premières étapes cruciales avec succès. Inestimable !",
+        "Grâce à DocOnline, mes consultations sont efficaces et flexibles. L'application m'a permis de suivre mes traitements et de poser toutes mes questions directement aux médecins, sans stress ni déplacements.",
+
+      "testimonials.client4.name": "Sophie Martin",
+      "testimonials.client4.position": "Mère de famille",
+      "testimonials.client4.content":
+        "Pour mes enfants, c'est devenu un réflexe de consulter via DocOnline. Rapidité, sécurité et conseils clairs, je recommande cette plateforme à toutes les familles.",
+
+      "testimonials.client5.name": "Aliou Koné",
+      "testimonials.client5.position": "Étudiant",
+      "testimonials.client5.content":
+        "DocOnline a transformé ma manière de gérer ma santé. J'ai pu consulter un spécialiste depuis mon appartement sans prendre de congé à l'université. Très pratique et fiable !",
 
       "contact.sectionTitle": "Entrons en Contact",
       "contact.sectionSubtitle":

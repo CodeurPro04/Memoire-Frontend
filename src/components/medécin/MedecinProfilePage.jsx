@@ -13,11 +13,13 @@ import {
   Award,
   Stethoscope,
   Shield,
+  Globe,
 } from "lucide-react";
 import api from "@/api/axios";
 import defaultAvatar from "@/assets/default-avatar.png";
 
 const MedecinProfilePage = () => {
+  const today = new Date().toLocaleDateString("fr-FR", { weekday: "long" });
   const { id } = useParams();
   const navigate = useNavigate();
   const [medecin, setMedecin] = useState(null);
@@ -52,7 +54,17 @@ const MedecinProfilePage = () => {
     assurances: [],
   };
 
-  const medecinData = medecin ? { ...defaultMedecin, ...medecin } : null;
+  const medecinData = medecin
+    ? {
+        ...defaultMedecin,
+        ...medecin,
+        languages: Array.isArray(medecin.languages)
+          ? medecin.languages
+          : medecin.languages
+          ? medecin.languages.split(",").map((l) => l.trim())
+          : [],
+      }
+    : null;
 
   useEffect(() => {
     const fetchMedecin = async () => {
@@ -180,40 +192,75 @@ const MedecinProfilePage = () => {
                   Dr. {medecinData.prenom} {medecinData.nom}
                 </h1>
                 <p className="text-xl font-medium text-blue-100">
-                  {medecinData.specialite}
+                  {medecinData.specialite || "Spécialité non renseignée"}
                 </p>
               </div>
               <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
                 <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                <span className="font-bold">4.8</span>
-                <span className="text-sm text-blue-100">(128 avis)</span>
+                <span className="font-bold">
+                  {medecinData.average_rating || "0.0"}
+                </span>
+                <span className="text-sm text-blue-100">
+                  ({medecinData.reviews_count || 0} avis)
+                </span>
               </div>
             </div>
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-2">
+              {/* Adresse */}
               <p className="flex items-center gap-2 text-blue-100">
                 <MapPin className="w-5 h-5 text-white" />
                 <span className="font-medium">
-                  {quartier}, {ville}
+                  {medecinData.address || "Adresse non renseignée"}
                 </span>
               </p>
+
+              {/* Disponibilité */}
               <p className="flex items-center gap-2 text-blue-100">
-                <Clock className="w-5 h-5 text-white" />
-                <span className="font-medium">Disponible aujourd'hui</span>
+                <Clock className="w-4 h-4" />
+                {(() => {
+                  const todayLower = today.toLowerCase();
+                  const todayHours = medecin.working_hours?.find(
+                    (wh) => wh.day.toLowerCase() === todayLower
+                  );
+                  return todayHours
+                    ? `Disponible Aujourd'hui: ${todayHours.hours}`
+                    : "Indisponible";
+                })()}
               </p>
+
+              {/* Diplôme / Éducation */}
               <p className="flex items-center gap-2 text-blue-100">
                 <Award className="w-5 h-5 text-white" />
                 <span className="font-medium">
                   {medecinData.education || "Diplôme non spécifié"}
                 </span>
               </p>
+
+              {/* Assurances */}
               <p className="flex items-center gap-2 text-blue-100">
                 <Shield className="w-5 h-5 text-white" />
                 <span className="font-medium">
-                  {medecinData.assurances.length > 0
-                    ? medecinData.assurances.join(", ")
-                    : "Assurances acceptées"}
+                  Assurances acceptées :{" "}
+                  {medecinData.insurance_accepted === 1 ? "Oui" : "Non"}
                 </span>
+              </p>
+              {/* Langues parlées */}
+              <p className="flex flex-wrap gap-2 text-blue-100">
+                <Globe className="w-5 h-5 text-white" />
+                {medecinData.languages?.length > 0 ? (
+                  medecinData.languages.map((lang, idx) => (
+                    <Badge
+                      key={idx}
+                      variant="secondary"
+                      className="bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 flex items-center gap-1 px-3 py-1 rounded-full"
+                    >
+                      {lang.trim()}
+                    </Badge>
+                  ))
+                ) : (
+                  <span className="font-medium">Non renseigné</span>
+                )}
               </p>
             </div>
           </div>
@@ -241,20 +288,12 @@ const MedecinProfilePage = () => {
                   variant="secondary"
                   className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full"
                 >
-                  {medecinData.annees_experience || "?"}+ ans d'expérience
+                  {medecinData.experience_years || "?"}+ ans d'expérience
                 </Badge>
-                {medecinData.languages.map((lang) => (
-                  <Badge
-                    key={lang}
-                    variant="outline"
-                    className="px-4 py-2 rounded-full border-gray-200"
-                  >
-                    {lang}
-                  </Badge>
-                ))}
               </div>
 
               <div className="flex gap-4 flex-wrap">
+                {/* Header Profil Premium 
                 <Button
                   onClick={() => setChatOpen(!chatOpen)}
                   variant="outline"
@@ -262,7 +301,7 @@ const MedecinProfilePage = () => {
                 >
                   <MessageCircle className="w-5 h-5" />
                   {chatOpen ? "Fermer le chat" : "Envoyer un message"}
-                </Button>
+                </Button> 
 
                 <Button
                   onClick={() =>
@@ -274,9 +313,9 @@ const MedecinProfilePage = () => {
                 >
                   <Calendar className="w-5 h-5" /> Prendre RDV
                 </Button>
+                */}
               </div>
-
-              {/* Chat Box */}
+              {/* Chat Box  */}
               {chatOpen && (
                 <div className="mt-8 p-6 border border-gray-200 rounded-xl bg-gray-50">
                   <h3 className="font-bold text-lg mb-4 text-gray-800">
@@ -317,61 +356,13 @@ const MedecinProfilePage = () => {
 
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                    Expérience Clinique
-                  </h3>
-                  {medecinData.experiences &&
-                  medecinData.experiences.length > 0 ? (
-                    <ul className="space-y-3">
-                      {medecinData.experiences.map((exp, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <div className="mt-1 w-3 h-3 bg-blue-600 rounded-full flex-shrink-0"></div>
-                          <div>
-                            <p className="font-medium text-gray-800">
-                              {exp.poste || "Poste non spécifié"}
-                            </p>
-                            <p className="text-gray-600 text-sm">
-                              {exp.etablissement ||
-                                "Établissement non spécifié"}{" "}
-                              • {exp.annees || "Années non spécifiées"}
-                            </p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-500 italic">
-                      Aucune expérience clinique renseignée
+                  {medecinData.professional_background ? (
+                    <p className="text-gray-700">
+                      {medecinData.professional_background}
                     </p>
-                  )}
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                    Formations
-                  </h3>
-                  {medecinData.formations &&
-                  medecinData.formations.length > 0 ? (
-                    <ul className="space-y-3">
-                      {medecinData.formations.map((formation, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <div className="mt-1 w-3 h-3 bg-teal-500 rounded-full flex-shrink-0"></div>
-                          <div>
-                            <p className="font-medium text-gray-800">
-                              {formation.diplome || "Diplôme non spécifié"}
-                            </p>
-                            <p className="text-gray-600 text-sm">
-                              {formation.etablissement ||
-                                "Établissement non spécifié"}{" "}
-                              • {formation.annee || "Année non spécifiée"}
-                            </p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
                   ) : (
                     <p className="text-gray-500 italic">
-                      Aucune formation renseignée
+                      Aucun parcours professionnel renseigné
                     </p>
                   )}
                 </div>
@@ -444,35 +435,34 @@ const MedecinProfilePage = () => {
 
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <h3 className="font-bold text-gray-800 mb-3">
-                  Tarifs et remboursements
+                  Tarifs de Consultation
                 </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Consultation standard</span>
-                    <span className="font-medium">25 000 FCFA</span>
+                    <span className="font-medium">
+                      {medecinData.consultation_price || "Non spécifié"} FCFA
+                    </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Remboursement Sécu</span>
-                    <span className="font-medium">70%</span>
-                  </div>
-                  {medecinData.assurances.length > 0 && (
-                    <div className="pt-2">
-                      <p className="text-sm text-gray-600 mb-1">
-                        Assurances acceptées :
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {medecinData.assurances.map((assurance, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {assurance}
-                          </Badge>
-                        ))}
+                  {medecinData.assurances &&
+                    medecinData.assurances.length > 0 && (
+                      <div className="pt-2">
+                        <p className="text-sm text-gray-600 mb-1">
+                          Assurances acceptées :
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {medecinData.assurances.map((assurance, index) => (
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {assurance}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               </div>
             </div>
