@@ -22,6 +22,7 @@ const MedecinProfilePage = () => {
   const today = new Date().toLocaleDateString("fr-FR", { weekday: "long" });
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [medecin, setMedecin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,11 +30,14 @@ const MedecinProfilePage = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [rdvDate, setRdvDate] = useState("");
+  const [rdvTime, setRdvTime] = useState(""); // Nouvel état pour l'heure
   const [consultationType, setConsultationType] = useState(
     "Consultation générale"
   );
   const [loadingRdv, setLoadingRdv] = useState(false);
   const [rdvMessage, setRdvMessage] = useState("");
+
+  const [alternativeMedecins, setAlternativeMedecins] = useState([]); // Médecins alternatifs
 
   // Données par défaut pour éviter les erreurs
   const defaultMedecin = {
@@ -78,7 +82,6 @@ const MedecinProfilePage = () => {
         setLoading(false);
       }
     };
-
     fetchMedecin();
   }, [id]);
 
@@ -93,30 +96,42 @@ const MedecinProfilePage = () => {
   };
 
   const handlePrendreRdv = async () => {
-    if (!rdvDate) {
-      alert("Veuillez sélectionner une date pour le rendez-vous");
+    if (!rdvDate || !rdvTime) {
+      alert("Veuillez sélectionner une date et une heure pour le rendez-vous");
       return;
     }
 
     setLoadingRdv(true);
     setMessage("");
+    setAlternativeMedecins([]);
 
     try {
       const response = await api.post("/appointments", {
         medecin_id: medecinData.id,
         date: rdvDate,
+        time: rdvTime, // On envoie également l'heure
         consultation_type: consultationType,
       });
 
       setMessage(response.data.message || "Rendez-vous pris avec succès !");
       setRdvDate("");
+      setRdvTime("");
       setConsultationType("Consultation générale");
     } catch (error) {
-      console.error(error);
-      setMessage(
-        error.response?.data?.message ||
-          "Erreur lors de la prise de rendez-vous."
-      );
+      const response = error.response;
+
+      if (response?.status === 409) {
+        const alternatives = response.data.alternative_medecins || [];
+        setAlternativeMedecins(alternatives);
+        setMessage(
+          response.data.message ||
+            "Rendez-vous indisponible. Médecins alternatifs disponibles :"
+        );
+      } else {
+        setMessage(
+          response?.data?.message || "Erreur lors de la prise de rendez-vous."
+        );
+      }
     }
 
     setLoadingRdv(false);
@@ -377,6 +392,7 @@ const MedecinProfilePage = () => {
                 Prendre rendez-vous
               </h2>
               <div className="space-y-4">
+                {/* Date du rendez-vous */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Date du rendez-vous *
@@ -390,6 +406,20 @@ const MedecinProfilePage = () => {
                   />
                 </div>
 
+                {/* Heure du rendez-vous */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Heure du rendez-vous *
+                  </label>
+                  <Input
+                    type="time"
+                    value={rdvTime}
+                    onChange={(e) => setRdvTime(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Motif de consultation */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Motif de consultation
@@ -415,10 +445,11 @@ const MedecinProfilePage = () => {
                 <Button
                   onClick={handlePrendreRdv}
                   className="w-full bg-gradient-to-r from-blue-600 to-teal-500 text-white hover:from-blue-700 hover:to-teal-600 py-3 rounded-xl shadow-md text-lg font-medium"
-                  disabled={!rdvDate || loadingRdv}
+                  disabled={!rdvDate || !rdvTime || loadingRdv}
                 >
                   {loadingRdv ? "Chargement..." : "Confirmer le rendez-vous"}
                 </Button>
+
                 {/* Message de retour */}
                 {message && (
                   <p
@@ -432,6 +463,21 @@ const MedecinProfilePage = () => {
                   </p>
                 )}
               </div>
+
+              {/* Liste des médecins alternatifs */}
+              {alternativeMedecins.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {alternativeMedecins.map((med) => (
+                    <button
+                      key={med.id}
+                      onClick={() => navigate(`/profil-medecin/${med.id}`)}
+                      className="flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-teal-500 text-white font-medium rounded-lg shadow-md hover:from-blue-700 hover:to-teal-600 transition-colors duration-300"
+                    >
+                      {med.nom} {med.prenom}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <h3 className="font-bold text-gray-800 mb-3">

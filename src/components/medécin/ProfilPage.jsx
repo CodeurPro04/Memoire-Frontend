@@ -1,7 +1,18 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import api from "@/api/axios";
+import { toast } from "sonner";
+import defaultAvatar from "@/assets/default-avatar.png";
+
+// UI Components
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Textarea from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+
+// Icons
 import {
   User,
   Mail,
@@ -26,30 +37,41 @@ import {
   Globe,
   CreditCard,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import Textarea from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "sonner";
-import defaultAvatar from "@/assets/default-avatar.png";
 
 const ProfilMedecin = () => {
-  const today = new Date().toLocaleDateString("fr-FR", { weekday: "long" });
-  const [appointments, setAppointments] = useState([]);
+  // ✅ Contexte utilisateur
   const { role } = useContext(AuthContext);
+
+  // ✅ États globaux
   const [medecin, setMedecin] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({});
-  const [activeTab, setActiveTab] = useState("profil");
+  const [formData, setFormData] = useState({
+    email: "",
+    telephone: "",
+    address: "",
+    specialite: "",
+    experience_years: "",
+    languages: "",
+    professional_background: "",
+    consultation_price: "",
+    insurance_accepted: "",
+    bio: "",
+    photo: "",
+  });
+  const [appointments, setAppointments] = useState([]);
   const [messages, setMessages] = useState([]);
   const [workingHours, setWorkingHours] = useState([]);
+
+  // ✅ États UI
+  const [editMode, setEditMode] = useState(false);
+  const [activeTab, setActiveTab] = useState("profil");
   const [newDay, setNewDay] = useState("");
   const [newHours, setNewHours] = useState("");
   const fileInputRef = useRef(null);
 
-  // Horaires par défaut si aucun horaire n'est défini
+  // ✅ Date du jour (utile pour l'affichage)
+  const today = new Date().toLocaleDateString("fr-FR", { weekday: "long" });
+
+  // ✅ Horaires par défaut
   const defaultHours = [
     { day: "Lundi", hours: "09:00 - 12:30 | 14:00 - 18:00" },
     { day: "Mardi", hours: "09:00 - 12:30 | 14:00 - 18:00" },
@@ -58,123 +80,147 @@ const ProfilMedecin = () => {
     { day: "Vendredi", hours: "09:00 - 12:30 | 14:00 - 17:00" },
   ];
 
+  /**
+   * 🔹 Chargement du profil et des rendez-vous
+   */
   useEffect(() => {
-    if (role === "medecin") {
-      // Récupération profil médecin
-      api
-        .get("/medecin/profile")
-        .then((res) => {
-          setMedecin(res.data);
-          setFormData(res.data);
+    if (role !== "medecin") return;
 
-          // ⚡ Correction : backend renvoie working_hours
-          const horaires = res.data.working_hours || defaultHours;
-          setWorkingHours(horaires);
-        })
-        .catch((err) => console.error("Erreur chargement profil :", err));
+    const fetchData = async () => {
+      try {
+        // Profil médecin
+        const { data: profil } = await api.get("/medecin/profile");
+        setMedecin(profil);
 
-      // Récupération rendez-vous
-      api
-        .get("/medecin/appointments")
-        .then((res) => setAppointments(res.data))
-        .catch((err) => console.error("Erreur chargement rendez-vous :", err));
+        // Mapper les données du backend vers le formulaire
+        setFormData({
+          email: profil.email || "",
+          telephone: profil.telephone || "",
+          address: profil.address || "",
+          specialite: profil.specialite || "",
+          experience_years: profil.experience_years || "",
+          languages: profil.languages || "",
+          professional_background: profil.professional_background || "",
+          consultation_price: profil.consultation_price || "",
+          insurance_accepted: profil.insurance_accepted || "",
+          bio: profil.bio || "",
+          photo: profil.photo || "",
+        });
 
-      // Messages mock
-      setMessages([
-        {
-          id: 1,
-          from: "Patient A",
-          content: "Bonjour docteur...",
-          time: "10:30",
-          read: false,
-        },
-        {
-          id: 2,
-          from: "Patient B",
-          content: "Résultats d'analyse",
-          time: "Hier",
-          read: true,
-        },
-        {
-          id: 3,
-          from: "Patient C",
-          content: "Disponibilité pour consultation",
-          time: "15/06",
-          read: false,
-        },
-      ]);
-    }
+        setWorkingHours(profil.working_hours || defaultHours);
+
+        // Rendez-vous
+        const { data: rdvs } = await api.get("/medecin/appointments");
+        setAppointments(rdvs);
+
+        // Messages simulés
+        setMessages([
+          {
+            id: 1,
+            from: "Patient A",
+            content: "Bonjour docteur...",
+            time: "10:30",
+            read: false,
+          },
+          {
+            id: 2,
+            from: "Patient B",
+            content: "Résultats d'analyse",
+            time: "Hier",
+            read: true,
+          },
+          {
+            id: 3,
+            from: "Patient C",
+            content: "Disponibilité pour consultation",
+            time: "15/06",
+            read: false,
+          },
+        ]);
+      } catch (err) {
+        console.error("❌ Erreur chargement données :", err);
+        toast.error("Erreur lors du chargement du profil");
+      }
+    };
+
+    fetchData();
   }, [role]);
 
-  // Mise à jour des champs du formulaire
+  /**
+   * 🔹 Gestion changement inputs (formulaire profil)
+   */
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Gestion du statut d'un rendez-vous
-  const handleStatusChange = (id, status) => {
+  /**
+   * 🔹 Mise à jour statut rendez-vous
+   */
+  const handleStatusChange = async (id, status) => {
     const route =
       status === "confirmé"
         ? `/medecin/appointments/${id}/confirm`
         : `/medecin/appointments/${id}/reject`;
 
-    api
-      .patch(route)
-      .then(() => {
-        setAppointments((prev) =>
-          prev.map((app) => (app.id === id ? { ...app, status } : app))
-        );
-        toast.success(`Rendez-vous ${status}`);
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.error("Erreur lors de la mise à jour du rendez-vous");
-      });
+    try {
+      await api.patch(route);
+      setAppointments((prev) =>
+        prev.map((app) => (app.id === id ? { ...app, status } : app))
+      );
+      toast.success(`Rendez-vous ${status}`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur lors de la mise à jour du rendez-vous");
+    }
   };
 
+  /**
+   * 🔹 Sauvegarde du profil et des horaires
+   */
   const handleSave = async () => {
     try {
-      // Sauvegarde du profil général (email, téléphone, etc.)
-      const profileRes = await api.put("/medecin/profile", formData);
+      // Sauvegarde du profil général
+      const { data: profileRes } = await api.put("/medecin/profile", formData);
 
       // Sauvegarde des horaires
-      const hoursRes = await api.put("/medecin/working-hours", {
+      const { data: hoursRes } = await api.put("/medecin/working-hours", {
         working_hours: workingHours,
       });
 
-      // Mettre à jour les states avec les réponses du backend
-      setMedecin({
-        ...profileRes.data,
-        workingHours: hoursRes.data.working_hours,
-      });
-      setFormData({
-        ...formData,
-        workingHours: hoursRes.data.working_hours,
-      });
+      setMedecin({ ...profileRes, working_hours: hoursRes.working_hours });
+      setFormData((prev) => ({
+        ...prev,
+        working_hours: hoursRes.working_hours,
+      }));
 
       setEditMode(false);
-      toast.success("Profil et horaires mis à jour !");
+      toast.success("✅ Profil et horaires mis à jour !");
     } catch (error) {
       console.error("Erreur de mise à jour :", error);
       toast.error("Erreur lors de la mise à jour");
     }
   };
 
-  // Gestion de l'image de profil
+  /**
+   * 🔹 Upload image profil
+   */
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({ ...formData, photo: reader.result });
-      };
-      reader.readAsDataURL(file);
-    }
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData((prev) => ({ ...prev, photo: reader.result }));
+    };
+    reader.readAsDataURL(file);
   };
 
-  const triggerFileInput = () => fileInputRef.current.click();
+  const triggerFileInput = () => fileInputRef.current?.click();
 
-  // Ajout et suppression d'horaires
+  /**
+   * 🔹 Gestion des horaires (ajout/suppression)
+   */
   const addWorkingDay = () => {
     if (newDay && newHours) {
       setWorkingHours([...workingHours, { day: newDay, hours: newHours }]);
@@ -184,12 +230,12 @@ const ProfilMedecin = () => {
   };
 
   const removeWorkingDay = (index) => {
-    const updatedHours = [...workingHours];
-    updatedHours.splice(index, 1);
-    setWorkingHours(updatedHours);
+    setWorkingHours((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Loader tant que le profil n'est pas chargé
+  /**
+   * 🔹 Loader si pas encore de données
+   */
   if (!medecin) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -306,7 +352,8 @@ const ProfilMedecin = () => {
                 className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 flex items-center gap-1 px-3 py-1 rounded-full"
               >
                 <ShieldCheck className="w-4 h-4" />
-                Assurances acceptées : {medecin.insurance_accepted === 1 ? "Oui" : "Non"}
+                Assurances acceptées :{" "}
+                {medecin.insurance_accepted === 1 ? "Oui" : "Non"}
               </Badge>
             </div>
           </div>
@@ -367,7 +414,7 @@ const ProfilMedecin = () => {
                     {editMode ? (
                       <Textarea
                         name="bio"
-                        value={formData.bio || ""}
+                        value={formData.bio}
                         onChange={handleChange}
                         placeholder="Décrivez votre parcours, spécialités et approche médicale..."
                         className="min-h-[150px]"
@@ -379,95 +426,6 @@ const ProfilMedecin = () => {
                     )}
                   </CardContent>
                 </Card>
-
-                <TabsContent value="agenda" className="mt-6">
-                  <Card className="border-0 shadow-lg">
-                    <CardHeader className="bg-blue-50 rounded-t-lg">
-                      <CardTitle className="flex items-center gap-2 text-blue-700 text-lg font-semibold">
-                        <Calendar className="w-5 h-5" /> Mes Rendez-vous
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {appointments.length === 0 ? (
-                        <p className="text-gray-500 italic text-center">
-                          Aucun rendez-vous pour le moment.
-                        </p>
-                      ) : (
-                        appointments.map((app) => {
-                          const statusColor =
-                            app.status === "en attente"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : app.status === "confirmé"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800";
-
-                          return (
-                            <div
-                              key={app.id}
-                              className="p-4 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
-                            >
-                              <div className="flex-1 space-y-1">
-                                <p>
-                                  <strong>Patient :</strong> {app.patient}
-                                </p>
-                                <p>
-                                  <strong>Téléphone :</strong>{" "}
-                                  {app.phone || "Non renseigné"}
-                                </p>
-                                <p>
-                                  <strong>Adresse :</strong>{" "}
-                                  {app.address || "Non renseignée"}
-                                </p>
-                                <p>
-                                  <strong>Date :</strong>{" "}
-                                  {new Date(app.date).toLocaleString("fr-FR", {
-                                    weekday: "long",
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </p>
-                                <p>
-                                  <strong>Type :</strong>{" "}
-                                  {app.consultation_type}
-                                </p>
-                                <p>
-                                  <strong>Status :</strong>{" "}
-                                  <Badge className={statusColor}>
-                                    {app.status}
-                                  </Badge>
-                                </p>
-                              </div>
-
-                              {app.status === "en attente" && (
-                                <div className="flex gap-2 mt-2 md:mt-0">
-                                  <Button
-                                    className="bg-green-600 hover:bg-green-700 text-white transition-colors duration-200"
-                                    onClick={() =>
-                                      handleStatusChange(app.id, "confirmé")
-                                    }
-                                  >
-                                    Confirmer
-                                  </Button>
-                                  <Button
-                                    className="bg-red-600 hover:bg-red-700 text-white transition-colors duration-200"
-                                    onClick={() =>
-                                      handleStatusChange(app.id, "refusé")
-                                    }
-                                  >
-                                    Refuser
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })
-                      )}
-                    </CardContent>
-                  </Card>
-                </TabsContent>
 
                 {/* Horaires de consultation */}
                 <Card className="border-0 shadow-sm">
@@ -528,7 +486,7 @@ const ProfilMedecin = () => {
                       ))}
                     </div>
 
-                    {/* Ajout d’un nouvel horaire */}
+                    {/* Ajout d'un nouvel horaire */}
                     {editMode && (
                       <div className="mt-4 space-y-3">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -557,25 +515,6 @@ const ProfilMedecin = () => {
                         </p>
                       </div>
                     )}
-
-                    {/* Boutons principaux pour tout le profil */}
-                    {editMode && (
-                      <div className="mt-6 flex flex-col sm:flex-row justify-end gap-3">
-                        <Button
-                          variant="outline"
-                          onClick={() => setEditMode(false)}
-                          className="border-gray-300"
-                        >
-                          Annuler
-                        </Button>
-                        <Button
-                          onClick={handleSave} // ici on sauvegarde tout, y compris workingHours
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          <Save className="w-4 h-4 mr-2" /> Enregistrer
-                        </Button>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -598,14 +537,14 @@ const ProfilMedecin = () => {
                       {editMode ? (
                         <Input
                           name="email"
-                          value={formData.email || ""}
+                          value={formData.email}
                           onChange={handleChange}
                           className="bg-gray-50"
                         />
                       ) : (
                         <p className="flex items-center gap-2 text-gray-700">
                           <Mail className="w-5 h-5 text-blue-400" />
-                          {medecin.email || "Non renseigné"}
+                          {medecin.email}
                         </p>
                       )}
                     </div>
@@ -618,14 +557,14 @@ const ProfilMedecin = () => {
                       {editMode ? (
                         <Input
                           name="telephone"
-                          value={formData.telephone || ""}
+                          value={formData.telephone}
                           onChange={handleChange}
                           className="bg-gray-50"
                         />
                       ) : (
                         <p className="flex items-center gap-2 text-gray-700">
                           <Phone className="w-5 h-5 text-blue-400" />
-                          {medecin.telephone || "Non renseigné"}
+                          {medecin.telephone}
                         </p>
                       )}
                     </div>
@@ -638,7 +577,7 @@ const ProfilMedecin = () => {
                       {editMode ? (
                         <Input
                           name="address"
-                          value={formData.address || ""}
+                          value={formData.address}
                           onChange={handleChange}
                           className="bg-gray-50"
                         />
@@ -658,14 +597,14 @@ const ProfilMedecin = () => {
                       {editMode ? (
                         <Input
                           name="specialite"
-                          value={formData.specialite || ""}
+                          value={formData.specialite}
                           onChange={handleChange}
                           className="bg-gray-50"
                         />
                       ) : (
                         <p className="flex items-center gap-2 text-gray-700">
                           <Stethoscope className="w-5 h-5 text-blue-400" />
-                          {medecin.specialite || "Non renseignée"}
+                          {medecin.specialite}
                         </p>
                       )}
                     </div>
@@ -677,8 +616,8 @@ const ProfilMedecin = () => {
                       </label>
                       {editMode ? (
                         <Input
-                          name="years_experience"
-                          value={formData.years_experience || ""}
+                          name="experience_years"
+                          value={formData.experience_years}
                           onChange={handleChange}
                           className="bg-gray-50"
                           type="number"
@@ -687,7 +626,7 @@ const ProfilMedecin = () => {
                       ) : (
                         <p className="flex items-center gap-2 text-gray-700">
                           <Calendar className="w-5 h-5 text-blue-400" />
-                          {medecin.experience_years || "Non renseigné"}
+                          {medecin.experience_years}
                         </p>
                       )}
                     </div>
@@ -700,7 +639,7 @@ const ProfilMedecin = () => {
                       {editMode ? (
                         <Input
                           name="languages"
-                          value={formData.languages || ""}
+                          value={formData.languages}
                           onChange={handleChange}
                           className="bg-gray-50"
                           placeholder="Ex: Français, Anglais"
@@ -708,7 +647,7 @@ const ProfilMedecin = () => {
                       ) : (
                         <p className="flex items-center gap-2 text-gray-700">
                           <Globe className="w-5 h-5 text-blue-400" />
-                          {medecin.languages || "Non renseigné"}
+                          {medecin.languages}
                         </p>
                       )}
                     </div>
@@ -721,7 +660,7 @@ const ProfilMedecin = () => {
                       {editMode ? (
                         <Textarea
                           name="professional_background"
-                          value={formData.professional_background || ""}
+                          value={formData.professional_background}
                           onChange={handleChange}
                           className="bg-gray-50"
                           placeholder="Expérience clinique et formations"
@@ -729,7 +668,7 @@ const ProfilMedecin = () => {
                       ) : (
                         <p className="flex items-start gap-2 text-gray-700 whitespace-pre-line">
                           <Briefcase className="w-5 h-5 text-blue-400 mt-1" />
-                          {medecin.professional_background || "Non renseigné"}
+                          {medecin.professional_background}
                         </p>
                       )}
                     </div>
@@ -742,7 +681,7 @@ const ProfilMedecin = () => {
                       {editMode ? (
                         <Input
                           name="consultation_price"
-                          value={formData.consultation_price || ""}
+                          value={formData.consultation_price}
                           onChange={handleChange}
                           className="bg-gray-50"
                           type="number"
@@ -763,13 +702,12 @@ const ProfilMedecin = () => {
                       <label className="text-sm font-medium text-gray-500 mb-1 block">
                         Assurances acceptées
                       </label>
-
                       {editMode ? (
                         <select
                           name="insurance_accepted"
-                          value={formData.insurance_accepted ? "oui" : "non"}
+                          value={formData.insurance_accepted ? "1" : "0"}
                           onChange={(e) => {
-                            const value = e.target.value === "oui" ? 1 : 0;
+                            const value = e.target.value === "1" ? 1 : 0;
                             setFormData({
                               ...formData,
                               insurance_accepted: value,
@@ -777,8 +715,8 @@ const ProfilMedecin = () => {
                           }}
                           className="bg-gray-50 w-full p-2 border rounded"
                         >
-                          <option value="oui">Oui</option>
-                          <option value="non">Non</option>
+                          <option value="1">Oui</option>
+                          <option value="0">Non</option>
                         </select>
                       ) : (
                         <p className="flex items-center gap-2 text-gray-700">
@@ -860,66 +798,96 @@ const ProfilMedecin = () => {
             )}
           </TabsContent>
 
-          {/* Onglet Messages 
-          <TabsContent value="messages" className="mt-6">
-            <Card className="border-0 shadow-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-blue-600">
-                  <MessageSquare className="w-5 h-5" />
-                  Boîte de réception ({
-                    messages.filter((m) => !m.read).length
-                  }{" "}
-                  non lus)
+          {/* Onglet Agenda */}
+          <TabsContent value="agenda" className="mt-6">
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="bg-blue-50 rounded-t-lg">
+                <CardTitle className="flex items-center gap-2 text-blue-700 text-lg font-semibold">
+                  <Calendar className="w-5 h-5" /> Mes Rendez-vous
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                        message.read
-                          ? "bg-white hover:bg-gray-50 border-gray-200"
-                          : "bg-blue-50 border-blue-200"
-                      }`}
-                      onClick={() => {
-                        if (!message.read) {
-                          setMessages(
-                            messages.map((m) =>
-                              m.id === message.id ? { ...m, read: true } : m
-                            )
-                          );
-                        }
-                      }}
-                    >
-                      <div className="flex justify-between items-start">
-                        <h3
-                          className={`font-medium ${
-                            message.read ? "text-gray-800" : "text-blue-800"
-                          }`}
-                        >
-                          {message.from}
-                        </h3>
-                        <span className="text-xs text-gray-500">
-                          {message.time}
-                        </span>
-                      </div>
-                      <p
-                        className={`mt-1 text-sm ${
-                          message.read ? "text-gray-600" : "text-blue-600"
-                        }`}
+              <CardContent className="space-y-4">
+                {appointments.length === 0 ? (
+                  <p className="text-gray-500 italic text-center">
+                    Aucun rendez-vous pour le moment.
+                  </p>
+                ) : (
+                  appointments.map((app) => {
+                    const statusColor =
+                      app.status === "en attente"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : app.status === "confirmé"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800";
+
+                    return (
+                      <div
+                        key={app.id}
+                        className="p-4 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
                       >
-                        {message.content}
-                      </p>
-                      {!message.read && (
-                        <div className="mt-2 w-2 h-2 rounded-full bg-blue-500"></div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                        <div className="flex-1 space-y-1">
+                          <p>
+                            <strong>Patient :</strong> {app.patient}
+                          </p>
+                          <p>
+                            <strong>Téléphone :</strong>{" "}
+                            {app.phone || "Non renseigné"}
+                          </p>
+                          <p>
+                            <strong>Adresse :</strong>{" "}
+                            {app.address || "Non renseignée"}
+                          </p>
+                          <p>
+                            <strong>Date :</strong>{" "}
+                            {new Date(app.date + "T" + app.time).toLocaleString(
+                              "fr-FR",
+                              {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </p>
+
+                          <p>
+                            <strong>Type :</strong> {app.consultation_type}
+                          </p>
+                          <p>
+                            <strong>Status :</strong>{" "}
+                            <Badge className={statusColor}>{app.status}</Badge>
+                          </p>
+                        </div>
+
+                        {app.status === "en attente" && (
+                          <div className="flex gap-2 mt-2 md:mt-0">
+                            <Button
+                              className="bg-green-600 hover:bg-green-700 text-white transition-colors duration-200"
+                              onClick={() =>
+                                handleStatusChange(app.id, "confirmé")
+                              }
+                            >
+                              Confirmer
+                            </Button>
+                            <Button
+                              className="bg-red-600 hover:bg-red-700 text-white transition-colors duration-200"
+                              onClick={() =>
+                                handleStatusChange(app.id, "refusé")
+                              }
+                            >
+                              Refuser
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </CardContent>
             </Card>
-          </TabsContent> */}
+          </TabsContent>
         </Tabs>
       </div>
     </div>
