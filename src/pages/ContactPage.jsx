@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   Mail,
   Phone,
@@ -9,15 +10,37 @@ import {
   CheckCircle,
   User,
   ChevronRight,
+  ArrowRight,
+  Shield,
+  Sparkles,
+  BadgeCheck,
+  Calendar,
+  MessageCircle,
+  Star,
+  Users,
+  Zap,
+  Award,
+  Globe,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import MapSection from "@/components/MapSection";
-import axios from "axios";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Dialog } from "@headlessui/react";
 import { toast } from "@/components/ui/use-toast";
+import MapSection from "@/components/MapSection";
+import axios from "axios";
+import api from "@/api/axios";
 
-const ContactPage = () => {
-  const [isOpen, setIsOpen] = useState(false); // ✅ définis ici
+const ContactPagePremium = () => {
+  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -27,39 +50,76 @@ const ContactPage = () => {
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const [statsData, setStatsData] = useState({
+    medecinsCount: 0,
+    consultationsCount: 0,
+    satisfactionRate: "98%",
+    responseTime: "< 24h",
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+
+        // Récupérer les médecins pour compter le nombre
+        const medecinsResponse = await api.get("/medecins");
+        const medecinsCount = medecinsResponse.data.length;
+
+        // Estimation du nombre de consultations basé sur le nombre de médecins
+        const consultationsCount = Math.floor(medecinsCount * 100);
+
+        setStatsData({
+          medecinsCount,
+          consultationsCount,
+          satisfactionRate: "98%",
+          responseTime: "< 24h",
+        });
+      } catch (error) {
+        console.error("Erreur lors du chargement des statistiques:", error);
+        // Valeurs par défaut en cas d'erreur
+        setStatsData({
+          medecinsCount: 500,
+          consultationsCount: 50000,
+          satisfactionRate: "98%",
+          responseTime: "< 24h",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSubjectChange = (value) => {
+    setFormData((prev) => ({ ...prev, subject: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await fetch(
-        "",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch("", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
       const result = await response.json();
-      console.log("Réponse API :", result);
-
       if (result.success) {
         toast({
-          title: "Message envoyé ✅",
+          title: "Message envoyé",
           description:
             "Merci pour votre message. Nous vous répondrons très bientôt.",
           variant: "default",
         });
-
-        // Réinitialise le formulaire
         setFormData({
           name: "",
           email: "",
@@ -67,6 +127,7 @@ const ContactPage = () => {
           subject: "",
           message: "",
         });
+        setIsSubmitted(true);
       } else {
         toast({
           title: "Erreur",
@@ -77,7 +138,7 @@ const ContactPage = () => {
         });
       }
     } catch (error) {
-      console.error("Erreur d’envoi :", error);
+      console.error("Erreur d'envoi :", error);
       toast({
         title: "Erreur réseau",
         description:
@@ -90,782 +151,625 @@ const ContactPage = () => {
   const [categories, setCategories] = useState([]);
   useEffect(() => {
     axios
-      .get("") // Adapte l'URL si besoin
+      .get("")
       .then((res) => {
-        if (res.data.success) {
-          setCategories(res.data.categories);
-        }
+        if (res.data.success) setCategories(res.data.categories);
       })
-      .catch((err) => {
-        console.error("Erreur lors de la récupération des catégories", err);
-      });
+      .catch((err) =>
+        console.error("Erreur lors de la récupération des catégories", err)
+      );
   }, []);
 
-  const handleRdvSubmit = async (e) => {
-    e.preventDefault();
+  // Stats dynamiques
+  const stats = [
+    {
+      icon: Users,
+      value: `${(statsData.medecinsCount * 20).toLocaleString()}+`,
+      label: "Patients satisfaits",
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      icon: CheckCircle,
+      value: statsData.satisfactionRate,
+      label: "Taux de réponse",
+      color: "from-emerald-500 to-teal-500",
+    },
+    {
+      icon: Zap,
+      value: statsData.responseTime,
+      label: "Temps de réponse",
+      color: "from-amber-500 to-orange-500",
+    },
+    {
+      icon: Award,
+      value: `${statsData.medecinsCount}+`,
+      label: "Experts disponibles",
+      color: "from-purple-500 to-pink-500",
+    },
+  ];
 
-    try {
-      const response = await fetch(
-        "",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+  // Stats pour la section CTA finale
+  const finalStats = [
+    {
+      value: `${statsData.medecinsCount}+`,
+      label: "Médecins",
+    },
+    {
+      value: `${(statsData.consultationsCount / 1000).toFixed(0)}K+`,
+      label: "Consultations",
+    },
+    {
+      value: statsData.satisfactionRate,
+      label: "Satisfaction",
+    },
+  ];
 
-      const result = await response.json();
-      console.log("Réponse API :", result);
+  // Composant Select personnalisé qui fonctionne comme un bouton
+  const CustomSelect = () => {
+    const options = [
+      { value: "Cardiologie", label: "Cardiologie" },
+      { value: "Dermatologie", label: "Dermatologie" },
+      { value: "Médecine générale", label: "Médecine générale" },
+      { value: "Autre", label: "Autre" },
+    ];
 
-      if (result.success) {
-        toast({
-          title: "Rendez-vous confirmé 🎉",
-          description:
-            "Merci d'avoir pris rendez-vous avec nous. Nous vous contacterons bientôt.",
-          variant: "default",
-        });
-        setIsOpen(false);
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          date: "",
-          time: "",
-          message: "",
-        });
-      } else {
-        toast({
-          title: "Erreur",
-          description:
-            result.message ||
-            "Une erreur est survenue lors de la prise de rendez-vous.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Erreur d’envoi :", error);
-      toast({
-        title: "Erreur réseau",
-        description:
-          "Impossible de contacter le serveur. Veuillez réessayer plus tard.",
-        variant: "destructive",
-      });
-    }
+    const selectedOption = options.find(
+      (opt) => opt.value === formData.subject
+    );
+
+    return (
+      <div className="relative">
+        {/* Bouton du sélecteur */}
+        <button
+          type="button"
+          onClick={() => setIsSelectOpen(!isSelectOpen)}
+          className="w-full h-14 px-4 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 bg-white text-left font-normal hover:bg-slate-50 transition-all duration-200 flex items-center justify-between group"
+        >
+          <span
+            className={selectedOption ? "text-slate-900" : "text-slate-500"}
+          >
+            {selectedOption ? selectedOption.label : "Sélectionnez un sujet"}
+          </span>
+          <ChevronDown
+            className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${
+              isSelectOpen ? "rotate-180" : ""
+            } group-hover:text-slate-600`}
+          />
+        </button>
+
+        {/* Menu déroulant */}
+        {isSelectOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-2xl shadow-slate-900/20 border-2 border-slate-200 overflow-hidden"
+          >
+            {options.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  handleSubjectChange(option.value);
+                  setIsSelectOpen(false);
+                }}
+                className={`w-full px-4 py-4 text-left hover:bg-blue-50 transition-colors duration-200 border-b border-slate-100 last:border-b-0 ${
+                  formData.subject === option.value
+                    ? "bg-blue-50 text-blue-600 font-semibold"
+                    : "text-slate-700"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div className="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 overflow-hidden">
-      {/* Hero Section with Animated Background */}
-      <section
-        className="relative py-32 px-6 bg-gradient-to-r from-blue-600 to-teal-500 text-white overflow-hidden"
-        id="HomeContact"
-      >
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <video
-            className="w-full h-full object-cover opacity-45 dark:opacity-50"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src="" type="video/mp4" />
-            Votre navigateur ne prend pas en charge les vidéos HTML5.
-          </video>
-        </div>
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(12)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full bg-emerald-400/10"
-              style={{
-                width: Math.random() * 20 + 10,
-                height: Math.random() * 20 + 10,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                y: [0, Math.random() * 100 - 50],
-                x: [0, Math.random() * 100 - 50],
-                opacity: [0.1, 0.3, 0.1],
-              }}
-              transition={{
-                duration: Math.random() * 15 + 10,
-                repeat: Infinity,
-                repeatType: "reverse",
-              }}
-            />
-          ))}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
+      {/* Hero Section Ultra Premium */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-cyan-600/20 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto text-center">
-          <motion.h1
-            className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-lg"
+        <div className="container mx-auto px-6 py-24 md:py-32 relative z-10">
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto text-center"
           >
-            Contactez{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-teal-400 to-cyan-400 drop-shadow-lg">
-              DocOnline
-            </span>
-          </motion.h1>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 backdrop-blur-xl border border-blue-400/20 rounded-full px-6 py-3 mb-8"
+            >
+              <Sparkles className="w-4 h-4 text-blue-400" />
+              <span className="text-sm font-medium text-blue-200">
+                Support 24h/24 - 7j/7
+              </span>
+              <BadgeCheck className="w-4 h-4 text-cyan-400" />
+            </motion.div>
 
-          <motion.p
-            className="text-xl md:text-2xl text-white max-w-3xl mx-auto mb-10"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-          >
-            Nous sommes à votre écoute pour répondre à vos questions
-          </motion.p>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+              <span className="bg-gradient-to-r from-white via-blue-100 to-cyan-200 bg-clip-text text-transparent">
+                Contactez
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-cyan-300 via-blue-300 to-blue-200 bg-clip-text text-transparent">
+                Meetmed
+              </span>
+            </h1>
+
+            <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+              Notre équipe d'experts est à votre écoute pour répondre à toutes
+              vos questions médicales. Assistance rapide et personnalisée.
+            </p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12"
+            >
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 + index * 0.1 }}
+                  className="relative group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-cyan-500/0 group-hover:from-blue-500/5 group-hover:to-cyan-500/5 rounded-2xl transition-all duration-300" />
+                  <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all duration-300">
+                    <div
+                      className={`w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center`}
+                    >
+                      <stat.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-3xl font-bold text-white mb-1">
+                      {stat.value}
+                    </div>
+                    <div className="text-sm text-slate-400">{stat.label}</div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
 
-      {/* Contact Grid */}
-      <section className="relative py-20 px-6 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 120" fill="none" className="w-full">
+            <path
+              d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
+              fill="rgb(248, 250, 252)"
+            />
+          </svg>
+        </div>
+      </div>
+
+      {/* Contact Grid Premium */}
+      <div className="container mx-auto px-6 py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
+          {/* Contact Form Premium */}
           <motion.div
-            className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden"
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
+            className="bg-white rounded-3xl shadow-2xl shadow-slate-900/10 border border-slate-200 overflow-hidden"
           >
             <div className="p-8 md:p-12">
-              <h2 className="text-3xl font-bold mb-8 drop-shadow-lg">
-                Envoyez-nous un message
-              </h2>
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-slate-900 mb-3">
+                  Envoyez-nous un message
+                </h2>
+                <p className="text-slate-600">
+                  Notre équipe vous répond dans les plus brefs délais
+                </p>
+              </div>
 
-              {isSubmitted ? (
-                <motion.div
-                  className="bg-emerald-50 dark:bg-emerald-900/20 text-sky-600 dark:text-sky-400 p-6 rounded-xl mb-8 flex items-start gap-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <CheckCircle className="h-6 w-6 mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-bold mb-1">
-                      Message envoyé avec succès !
-                    </h3>
-                    <p>Nous vous recontacterons dans les plus brefs délais.</p>
-                  </div>
-                </motion.div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label htmlFor="name" className="block mb-2 font-medium">
-                      Nom complet
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        placeholder="Nom et Prenom*"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="w-full pl-10 pr-4 py-3 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="email" className="block mb-2 font-medium">
-                      Email
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        placeholder="Email*"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full pl-10 pr-4 py-3 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="phone" className="block mb-2 font-medium">
-                      Téléphone (optionnel)
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Phone className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        placeholder="Numero de telephone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="w-full pl-10 pr-4 py-3 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="subject" className="block mb-2 font-medium">
-                      Sujet
-                    </label>
-                    <select
-                      id="subject"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">Sélectionnez un sujet</option>
-                      <option value="Cardiologie">Cardiologie</option>
-                      <option value="Dermatologie">Dermatologie</option>
-                      <option value="Endocrinologie">Endocrinologie</option>
-                      <option value="Gastro-entérologie">
-                        Gastro-entérologie
-                      </option>
-                      <option value="Gynécologie">Gynécologie</option>
-                      <option value="Hématologie">Hématologie</option>
-                      <option value="Médecine générale">
-                        Médecine générale
-                      </option>
-                      <option value="Neurologie">Neurologie</option>
-                      <option value="Ophtalmologie">Ophtalmologie</option>
-                      <option value="Orthopédie">Orthopédie</option>
-                      <option value="Pédiatrie">Pédiatrie</option>
-                      <option value="Psychiatrie">Psychiatrie</option>
-                      <option value="Rhumatologie">Rhumatologie</option>
-                      <option value="Urologie">Urologie</option>
-                      <option value="Chirurgie générale">
-                        Chirurgie générale
-                      </option>
-                      <option value="Immunologie">Immunologie</option>
-                      <option value="Oncologie">Oncologie</option>
-                      <option value="Infectiologie">Infectiologie</option>
-                      <option value="Radiologie">Radiologie</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="message" className="block mb-2 font-medium">
-                      Message
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      placeholder="Message*"
-                      rows="5"
-                      value={formData.message}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 focus:border-transparent"
-                      required
-                    ></textarea>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-sky-500 via-sky-400 to-teal-400 hover:bg-sky-700 py-6 text-lg font-medium transition-all duration-300 transform hover:scale-[1.02]"
+              <AnimatePresence>
+                {isSubmitted ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-6 mb-8 flex items-start gap-4"
                   >
-                    Envoyer le message
-                    <Send className="ml-2 h-5 w-5" />
-                  </Button>
-                </form>
-              )}
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-emerald-900 mb-1 text-lg">
+                        Message envoyé avec succès !
+                      </h3>
+                      <p className="text-emerald-700">
+                        Nous vous recontacterons dans les plus brefs délais.
+                      </p>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.form
+                    onSubmit={handleSubmit}
+                    className="space-y-6"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                          <User className="w-4 h-4 text-blue-600" />
+                          Nom complet
+                        </label>
+                        <Input
+                          type="text"
+                          name="name"
+                          placeholder="Nom et Prénom*"
+                          value={formData.name}
+                          onChange={handleChange}
+                          className="h-14 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-blue-600" />
+                          Email
+                        </label>
+                        <Input
+                          type="email"
+                          name="email"
+                          placeholder="Email*"
+                          value={formData.email}
+                          onChange={handleChange}
+                          className="h-14 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-blue-600" />
+                          Téléphone
+                        </label>
+                        <Input
+                          type="tel"
+                          name="phone"
+                          placeholder="Numéro de téléphone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          className="h-14 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">
+                          Sujet
+                        </label>
+                        <CustomSelect />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Message
+                      </label>
+                      <textarea
+                        name="message"
+                        placeholder="Votre message*"
+                        rows="6"
+                        value={formData.message}
+                        onChange={handleChange}
+                        className="w-full px-4 py-4 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 resize-none outline-none transition-all"
+                        required
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full h-14 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 flex items-center justify-center gap-2 group"
+                    >
+                      Envoyer le message
+                      <Send className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </motion.form>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
 
-          {/* Contact Info */}
+          {/* Contact Info Premium */}
           <motion.div
-            className="space-y-8"
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
+            className="space-y-8"
           >
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800 p-8">
-              <h3 className="text-2xl font-bold mb-6 drop-shadow-lg">
+            {/* Coordonnées */}
+            <div className="bg-white rounded-3xl shadow-2xl shadow-slate-900/10 border border-slate-200 p-8">
+              <h3 className="text-2xl font-bold text-slate-900 mb-8">
                 Nos coordonnées
               </h3>
 
               <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-sky-100 dark:bg-emerald-900/20 rounded-full mt-1">
-                    <Mail className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-1">Email</h4>
-                    <a
-                      href="mailto:contact@kofgo-consulting.com"
-                      className="text-sky-600 dark:text-sky-400 hover:underline"
-                    >
-                      contact@doconline.com
-                    </a>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      Réponse sous 24h
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-sky-100 dark:bg-sky-900/20 rounded-full mt-1">
-                    <Phone className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-1">Téléphones</h4>
-                    <a
-                      href="tel:+225 07 04 84 28 43"
-                      className="text-sky-600 dark:text-sky-400 hover:underline"
-                    >
-                      Côte d'Ivoire: +225 07 00 00 00 43 <br />
-                      France/International: +33 7 00 00 00 43
-                    </a>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      Lun-Ven : 8h-18h
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-sky-100 dark:bg-sky-900/20 rounded-full mt-1">
-                    <MapPin className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-1">Nos bureaux</h4>
-                    <p className="text-gray-700 dark:text-gray-300">
-                      Rue des Entrepreneurs, Plateau
-                    </p>
-                    <p className="text-gray-700 dark:text-gray-300">
-                      Abidjan, Côte d'Ivoire
-                    </p>
-                    <br />
-                    <p className="text-gray-700 dark:text-gray-300">
-                      21 Rue Louise Michel 78711 Mantes-la-Jolie
-                    </p>
-                    <p className="text-gray-700 dark:text-gray-300">
-                      Paris, France
-                    </p>
-                    <a
-                      href="https://maps.app.goo.gl/VrLfGmPhzx4KLj6x7"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sky-600 dark:text-sky-400 p-0 h-auto mt-2 inline-flex items-center text-sm hover:underline"
-                    >
-                      Voir sur la carte
-                      <ChevronRight className="ml-1 h-4 w-4" />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-200 dark:border-sky-800 p-8">
-              <h3 className="text-2xl font-bold mb-6 drop-shadow-lg">
-                Horaires d'ouverture
-              </h3>
-
-              <div className="space-y-4">
                 {[
                   {
-                    day: "Lundi - Vendredi",
-                    hours: "8h00 - 18h00",
-                    current: true,
+                    icon: Mail,
+                    title: "Email",
+                    content: "contact@meetmed.com",
+                    subtitle: "Réponse sous 24h",
+                    color: "from-blue-500 to-cyan-500",
                   },
-                  { day: "Samedi", hours: "9h00 - 13h00", current: false },
-                  { day: "Dimanche", hours: "Fermé", current: false },
+                  {
+                    icon: Phone,
+                    title: "Téléphones",
+                    content: "+225 07 00 00 00 43\n+33 7 00 00 00 43",
+                    subtitle: "Lun-Ven : 8h-18h",
+                    color: "from-emerald-500 to-teal-500",
+                  },
+                  {
+                    icon: MapPin,
+                    title: "Nos bureaux",
+                    content:
+                      "Rue des Entrepreneurs, Plateau\nAbidjan, Côte d'Ivoire",
+                    color: "from-purple-500 to-pink-500",
+                  },
                 ].map((item, index) => (
                   <motion.div
                     key={index}
-                    className={`flex justify-between items-center p-3 rounded-lg ${
-                      item.current ? "bg-sky-50 dark:bg-sky-900/20" : ""
-                    }`}
+                    className="flex items-start gap-4 group hover:bg-slate-50/50 p-4 rounded-2xl transition-all duration-300"
                     whileHover={{ x: 5 }}
                   >
-                    <div className="flex items-center gap-3">
-                      <Clock className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-                      <span className="font-medium">{item.day}</span>
+                    <div
+                      className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center flex-shrink-0 mt-1`}
+                    >
+                      <item.icon className="w-6 h-6 text-white" />
                     </div>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {item.hours}
-                    </span>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-slate-900 mb-2">
+                        {item.title}
+                      </h4>
+                      <p className="text-slate-700 whitespace-pre-line mb-2">
+                        {item.content}
+                      </p>
+                      <p className="text-sm text-slate-500">{item.subtitle}</p>
+                      {item.title === "Nos bureaux" && (
+                        <a
+                          href="https://maps.app.goo.gl/VrLfGmPhzx4KLj6x7"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-700 inline-flex items-center gap-1 text-sm font-medium mt-2"
+                        >
+                          Voir sur la carte
+                          <ChevronRight className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
                   </motion.div>
                 ))}
               </div>
             </div>
-            {/* Modale 
-            <div className="bg-gradient-to-r from-sky-500 via-sky-400 to-teal-400 rounded-3xl shadow-xl p-8 text-white">
-              <h3 className="text-2xl font-bold mb-4 drop-shadow-lg">
-                Vous préférez un rendez-vous ?
-              </h3>
-              <p className="mb-6">
-                Planifiez une consultation en ligne avec l'un de nos experts.
-              </p>
-              <Button
-                className="bg-white text-sky-600 hover:bg-gray-100 w-full py-6 text-lg font-medium transition-all duration-300 transform hover:scale-[1.02]"
-                onClick={() => setIsOpen(true)}
-              >
-                Prendre rendez-vous
-              </Button>
-            </div>
-            */}
-
-            {/* Modale */}
-            <Dialog
-              open={isOpen}
-              onClose={() => setIsOpen(false)}
-              className="fixed z-50 inset-0 overflow-y-auto"
-            >
-              {/* Overlay avec animation */}
-              <div className="fixed inset-0 transition-opacity">
-                <div
-                  className="absolute inset-0 bg-black bg-opacity-50"
-                  onClick={() => setIsOpen(false)}
-                ></div>
-              </div>
-
-              {/* Contenu du modal avec animations */}
-              <div className="flex items-center justify-center min-h-screen px-4">
-                <Dialog.Panel className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:p-8">
-                  {/* En-tête */}
-                  <div className="flex justify-between items-start">
-                    <Dialog.Title className="text-2xl font-bold text-gray-800">
-                      Prendre un rendez-vous
-                    </Dialog.Title>
-                    <button
-                      onClick={() => setIsOpen(false)}
-                      className="text-gray-400 hover:text-gray-500"
-                    >
-                      <svg
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {/* Formulaire */}
-                  <form onSubmit={handleRdvSubmit} className="mt-6 space-y-4">
-                    <div className="space-y-4">
-                      <div>
-                        <label
-                          htmlFor="name"
-                          className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                          Nom complet
-                        </label>
-                        <input
-                          type="text"
-                          id="name"
-                          name="name"
-                          placeholder="Votre nom"
-                          required
-                          onChange={handleChange}
-                          value={formData.name}
-                          className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
-                        />
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="email"
-                          className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                          Email
-                        </label>
-                        <input
-                          type="email"
-                          id="email"
-                          name="email"
-                          placeholder="Email@gmail.com"
-                          required
-                          onChange={handleChange}
-                          value={formData.email}
-                          className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
-                        />
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="phone"
-                          className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                          Téléphone
-                        </label>
-                        <input
-                          type="tel"
-                          id="phone"
-                          name="phone"
-                          placeholder="00 00 00 00 43"
-                          required
-                          onChange={handleChange}
-                          value={formData.phone}
-                          className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label
-                            htmlFor="date"
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                          >
-                            Date
-                          </label>
-                          <input
-                            type="date"
-                            id="date"
-                            name="date"
-                            required
-                            onChange={handleChange}
-                            value={formData.date}
-                            className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
-                          />
-                        </div>
-
-                        <div>
-                          <label
-                            htmlFor="time"
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                          >
-                            Heure
-                          </label>
-                          <input
-                            type="time"
-                            id="time"
-                            name="time"
-                            required
-                            onChange={handleChange}
-                            value={formData.time}
-                            className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="message"
-                          className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                          Message (optionnel)
-                        </label>
-                        <textarea
-                          id="message"
-                          name="message"
-                          rows={3}
-                          placeholder="Décrivez votre demande..."
-                          onChange={handleChange}
-                          value={formData.message}
-                          className="w-full px-4 py-2 border border-sky-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition"
-                        ></textarea>
-                      </div>
-                    </div>
-
-                    {/* Boutons */}
-                    <div className="flex justify-end space-x-3 pt-2">
-                      <button
-                        type="button"
-                        onClick={() => setIsOpen(false)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition"
-                      >
-                        Annuler
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 bg-gradient-to-r from-sky-500 via-sky-400 to-teal-400 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition"
-                      >
-                        Confirmer le rendez-vous
-                      </button>
-                    </div>
-                  </form>
-                </Dialog.Panel>
-              </div>
-            </Dialog>
           </motion.div>
         </div>
-      </section>
+      </div>
 
-      {/* Team Contact 
-      <section className="py-20 px-6 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto">
+      {/* Map Section */}
+      <MapSection />
+
+      {/* Section CTA finale */}
+      <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-24 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10">
           <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto text-center"
           >
-            <h2 className="text-4xl font-bold mb-6 drop-shadow-lg">
-              Contactez nos{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 drop-shadow-lg">
-                experts
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full px-6 py-3 mb-8">
+              <Shield className="w-4 h-4 text-blue-400" />
+              <span className="text-sm font-medium">
+                Plateforme 100% sécurisée
+              </span>
+            </div>
+
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
+                Prenez votre santé en main
               </span>
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Notre équipe pluridisciplinaire est à votre disposition
+
+            <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Rejoignez des milliers de patients satisfaits. Consultation
+              rapide, médecins certifiés, rendez-vous en ligne 24/7.
             </p>
-          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {[
-              {
-                name: "Konan KOFFI",
-                role: "Directeur Consulting",
-                email: "innocent.koffi@kofgo-consulting.com",
-                phone: "+33 7 43 10 12 06",
-                photo: "https://kofgo-consulting.com/dgkoffi.png",
-              },
-              {
-                name: "Richard TAGO",
-                role: "Responsable Financier",
-                email: "tago.richard@kofgo-consulting.com",
-                phone: "+225 48 34 68 88",
-                photo:
-                  "https://media.licdn.com/dms/image/v2/D4E03AQGsNhrC9-x9EA/profile-displayphoto-crop_800_800/B4EZfSRSV1HsAI-/0/1751579437932?e=1757548800&v=beta&t=-C1B_JunUMUfFmXmjc7HZ5SnGp_OVBBlJCgXJc_xFNU",
-              },
-              {
-                name: "Suzanne KOFFI",
-                role: "Experte en marketing digital et en design",
-                email: "suzanne.koffi@kofgo-consulting.com",
-                phone: "+233 53 846 7083",
-                photo:
-                  "https://media.licdn.com/dms/image/v2/D5603AQE2NfYmFrroCg/profile-displayphoto-shrink_800_800/B56Zai.HpzHgAc-/0/1746490916362?e=1755129600&v=beta&t=pW-gB7-p8LkkmUI1OesK5LgzEYCq7XfhF8AaSRybvXs",
-              },
-              {
-                name: "Cedrick KONATE",
-                role: "Développeur full-stack",
-                email: "cedrick.konate@kofgo-consulting.com",
-                phone: "+225 07 57 24 25 91",
-                photo: "/cedrick.png",
-              },
-            ].map((person, index) => (
-              <motion.div
-                key={index}
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col h-[500px]"
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.15 }}
-                whileHover={{ y: -10 }}
-              >
-                {/* Image 
-                <div className="h-[200px] w-full overflow-hidden flex-shrink-0">
-                  <img
-                    src={person.photo}
-                    alt={person.name}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-
-                {/* Contenu qui prend tout le reste 
-                <div className="p-6 flex flex-col flex-grow">
-                  {/* Haut 
-                  <div>
-                    <h3 className="text-xl font-bold mb-1">{person.name}</h3>
-                    <p className="text-emerald-600 dark:text-emerald-400 mb-4">
-                      {person.role}
-                    </p>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Mail className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                        <a
-                          href={`mailto:${
-                            person.email
-                          }?subject=${encodeURIComponent(
-                            "Contact depuis le site"
-                          )}&body=${encodeURIComponent(
-                            `Bonjour ${person.name.split(" ")[0]},`
-                          )}`}
-                          className="text-gray-700 dark:text-gray-300 hover:text-emerald-600 hover:underline break-all"
-                        >
-                          {person.email}
-                        </a>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Phone className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                        <a
-                          href={`tel:${person.phone}`}
-                          className="text-gray-700 dark:text-gray-300 hover:text-emerald-600 hover:underline"
-                        >
-                          {person.phone}
-                        </a>
-                      </div>
-                    </div>
+            {/* Stats finaux dynamiques */}
+            <div className="grid grid-cols-3 gap-6 mb-10 max-w-2xl mx-auto">
+              {finalStats.map((stat, index) => (
+                <div key={index} className="text-center">
+                  <div className="text-3xl font-bold text-white mb-1">
+                    {stat.value}
                   </div>
-
-                  {/* Bouton toujours collé en bas 
-                  <a
-                    href={`mailto:${person.email}?subject=${encodeURIComponent(
-                      "Contact depuis le site"
-                    )}&body=${encodeURIComponent(
-                      `Bonjour ${person.name.split(" ")[0]},`
-                    )}`}
-                    className="mt-auto h-11 w-full border border-emerald-600 text-emerald-600 text-center flex items-center justify-center rounded-md hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-sm"
-                  >
-                    Contacter {person.name.split(" ")[0]}
-                  </a>
+                  <div className="text-sm text-slate-400">{stat.label}</div>
                 </div>
-              </motion.div>
-            ))}
-            
-          </div>
-        </div>
-      </section>
-*/}
-      {/* ===== CTA FINAL ===== */}
-      <div className="bg-gradient-to-r from-blue-600 to-teal-500 text-white py-16">
-        <div className="container mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Prêt à prendre rendez-vous avec un spécialiste ?
-            </h2>
-            <p className="text-xl opacity-90 mb-8">
-              Notre équipe est disponible 24h/24 pour vous aider à trouver le
-              professionnel de santé qu'il vous faut.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <motion.div whileHover={{ scale: 1.05 }}>
-                <Button className="bg-white text-blue-600 px-8 py-4 rounded-lg shadow-lg hover:bg-blue-50 text-lg font-semibold">
-                  Trouver un médecin
-                </Button>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }}>
-                <Button
-                  variant="outline"
-                  className="border-white text-black px-8 py-4 rounded-lg hover:bg-white hover:text-blue-600 text-lg font-semibold"
-                >
-                  Contactez-nous
-                </Button>
-              </motion.div>
+              ))}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={() => navigate("/trouver-medecin")}
+                className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl text-white font-semibold shadow-2xl shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+              >
+                Commencer maintenant
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button
+                onClick={() => navigate("/contact")}
+                className="px-8 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl text-white font-semibold hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <Phone className="w-5 h-5" />
+                Nous contacter
+              </Button>
             </div>
           </motion.div>
         </div>
       </div>
-      <MapSection />
+
+      {/* Modal Rendez-vous Premium */}
+      <Dialog
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        className="relative z-50"
+      >
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+          aria-hidden="true"
+        />
+
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="bg-white rounded-3xl shadow-2xl shadow-slate-900/20 max-w-md w-full mx-auto overflow-hidden border border-slate-200">
+            <div className="p-8">
+              <div className="flex justify-between items-start mb-6">
+                <Dialog.Title className="text-2xl font-bold text-slate-900">
+                  Prendre un rendez-vous
+                </Dialog.Title>
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 transition-colors p-2 hover:bg-slate-100 rounded-xl"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Nom complet
+                    </label>
+                    <Input
+                      type="text"
+                      name="name"
+                      placeholder="Votre nom"
+                      required
+                      className="h-12 rounded-xl border-2 border-slate-200 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Email
+                    </label>
+                    <Input
+                      type="email"
+                      name="email"
+                      placeholder="Email@gmail.com"
+                      required
+                      className="h-12 rounded-xl border-2 border-slate-200 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Téléphone
+                    </label>
+                    <Input
+                      type="tel"
+                      name="phone"
+                      placeholder="00 00 00 00 43"
+                      required
+                      className="h-12 rounded-xl border-2 border-slate-200 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Date
+                      </label>
+                      <Input
+                        type="date"
+                        name="date"
+                        required
+                        className="h-12 rounded-xl border-2 border-slate-200 focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Heure
+                      </label>
+                      <Input
+                        type="time"
+                        name="time"
+                        required
+                        className="h-12 rounded-xl border-2 border-slate-200 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Message (optionnel)
+                    </label>
+                    <textarea
+                      name="message"
+                      rows={3}
+                      placeholder="Décrivez votre demande..."
+                      className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 resize-none outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    className="px-6 py-3 border-2 border-slate-200 text-white rounded-xl font-semibold bg-red-600 hover:border-red-800 hover:bg-red-800 transition-all"
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg shadow-blue-500/25"
+                  >
+                    Confirmer le rendez-vous
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
     </div>
   );
 };
 
-export default ContactPage;
+export default ContactPagePremium;

@@ -7,6 +7,9 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(null); // "patient" ou "medecin"
   const [token, setToken] = useState(localStorage.getItem("auth_token") || "");
 
+  // Ajoutez isAuthenticated qui se base sur la présence du token
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedRole = localStorage.getItem("role");
@@ -16,6 +19,9 @@ export const AuthProvider = ({ children }) => {
       setUser(JSON.parse(storedUser));
       setRole(storedRole);
       setToken(storedToken);
+      setIsAuthenticated(true); // Mettez à jour isAuthenticated
+    } else {
+      setIsAuthenticated(false);
     }
   }, []);
 
@@ -23,6 +29,7 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     setRole(userRole);
     setToken(accessToken);
+    setIsAuthenticated(true); // Mettez à jour isAuthenticated
 
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("role", userRole);
@@ -33,13 +40,24 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setRole(null);
     setToken("");
+    setIsAuthenticated(false); // Mettez à jour isAuthenticated
+
     localStorage.removeItem("user");
     localStorage.removeItem("role");
     localStorage.removeItem("auth_token");
   };
 
   return (
-    <AuthContext.Provider value={{ user, role, token, loginUser, logoutUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        role,
+        token,
+        isAuthenticated, // Ajoutez isAuthenticated ici
+        loginUser,
+        logoutUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

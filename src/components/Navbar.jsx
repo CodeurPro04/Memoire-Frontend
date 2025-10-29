@@ -70,11 +70,14 @@ const Navbar = () => {
           >
             <div className="w-24 h-24 flex items-center justify-center">
               <img
-                src="/logo/logo1.png"
-                alt="KofGo Logo"
+                src="/logo/meetmed2.png"
+                alt="Meetmed Logo"
                 className="w-20 h-20 object-contain"
               />
             </div>
+            <span className="text-2xl font-bold text-primary dark:text-white">
+              Meetmed
+            </span>
           </motion.div>
 
           {/* Nav centrée */}
@@ -123,11 +126,11 @@ const Navbar = () => {
                 {/* Bouton Profil */}
                 <Button
                   variant="default"
-                  onClick={() =>
-                    navigate(
-                      role === "patient" ? "/profil-patient" : "/profil-medecin"
-                    )
-                  }
+                  onClick={() => {
+                    if (role === "patient") navigate("/profil-patient");
+                    else if (role === "medecin") navigate("/profil-medecin");
+                    else if (role === "clinique") navigate("/profil-clinique");
+                  }}
                   className="flex items-center justify-center rounded-full bg-gradient-to-r from-sky-500 to-teal-400 hover:from-teal-400 hover:to-sky-500 text-white w-10 h-10 p-2 shadow-lg transition-all duration-300"
                 >
                   <User className="w-5 h-5" />
@@ -142,8 +145,7 @@ const Navbar = () => {
                   }}
                   className="flex items-center justify-center rounded-full border-red-500 text-red-500 hover:bg-red-500/10 w-10 h-10 p-2 transition-all duration-300"
                 >
-                  <LogIn className="w-5 h-5 rotate-180" />{" "}
-                  {/* icône inversée pour symboliser la sortie */}
+                  <LogIn className="w-5 h-5 rotate-180" />
                 </Button>
               </div>
             ) : (

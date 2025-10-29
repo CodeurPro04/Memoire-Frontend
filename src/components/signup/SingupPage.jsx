@@ -66,7 +66,7 @@ const SingupPage = () => {
       >
         <div className="text-center mb-8">
           <img
-            src="/logo/logo.png"
+            src="/logo/meetmed2.png"
             alt="Logo"
             className="mx-auto w-24 h-24 object-contain rounded-full shadow-lg mb-4"
           />

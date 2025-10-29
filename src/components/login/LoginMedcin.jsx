@@ -52,7 +52,7 @@ const LoginMedcin = () => {
       >
         <div className="text-center mb-8">
           <img
-            src="/logo/logo.png"
+            src="/logo/meetmed2.png"
             alt="Medical Logo"
             className="mx-auto w-24 h-24 object-contain rounded-full shadow-lg mb-4"
           />
@@ -110,6 +110,15 @@ const LoginMedcin = () => {
               onClick={() => navigate("/register-medcin")}
             >
               {t("login.register")}
+            </span>
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            {t("login.noAccountttt")}{" "}
+            <span
+              className="text-sky-500 hover:text-sky-400 cursor-pointer font-semibold"
+              onClick={() => navigate("/login-clinique")}
+            >
+              {t("loginn.registerrr")}
             </span>
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-300">

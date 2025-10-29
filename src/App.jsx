@@ -17,12 +17,16 @@ import { useTranslation } from "react-i18next";
 import HomePage from "@/pages/HomePage";
 import LoginPage from "@/components/login/LoginPage";
 import LoginMedcin from "@/components/login/LoginMedcin";
+import LoginClinique from "@/components/login/LoginClinique";
 import SingupPage from "@/components/signup/SingupPage";
 import SingupMedcin from "@/components/signup/SingupMedcin";
+import SingupClinique from "@/components/signup/SingupClinique";
 import DocteursPage from "@/components/medécin/DocteursPage";
 import MedecinProfilePage from "@/components/medécin/MedecinProfilePage";
 import ProfilPage from "@/components/medécin/ProfilPage";
 import ProfilePage from "@/components/patient/ProfilePage";
+import ProfilClinique from "@/components/clinique/ProfilClinique";
+import ProfileClinique from "@/components/clinique/ProfileClinique";
 import SpecialitePage from "@/components/specialites/SpecialitePage";
 import InfosPage from "@/components/infos/InfosPage";
 import RealisationsPage from "@/pages/RealisationsPage";
@@ -77,12 +81,16 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/login-medecin" element={<LoginMedcin />} />
+          <Route path="/login-clinique" element={<LoginClinique />} />
           <Route path="/register-client" element={<SingupPage />} />
           <Route path="/register-medcin" element={<SingupMedcin />} />
+          <Route path="/register-clinique" element={<SingupClinique />} />
           <Route path="/trouver-medecin" element={<DocteursPage />} />
           <Route path="/profil-medecin/:id" element={<MedecinProfilePage />} />
           <Route path="/profil-medecin" element={<ProfilPage />} />
           <Route path="/profil-patient" element={<ProfilePage />} />
+          <Route path="/profil-clinique" element={<ProfilClinique />} />
+          <Route path="/profil-clinique/:id" element={<ProfileClinique />} />
           <Route path="/specialites" element={<SpecialitePage />} />
           <Route path="/comment-ca-marche" element={<InfosPage />} />
           <Route path="/realisations" element={<RealisationsPage />} />

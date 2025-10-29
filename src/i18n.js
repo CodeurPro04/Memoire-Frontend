@@ -79,7 +79,7 @@ const resources = {
       "services.contactButton": "Contact Us",
       "services.learnMoreButton": "View all services",
 
-      "about.title.line1": "KOF-GO CONSULTING",
+      "about.title.line1": "Meetmed CONSULTING",
       "about.title.line2":
         "Act with method, Change with impact, Succeed with meaning.",
       "about.paragraph1":
@@ -96,7 +96,7 @@ const resources = {
       "about.stats.expertsValue": "12+",
       "about.stats.expertsLabel": "Countries of operation",
       "about.imageAlt":
-        "KofGo Consulting team in strategic brainstorming session in modern office",
+        "Meetmed Consulting team in strategic brainstorming session in modern office",
       "partners.title": "Our Partners",
       "partners.subtitle": "Strategic alliances for your success",
 
@@ -191,7 +191,7 @@ const resources = {
       "testimonials.client3.name": "Chen Zhao",
       "testimonials.client3.position": "Founder, Epsilon Start-up",
       "testimonials.client3.content":
-        "As a young company, we needed expert guidance. KofGo provided us with the tools and strategy to successfully navigate the crucial first steps. Priceless!",
+        "As a young company, we needed expert guidance. Meetmed provided us with the tools and strategy to successfully navigate the crucial first steps. Priceless!",
 
       "contact.sectionTitle": "Let's Get in Touch",
       "contact.sectionSubtitle":
@@ -246,9 +246,9 @@ const resources = {
       "footer.rightsReserved": "All rights reserved. Designed with passion.",
       "footer.developedBy": "Website developed by Hostinger Horizons.",
 
-      "chatbot.header": "KofGo Assistant",
+      "chatbot.header": "Meetmed Assistant",
       "chatbot.welcome":
-        "Hello! I'm the KofGo assistant. How can I help you today?",
+        "Hello! I'm the Meetmed assistant. How can I help you today?",
       "chatbot.inputPlaceholder": "Type your message...",
       "chatbot.sendAria": "Send message",
       "chatbot.openAria": "Open chat",
@@ -340,9 +340,17 @@ const resources = {
         noAccount: "Vous n'avez pas de compte ?",
         noAccountt: "Vous êtes un medécin ?",
         noAccounttt: "Vous êtes un patient ?",
+        noAccountttt: "Vous êtes une clinique ?",
         register: "Inscrivez-vous",
         registerr: "connectez-vous",
         errorEmpty: "Veuillez remplir tous les champs",
+      },
+
+      loginn: {
+        noAccountttt: "Vous êtes une clinique ?",
+        registerrr: "connectez-vous",
+        titleee : "Connexion Clinique",
+        subtitlee : "Accédez à votre espace personnel",
       },
 
       signup: {
@@ -373,17 +381,17 @@ const resources = {
         email: "Email",
         emailPlaceholder: "Email@gmail.com",
         password: "Mot de passe",
-        passwordPlaceholder: "Minimum 8 caractères",
+        passwordPlaceholder: "Entrez votre mot de passe",
         phone: "Téléphone",
         phonePlaceholder: "Entrez votre numéro de téléphone",
         address: "Adresse",
-        addressPlaceholder: "Entrez votre adresse complète",
+        addressPlaceholder: "Abidjan, Marcory",
         signupButton: "S'inscrire",
         errorEmpty: "Veuillez remplir tous les champs.",
         alreadyAccount: "Vous avez déjà un compte ?",
         login: "Connectez-vous",
         adresse: "Adresse",
-        adressePlaceholder: "Entrez votre adresse complète",
+        adressePlaceholder: "Abidjan, Marcory",
       },
 
       "about.stats.yearsExperience": "Années d'expérience",
@@ -472,7 +480,7 @@ const resources = {
       "about.stats.expertsValue": "12+",
       "about.stats.expertsLabel": "Pays d'intervention",
       "about.imageAlt":
-        "Équipe KofGo Consulting en session de brainstorming stratégique dans un bureau moderne",
+        "Équipe Meetmed Consulting en session de brainstorming stratégique dans un bureau moderne",
       "partners.title": "Nos Partenaires",
       "partners.subtitle": "Des alliances stratégiques pour votre réussite",
 
@@ -564,7 +572,7 @@ const resources = {
       "testimonials.client1.name": "Amina Diallo",
       "testimonials.client1.position": "Entrepreneure, SantéPlus",
       "testimonials.client1.content":
-        "DocOnline m'a permis de consulter un médecin rapidement depuis chez moi. Les conseils étaient précis et professionnels, ce qui m'a évité de longues attentes en clinique.",
+        "Meetmed m'a permis de consulter un médecin rapidement depuis chez moi. Les conseils étaient précis et professionnels, ce qui m'a évité de longues attentes en clinique.",
 
       "testimonials.client2.name": "Thomas Lefevre",
       "testimonials.client2.position": "Cadre, Alpha Tech",
@@ -574,12 +582,12 @@ const resources = {
       "testimonials.client3.name": "Chen Zhao",
       "testimonials.client3.position": "Fondateur, Bien-être Start-up",
       "testimonials.client3.content":
-        "Grâce à DocOnline, mes consultations sont efficaces et flexibles. L'application m'a permis de suivre mes traitements et de poser toutes mes questions directement aux médecins, sans stress ni déplacements.",
+        "Grâce à Meetmed, mes consultations sont efficaces et flexibles. L'application m'a permis de suivre mes traitements et de poser toutes mes questions directement aux médecins, sans stress ni déplacements.",
 
       "testimonials.client4.name": "Sophie Martin",
       "testimonials.client4.position": "Mère de famille",
       "testimonials.client4.content":
-        "Pour mes enfants, c'est devenu un réflexe de consulter via DocOnline. Rapidité, sécurité et conseils clairs, je recommande cette plateforme à toutes les familles.",
+        "Pour mes enfants, c'est devenu un réflexe de consulter via Meetmed. Rapidité, sécurité et conseils clairs, je recommande cette plateforme à toutes les familles.",
 
       "testimonials.client5.name": "Aliou Koné",
       "testimonials.client5.position": "Étudiant",
@@ -632,7 +640,7 @@ const resources = {
       "footer.links.company.title": "L'Entreprise",
       "footer.links.company.about": "À Propos de Nous",
       "footer.links.company.team": "Notre Équipe d'Experts",
-      "footer.links.company.careers": "Carrières chez DocOnline",
+      "footer.links.company.careers": "Carrières chez Meetmed",
       "footer.links.company.blog": "Blog & Analyses",
       "footer.links.legal.title": "Informations",
       "footer.links.legal.mentions": "Mentions Légales",
@@ -641,9 +649,9 @@ const resources = {
       "footer.rightsReserved": "Tous droits réservés .",
       "footer.developedBy": "Site développé par Hostinger Horizons.",
 
-      "chatbot.header": "Assistant DocOnline",
+      "chatbot.header": "Assistant Meetmed",
       "chatbot.welcome":
-        "Bonjour ! Je suis l'assistant DocOnline. Comment puis-je vous aider aujourd'hui ?",
+        "Bonjour ! Je suis l'assistant Meetmed. Comment puis-je vous aider aujourd'hui ?",
       "chatbot.inputPlaceholder": "Tapez votre message...",
       "chatbot.sendAria": "Envoyer le message",
       "chatbot.openAria": "Ouvrir le chat",

@@ -120,14 +120,14 @@ const ServicesSection = () => {
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button
               size="lg"
-              onClick={() => navigate("/contact#HomeContact")}
+              onClick={() => navigate("/contact")}
               className="bg-gradient-to-r from-sky-500 to-teal-400 text-white font-semibold text-lg px-10 py-4 rounded-xl shadow-lg hover:shadow-sky-500/30 transition-all duration-300 transform hover:scale-[1.02]"
             >
               {t("services.contactButton")}
             </Button>
             <Button
               size="lg"
-              onClick={() => navigate("/services#HomeService")}
+              onClick={() => navigate("/comment-ca-marche")}
               variant="outline"
               className="border-sky-500 text-sky-500 hover:bg-emerald-100/20 font-semibold text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]"
             >
