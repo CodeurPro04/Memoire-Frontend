@@ -157,6 +157,107 @@ const AvailabilityBadge = React.memo(({ availability }) => {
 });
 AvailabilityBadge.displayName = "AvailabilityBadge";
 
+const getCurrentAvailability = (workingHours) => {
+  // Vérifie si workingHours est null, "null" (string) ou non tableau
+  if (
+    !workingHours ||
+    workingHours === "null" ||
+    !Array.isArray(workingHours) ||
+    workingHours.length === 0
+  ) {
+    return {
+      is_available: false,
+      status: "unavailable",
+      message: "Horaires non définis",
+      next_available: null,
+    };
+  }
+
+  const now = new Date();
+  const today = now
+    .toLocaleDateString("fr-FR", { weekday: "long" })
+    .toLowerCase(); // ex: "mercredi"
+  const currentTime = now.toTimeString().slice(0, 5); // "HH:MM"
+
+  // Trouver le jour correspondant dans le tableau
+  const todaySchedule = workingHours.find((d) => d.day.toLowerCase() === today);
+
+  // Aucun horaire défini ou jour désactivé
+  if (!todaySchedule || !todaySchedule.enabled || !todaySchedule.hours) {
+    return {
+      is_available: false,
+      status: "unavailable",
+      message: "Horaires non définis",
+      next_available: null,
+    };
+  }
+
+  // Vérifie les créneaux du jour
+  const timeSlots = todaySchedule.hours.split(" | ").map((slot) => slot.trim());
+
+  for (const slot of timeSlots) {
+    const [start, end] = slot.split(" - ").map((s) => s.trim());
+    if (currentTime >= start && currentTime <= end) {
+      return {
+        is_available: true,
+        status: "available",
+        message: `Ouvert jusqu'à ${end}`,
+        next_available: null,
+      };
+    }
+  }
+
+  // Avant le premier créneau
+  const [firstStart] = timeSlots[0]?.split(" - ") || [];
+  if (firstStart && currentTime < firstStart) {
+    return {
+      is_available: false,
+      status: "later_today",
+      message: `Ouvre à ${firstStart}`,
+      next_available: firstStart,
+    };
+  }
+
+  // Après les heures d'aujourd'hui → chercher prochain jour ouvert
+  const days = [
+    "lundi",
+    "mardi",
+    "mercredi",
+    "jeudi",
+    "vendredi",
+    "samedi",
+    "dimanche",
+  ];
+  const todayIndex = days.indexOf(today);
+
+  for (let i = 1; i <= 7; i++) {
+    const nextDayIndex = (todayIndex + i) % 7;
+    const nextDay = days[nextDayIndex];
+
+    const nextDaySchedule = workingHours.find(
+      (d) => d.day.toLowerCase() === nextDay && d.enabled && d.hours
+    );
+
+    if (nextDaySchedule) {
+      const [nextStart] = nextDaySchedule.hours.split(" | ")[0].split(" - ");
+      return {
+        is_available: false,
+        status: "next_day",
+        message: `Réouverture ${nextDay} à ${nextStart}`,
+        next_available: { day: nextDay, time: nextStart },
+      };
+    }
+  }
+
+  // Cas général : aucune disponibilité trouvée
+  return {
+    is_available: false,
+    status: "unavailable",
+    message: "Horaires non définis",
+    next_available: null,
+  };
+};
+
 // Composants de contenu des onglets
 const AproposContent = React.memo(({ medecinData }) => (
   <div className="space-y-6">
@@ -178,12 +279,6 @@ const AproposContent = React.memo(({ medecinData }) => (
                 }+ ans d'expérience`
               : "Expérience non spécifiée"}
           </Badge>
-          {medecinData.education && (
-            <Badge className="bg-purple-100 text-purple-700 border-0 px-4 py-2">
-              <Award className="w-4 h-4 mr-2" />
-              {medecinData.education}
-            </Badge>
-          )}
         </div>
       </div>
     </div>
@@ -206,6 +301,7 @@ const AproposContent = React.memo(({ medecinData }) => (
               </Badge>
             </div>
           </div>
+          {/* Exemple statique, à remplacer par des données réelles si disponibles 
           <div className="space-y-3">
             <h3 className="font-semibold text-slate-800">Compétences</h3>
             <div className="flex flex-wrap gap-2">
@@ -216,72 +312,13 @@ const AproposContent = React.memo(({ medecinData }) => (
                 Suivi personnalisé
               </Badge>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
   </div>
 ));
 AproposContent.displayName = "AproposContent";
-
-const ParcoursContent = React.memo(({ medecinData }) => (
-  <div className="space-y-6">
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-      <div className="h-2 bg-gradient-to-r from-green-500 to-emerald-500" />
-      <div className="p-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-          <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full" />
-          Formation et Diplômes
-        </h2>
-        {medecinData.education ? (
-          <div className="space-y-4">
-            <div className="flex items-start gap-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                <GraduationCap className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-800">
-                  Formation principale
-                </h3>
-                <p className="text-slate-700">{medecinData.education}</p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <p className="text-slate-500 italic text-center py-8">
-            Aucune information de formation renseignée
-          </p>
-        )}
-      </div>
-    </div>
-
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-      <div className="h-2 bg-gradient-to-r from-purple-500 to-pink-500" />
-      <div className="p-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-          <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
-          Certifications et Diplômes
-        </h2>
-        <div className="grid gap-4">
-          <div className="flex items-start gap-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Award className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-800">
-                Diplômes universitaires
-              </h3>
-              <p className="text-slate-700">
-                {medecinData.education || "Diplôme de médecine générale"}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-));
-ParcoursContent.displayName = "ParcoursContent";
 
 const ExperienceContent = React.memo(({ medecinData }) => (
   <div className="space-y-6">
@@ -644,150 +681,226 @@ const AvisContent = ({
   );
 };
 
-const ContactContent = React.memo(({ medecinData }) => (
-  <div className="space-y-6">
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-      <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
-      <div className="p-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-          <div className="w-2 h-8 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full" />
-          Informations de Contact
-        </h2>
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-4">
-            <h3 className="font-semibold text-slate-800 flex items-center gap-2 text-lg">
-              <MapPin className="w-5 h-5 text-emerald-600" />
-              Localisation
-            </h3>
+const ContactContent = React.memo(({ medecinData }) => {
+  // Fonction pour formater les horaires de travail
+  const formatWorkingHours = (workingHours) => {
+    if (!Array.isArray(workingHours)) {
+      return (
+        <div className="space-y-2">
+          <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
+            <span className="font-medium text-slate-700">
+              Horaires non définis
+            </span>
+            <span className="text-slate-600">-</span>
+          </div>
+        </div>
+      );
+    }
+
+    const daysOrder = [
+      "lundi",
+      "mardi",
+      "mercredi",
+      "jeudi",
+      "vendredi",
+      "samedi",
+      "dimanche",
+    ];
+
+    return (
+      <div className="space-y-2">
+        {daysOrder.map((day) => {
+          // Chercher le bon jour dans le tableau
+          const dayData = workingHours.find((d) => d.day.toLowerCase() === day);
+
+          if (!dayData || !dayData.enabled) {
+            return (
+              <div
+                key={day}
+                className="flex justify-between items-center p-3 bg-amber-50 rounded-lg"
+              >
+                <span className="font-medium text-slate-700 capitalize">
+                  {day}
+                </span>
+                <span className="text-red-500">Fermé</span>
+              </div>
+            );
+          }
+
+          return (
             <div
-              className="relative bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl border-2 border-emerald-300 overflow-hidden group cursor-pointer hover:border-emerald-400 hover:shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 aspect-video"
-              onClick={() =>
-                window.open(
-                  `https://maps.google.com/?q=${medecinData.address}`,
-                  "_blank"
-                )
-              }
+              key={day}
+              className="flex justify-between items-center p-3 bg-amber-50 rounded-lg"
             >
-              <div className="absolute inset-0">
-                <div className="absolute inset-0 bg-grid-white/[0.1] bg-[size:30px_30px]" />
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/90 to-teal-600/90" />
-              </div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <div className="relative">
-                  <div className="w-10 h-10 bg-white rounded-full border-4 border-emerald-500 shadow-2xl flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-emerald-600" />
-                  </div>
-                  <div className="absolute inset-0 w-10 h-10 bg-emerald-400 rounded-full animate-ping opacity-60" />
-                </div>
-              </div>
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-              <div className="absolute top-6 left-6">
-                <Badge className="bg-white/90 backdrop-blur-sm text-slate-700 border-0 px-3 py-2 font-medium shadow-lg">
-                  <MapPin className="w-3 h-3 mr-1" />
-                  {medecinData.address}
-                </Badge>
-              </div>
+              <span className="font-medium text-slate-700 capitalize">
+                {day}
+              </span>
+              <span className="text-slate-600">{dayData.hours}</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Button
+          );
+        })}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
+        <div className="p-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+            <div className="w-2 h-8 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full" />
+            Informations de Contact
+          </h2>
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-4">
+              <h3 className="font-semibold text-slate-800 flex items-center gap-2 text-lg">
+                <MapPin className="w-5 h-5 text-emerald-600" />
+                Localisation
+              </h3>
+              <div
+                className="relative bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl border-2 border-emerald-300 overflow-hidden group cursor-pointer hover:border-emerald-400 hover:shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 aspect-video"
                 onClick={() =>
                   window.open(
                     `https://maps.google.com/?q=${medecinData.address}`,
                     "_blank"
                   )
                 }
-                className="h-11 bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 rounded-xl font-semibold shadow-lg shadow-emerald-500/25"
               >
-                <MapPin className="w-4 h-4 mr-2" />
-                Voir la carte
-              </Button>
-              <Button
-                onClick={() =>
-                  window.open(
-                    `https://www.google.com/maps/dir/?api=1&destination=${medecinData.address}`,
-                    "_blank"
-                  )
-                }
-                variant="outline"
-                className="h-11 border-2 border-emerald-200 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50 rounded-xl font-semibold"
-              >
-                <Navigation className="w-4 h-4 mr-2" />
-                Itinéraire
-              </Button>
+                <div className="absolute inset-0">
+                  <div className="absolute inset-0 bg-grid-white/[0.1] bg-[size:30px_30px]" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/90 to-teal-600/90" />
+                </div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                  <div className="relative">
+                    <div className="w-10 h-10 bg-white rounded-full border-4 border-emerald-500 shadow-2xl flex items-center justify-center">
+                      <MapPin className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div className="absolute inset-0 w-10 h-10 bg-emerald-400 rounded-full animate-ping opacity-60" />
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                <div className="absolute top-6 left-6">
+                  <Badge className="bg-white/90 backdrop-blur-sm text-slate-700 border-0 px-3 py-2 font-medium shadow-lg">
+                    <MapPin className="w-3 h-3 mr-1" />
+                    {medecinData.address}
+                  </Badge>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() =>
+                    window.open(
+                      `https://maps.google.com/?q=${medecinData.address}`,
+                      "_blank"
+                    )
+                  }
+                  className="h-11 bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 rounded-xl font-semibold shadow-lg shadow-emerald-500/25"
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Voir la carte
+                </Button>
+                <Button
+                  onClick={() =>
+                    window.open(
+                      `https://www.google.com/maps/dir/?api=1&destination=${medecinData.address}`,
+                      "_blank"
+                    )
+                  }
+                  variant="outline"
+                  className="h-11 border-2 border-emerald-200 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50 rounded-xl font-semibold"
+                >
+                  <Navigation className="w-4 h-4 mr-2" />
+                  Itinéraire
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className="space-y-4">
-            <h3 className="font-semibold text-slate-800 text-lg">
-              Coordonnées
-            </h3>
             <div className="space-y-4">
-              <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-200 hover:border-blue-300 transition-colors group">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-slate-900">Téléphone</p>
-                  <p className="text-slate-700">
-                    {medecinData.telephone || "Non renseigné"}
-                  </p>
-                  {medecinData.telephone && (
-                    <Button
-                      onClick={() =>
-                        window.open(`tel:${medecinData.telephone}`)
-                      }
-                      size="sm"
-                      className="mt-2 bg-blue-600 hover:bg-blue-700 text-white text-xs h-8"
-                    >
-                      <Phone className="w-3 h-3 mr-1" />
-                      Appeler
-                    </Button>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 hover:border-green-300 transition-colors group">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-slate-900">Email</p>
-                  <p className="text-slate-700">
-                    {medecinData.email || "Non renseigné"}
-                  </p>
-                  {medecinData.email && (
-                    <Button
-                      onClick={() => window.open(`mailto:${medecinData.email}`)}
-                      size="sm"
-                      className="mt-2 bg-green-600 hover:bg-green-700 text-white text-xs h-8"
-                    >
-                      <Mail className="w-3 h-3 mr-1" />
-                      Envoyer
-                    </Button>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-start gap-4 p-4 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl border border-purple-200 hover:border-purple-300 transition-colors">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Languages className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-slate-900 mb-2">
-                    Langues parlées
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {medecinData.languages?.length > 0 ? (
-                      medecinData.languages.map((lang, idx) => (
-                        <Badge
-                          key={idx}
-                          className="bg-white/80 backdrop-blur-sm text-purple-700 border-purple-200 text-xs px-3 py-1 shadow-sm"
-                        >
-                          {lang}
-                        </Badge>
-                      ))
-                    ) : (
-                      <span className="text-slate-500 text-sm">
-                        Non renseignées
-                      </span>
+              <h3 className="font-semibold text-slate-800 text-lg">
+                Coordonnées
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-200 hover:border-blue-300 transition-colors group">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-900">Téléphone</p>
+                    <p className="text-slate-700">
+                      {medecinData.telephone || "Non renseigné"}
+                    </p>
+                    {medecinData.telephone && (
+                      <Button
+                        onClick={() =>
+                          window.open(`tel:${medecinData.telephone}`)
+                        }
+                        size="sm"
+                        className="mt-2 bg-blue-600 hover:bg-blue-700 text-white text-xs h-8"
+                      >
+                        <Phone className="w-3 h-3 mr-1" />
+                        Appeler
+                      </Button>
                     )}
+                  </div>
+                </div>
+                <div className="flex items-start sm:items-center gap-4 p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 hover:border-green-300 transition-colors group">
+                  {/* Icône à gauche */}
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-6 h-6 text-white" />
+                  </div>
+
+                  {/* Contenu texte */}
+                  <div className="flex-1 min-w-0">
+                    {/* Label */}
+                    <p className="font-medium text-slate-900">Email</p>
+
+                    {/* Email : tronqué proprement si trop long */}
+                    <p className="text-slate-700 break-words text-sm sm:text-base max-w-full truncate md:whitespace-normal">
+                      {medecinData.email || "Non renseigné"}
+                    </p>
+
+                    {/* Bouton */}
+                    {medecinData.email && (
+                      <Button
+                        onClick={() =>
+                          window.open(`mailto:${medecinData.email}`)
+                        }
+                        size="sm"
+                        className="mt-2 bg-green-600 hover:bg-green-700 text-white text-xs h-8"
+                      >
+                        <Mail className="w-3 h-3 mr-1" />
+                        Envoyer
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 p-4 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl border border-purple-200 hover:border-purple-300 transition-colors">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Languages className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-900 mb-2">
+                      Langues parlées
+                    </p>
+
+                    <div className="flex flex-wrap gap-2">
+                      {medecinData.languages?.length > 0 ? (
+                        medecinData.languages.map((lang, idx) => (
+                          <Badge
+                            key={idx}
+                            className="bg-gradient-to-br from-purple-50 to-fuchsia-50 text-purple-700 border border-purple-200 text-xs px-3 py-1.5 rounded-lg shadow-sm hover:bg-purple-100 transition-all truncate max-w-[150px] sm:max-w-[200px]"
+                            title={lang} // Affiche le texte complet au survol
+                          >
+                            {lang}
+                          </Badge>
+                        ))
+                      ) : (
+                        <span className="text-slate-500 text-sm">
+                          Non renseignées
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -795,54 +908,28 @@ const ContactContent = React.memo(({ medecinData }) => (
           </div>
         </div>
       </div>
-    </div>
 
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-      <div className="h-2 bg-gradient-to-r from-amber-500 to-orange-500" />
-      <div className="p-8">
-        <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-          <div className="w-2 h-8 bg-gradient-to-b from-amber-500 to-orange-500 rounded-full" />
-          Informations Pratiques
-        </h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-amber-600" />
-              Horaires de consultation
-            </h3>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
-                <span className="font-medium text-slate-700">
-                  Lundi - Vendredi
-                </span>
-                <span className="text-slate-600">09:00 - 18:00</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
-                <span className="font-medium text-slate-700">Samedi</span>
-                <span className="text-slate-600">09:00 - 12:00</span>
-              </div>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-green-600" />
-              Assurances acceptées
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge className="bg-green-100 text-green-700 border-0">
-                CNSS
-              </Badge>
-              <Badge className="bg-blue-100 text-blue-700 border-0">CNAS</Badge>
-              <Badge className="bg-purple-100 text-purple-700 border-0">
-                Mutuelle
-              </Badge>
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div className="h-2 bg-gradient-to-r from-amber-500 to-orange-500" />
+        <div className="p-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+            <div className="w-2 h-8 bg-gradient-to-b from-amber-500 to-orange-500 rounded-full" />
+            Informations Pratiques
+          </h2>
+          <div className="grid md:grid-cols-1 gap-6">
+            <div className="space-y-4">
+              <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+                <Clock className="w-5 h-5 text-amber-600" />
+                Horaires de consultation
+              </h3>
+              {formatWorkingHours(medecinData.working_hours)}
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-));
+  );
+});
 ContactContent.displayName = "ContactContent";
 
 // Composant principal optimisé
@@ -895,15 +982,29 @@ const MedecinProfilePage = () => {
       annees_experience: 0,
       languages: ["Français"],
       type: "independant",
+      working_hours: null,
     }),
     []
   );
 
   const medecinData = useMemo(() => {
     if (!medecin) return null;
+
+    let workingHours = medecin.working_hours;
+    // Si working_hours est une chaîne JSON, la parser
+    if (typeof workingHours === "string") {
+      try {
+        workingHours = JSON.parse(workingHours);
+      } catch (e) {
+        console.error("Erreur parsing working_hours:", e);
+        workingHours = null;
+      }
+    }
+
     return {
       ...defaultMedecin,
       ...medecin,
+      working_hours: workingHours,
       languages: Array.isArray(medecin.languages)
         ? medecin.languages
         : medecin.languages?.split(",").map((l) => l.trim()) || [],
@@ -934,24 +1035,42 @@ const MedecinProfilePage = () => {
   // Callbacks optimisés
   const checkAvailability = useCallback(async () => {
     try {
-      const response = await api.get(`/medecins/${id}/availability`);
-      setAvailability(response.data);
+      // Si on a les horaires, on calcule la disponibilité localement
+      if (medecinData?.working_hours) {
+        const currentAvailability = getCurrentAvailability(
+          medecinData.working_hours
+        );
+        setAvailability(currentAvailability);
+      } else {
+        // Sinon, on utilise l'API
+        const response = await api.get(`/medecins/${id}/availability`);
+        setAvailability(response.data);
+      }
     } catch (error) {
       console.error("Erreur vérification disponibilité:", error);
-      setAvailability({
-        is_available: false,
-        status: "error",
-        message: "Indisponible",
-        next_available: null,
-      });
+      // En cas d'erreur, on essaie de calculer localement
+      if (medecinData?.working_hours) {
+        const currentAvailability = getCurrentAvailability(
+          medecinData.working_hours
+        );
+        setAvailability(currentAvailability);
+      } else {
+        setAvailability({
+          is_available: false,
+          status: "error",
+          message: "Indisponible",
+          next_available: null,
+        });
+      }
     }
-  }, [id]);
+  }, [id, medecinData]);
 
   const toggleFavorite = useCallback(async () => {
     if (!user || role !== "patient") {
       toast({
         title: "Connexion requise",
-        description: "Vous devez être connecté en tant que patient pour ajouter aux favoris",
+        description:
+          "Vous devez être connecté en tant que patient pour ajouter aux favoris",
         variant: "default",
       });
       navigate("/login", {
@@ -1046,7 +1165,8 @@ const MedecinProfilePage = () => {
     if (!user || role !== "patient") {
       toast({
         title: "Connexion requise",
-        description: "Vous devez être connecté en tant que patient pour laisser un avis",
+        description:
+          "Vous devez être connecté en tant que patient pour laisser un avis",
         variant: "default",
       });
       navigate("/login", {
@@ -1078,7 +1198,7 @@ const MedecinProfilePage = () => {
       setComment("");
       setShowReviewForm(false);
       await Promise.all([fetchReviews(), fetchReviewStats()]);
-      
+
       toast({
         title: "Avis publié",
         description: "Votre avis a été ajouté avec succès",
@@ -1096,7 +1216,8 @@ const MedecinProfilePage = () => {
       } else {
         toast({
           title: "Erreur",
-          description: error.response?.data?.error || "Erreur lors de l'ajout de l'avis",
+          description:
+            error.response?.data?.error || "Erreur lors de l'ajout de l'avis",
           variant: "destructive",
         });
       }
@@ -1113,7 +1234,7 @@ const MedecinProfilePage = () => {
     navigate,
     fetchReviews,
     fetchReviewStats,
-    toast
+    toast,
   ]);
 
   const handlePrendreRdv = useCallback(async () => {
@@ -1152,8 +1273,9 @@ const MedecinProfilePage = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const successMessage = response.data.message || "Rendez-vous créé avec succès !";
-      
+      const successMessage =
+        response.data.message || "Rendez-vous créé avec succès !";
+
       toast({
         title: "Rendez-vous confirmé",
         description: successMessage,
@@ -1166,14 +1288,15 @@ const MedecinProfilePage = () => {
       setConsultationType("Consultation générale");
     } catch (error) {
       const errorData = error.response?.data;
-      const errorMessage = errorData?.message || "Erreur lors de la prise de rendez-vous";
-      
+      const errorMessage =
+        errorData?.message || "Erreur lors de la prise de rendez-vous";
+
       toast({
         title: "Erreur de rendez-vous",
         description: errorMessage,
         variant: "destructive",
       });
-      
+
       setRdvMessage(errorMessage);
     } finally {
       setLoadingRdv(false);
@@ -1187,7 +1310,7 @@ const MedecinProfilePage = () => {
     consultationType,
     medecinData,
     navigate,
-    toast
+    toast,
   ]);
 
   const handleShare = useCallback(async () => {
@@ -1243,13 +1366,13 @@ const MedecinProfilePage = () => {
       });
       return;
     }
-    
+
     toast({
       title: "Message envoyé",
       description: `Votre message a été envoyé au Dr. ${medecinData.nom}`,
       variant: "default",
     });
-    
+
     setMessage("");
     setChatOpen(false);
   }, [message, medecinData, toast]);
@@ -1274,7 +1397,7 @@ const MedecinProfilePage = () => {
   useEffect(() => {
     if (medecinData) {
       checkAvailability();
-      const interval = setInterval(checkAvailability, 60000);
+      const interval = setInterval(checkAvailability, 60000); // Mise à jour toutes les minutes
       return () => clearInterval(interval);
     }
   }, [medecinData, checkAvailability]);
@@ -1295,10 +1418,9 @@ const MedecinProfilePage = () => {
   // Composants d'interface
   const TabsNavigation = React.memo(() => (
     <div className="bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl p-2 mb-8">
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {[
           { id: "apropos", label: "À Propos", icon: FileText },
-          { id: "parcours", label: "Parcours", icon: GraduationCap },
           { id: "experience", label: "Expérience", icon: Briefcase },
           { id: "avis", label: "Avis", icon: ThumbsUp },
           { id: "contact", label: "Contact", icon: Languages },
@@ -1543,6 +1665,7 @@ const MedecinProfilePage = () => {
                     {reviewStats?.total_reviews || 0} avis
                   </p>
                 </div>
+
                 <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Award className="w-5 h-5 text-cyan-400" />
@@ -1558,7 +1681,25 @@ const MedecinProfilePage = () => {
                   </div>
                   <p className="text-sm text-slate-300">Années d'exp.</p>
                 </div>
-                <AvailabilityBadge availability={availability} />
+
+                {/* AvailabilityBadge */}
+                {(() => {
+                  let workingHours = medecinData?.working_hours ?? null;
+
+                  // Parser seulement si c'est une chaîne
+                  if (typeof workingHours === "string") {
+                    try {
+                      workingHours = JSON.parse(workingHours);
+                    } catch (err) {
+                      workingHours = null;
+                    }
+                  }
+
+                  const availability = getCurrentAvailability(workingHours);
+
+                  return <AvailabilityBadge availability={availability} />;
+                })()}
+
                 <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <TrendingUp className="w-5 h-5 text-purple-400" />
@@ -1590,9 +1731,6 @@ const MedecinProfilePage = () => {
             {/* Contenu des onglets */}
             {activeTab === "apropos" && (
               <AproposContent medecinData={medecinData} />
-            )}
-            {activeTab === "parcours" && (
-              <ParcoursContent medecinData={medecinData} />
             )}
             {activeTab === "experience" && (
               <ExperienceContent medecinData={medecinData} />
@@ -1715,15 +1853,6 @@ const MedecinProfilePage = () => {
                 </div>
               </div>
             </div>
-
-            {/* Bouton de contact 
-            <Button
-              onClick={() => setChatOpen(true)}
-              className="w-full h-12 bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 rounded-xl shadow-lg shadow-green-500/25 font-semibold"
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Contacter le médecin
-            </Button> */}
           </div>
         </div>
       </div>

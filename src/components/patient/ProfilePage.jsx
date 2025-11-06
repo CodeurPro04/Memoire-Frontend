@@ -1,4 +1,11 @@
-import React, { useContext, useEffect, useState, useRef } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { AuthContext } from "@/context/AuthContext";
 import api from "@/api/axios";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -24,6 +31,7 @@ import {
   FileText,
   Stethoscope,
   Loader2,
+  Droplet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,106 +104,95 @@ const ProfilPatient = () => {
   const [loadingFavorites, setLoadingFavorites] = useState(false);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [cancellingAppointment, setCancellingAppointment] = useState(null);
+  const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
-  // Configuration des statuts des rendez-vous
-  const statusConfig = {
-    en_attente: {
-      bg: "bg-yellow-50",
-      border: "border-yellow-200",
-      badge: "bg-yellow-100 text-yellow-800",
-      icon: Clock,
-      label: "En attente",
-    },
-    "en attente": {
-      bg: "bg-yellow-50",
-      border: "border-yellow-200",
-      badge: "bg-yellow-100 text-yellow-800",
-      icon: Clock,
-      label: "En attente",
-    },
-    confirmé: {
-      bg: "bg-green-50",
-      border: "border-green-200",
-      badge: "bg-green-100 text-green-800",
-      icon: CheckCircle2,
-      label: "Confirmé",
-    },
-    confirmé: {
-      bg: "bg-green-50",
-      border: "border-green-200",
-      badge: "bg-green-100 text-green-800",
-      icon: CheckCircle2,
-      label: "Confirmé",
-    },
-    annulé: {
-      bg: "bg-red-50",
-      border: "border-red-200",
-      badge: "bg-red-100 text-red-800",
-      icon: XCircle,
-      label: "Annulé",
-    },
-    annulé: {
-      bg: "bg-red-50",
-      border: "border-red-200",
-      badge: "bg-red-100 text-red-800",
-      icon: XCircle,
-      label: "Annulé",
-    },
-    refusé: {
-      bg: "bg-gray-50",
-      border: "border-gray-200",
-      badge: "bg-gray-100 text-gray-800",
-      icon: AlertCircle,
-      label: "Refusé",
-    },
-    refusé: {
-      bg: "bg-gray-50",
-      border: "border-gray-200",
-      badge: "bg-gray-100 text-gray-800",
-      icon: AlertCircle,
-      label: "Refusé",
-    },
-  };
+  // Configuration des statuts des rendez-vous (memoïsé)
+  const statusConfig = useMemo(
+    () => ({
+      en_attente: {
+        bg: "bg-yellow-50",
+        border: "border-yellow-200",
+        badge: "bg-yellow-100 text-yellow-800",
+        icon: Clock,
+        label: "En attente",
+      },
+      "en attente": {
+        bg: "bg-yellow-50",
+        border: "border-yellow-200",
+        badge: "bg-yellow-100 text-yellow-800",
+        icon: Clock,
+        label: "En attente",
+      },
+      confirmé: {
+        bg: "bg-green-50",
+        border: "border-green-200",
+        badge: "bg-green-100 text-green-800",
+        icon: CheckCircle2,
+        label: "Confirmé",
+      },
+      annulé: {
+        bg: "bg-red-50",
+        border: "border-red-200",
+        badge: "bg-red-100 text-red-800",
+        icon: XCircle,
+        label: "Annulé",
+      },
+      refusé: {
+        bg: "bg-gray-50",
+        border: "border-gray-200",
+        badge: "bg-gray-100 text-gray-800",
+        icon: AlertCircle,
+        label: "Refusé",
+      },
+    }),
+    []
+  );
 
-  useEffect(() => {
-    if (role === "patient") {
-      const fetchProfileAndAppointments = async () => {
-        try {
-          setLoading(true);
-          const profileRes = await api.get("/patient/profile");
-          setPatient(profileRes.data);
-          setFormData(profileRes.data);
+  // Chargement initial de TOUTES les données
+  const fetchAllData = useCallback(async () => {
+    if (role !== "patient") return;
 
-          await fetchAppointments();
-        } catch (error) {
-          console.error("Erreur chargement profil ou rendez-vous :", error);
-          toast.error("Erreur lors du chargement du profil");
-        } finally {
-          setLoading(false);
-        }
-      };
+    try {
+      setLoading(true);
 
-      fetchProfileAndAppointments();
+      // Charger toutes les données en parallèle
+      const [profileRes, appointmentsRes, favoritesRes] = await Promise.all([
+        api.get("/patient/profile"),
+        api.get("/patient/appointments"),
+        api.get("/favorites"),
+      ]);
+
+      setPatient(profileRes.data);
+      setFormData(profileRes.data);
+      setAppointments(appointmentsRes.data);
+      setFavorites(favoritesRes.data);
+    } catch (error) {
+      console.error("Erreur chargement des données :", error);
+      toast.error("Erreur lors du chargement des données");
+    } finally {
+      setLoading(false);
     }
   }, [role]);
 
-  // Charger les favoris quand l'onglet est actif
+  // Chargement initial
   useEffect(() => {
-    if (activeTab === "favoris" && isAuthenticated) {
+    if (role === "patient") {
+      fetchAllData();
+    }
+  }, [role, fetchAllData]);
+
+  // Recharger les données quand on revient sur l'onglet profil
+  useEffect(() => {
+    if (activeTab === "profil" && isAuthenticated && role === "patient") {
+      // Recharger les données importantes
+      fetchAppointments();
       fetchFavorites();
     }
-  }, [activeTab, isAuthenticated]);
+  }, [activeTab, isAuthenticated, role]);
 
-  // Charger les rendez-vous quand l'onglet est actif
-  useEffect(() => {
-    if (activeTab === "agenda" && isAuthenticated) {
-      fetchAppointments();
-    }
-  }, [activeTab, isAuthenticated]);
-
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     try {
       setLoadingAppointments(true);
       const response = await api.get("/patient/appointments");
@@ -206,9 +203,9 @@ const ProfilPatient = () => {
     } finally {
       setLoadingAppointments(false);
     }
-  };
+  }, []);
 
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     try {
       setLoadingFavorites(true);
       const response = await api.get("/favorites");
@@ -219,39 +216,58 @@ const ProfilPatient = () => {
     } finally {
       setLoadingFavorites(false);
     }
-  };
+  }, []);
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     try {
+      setSaving(true);
       const res = await api.put("/patient/profile", formData);
+
+      // Mise à jour IMMÉDIATE de toutes les données
       setPatient(res.data);
+      setFormData(res.data);
+
       setEditMode(false);
       toast.success("Profil mis à jour avec succès !");
+
+      // Recharger les données pour s'assurer que tout est synchronisé
+      await fetchAllData();
     } catch (error) {
       toast.error("Erreur lors de la mise à jour du profil");
       console.error(error);
+    } finally {
+      setSaving(false);
     }
-  };
+  }, [formData, fetchAllData]);
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = useCallback((e) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () =>
-        setFormData({ ...formData, photo: reader.result });
+      reader.onloadend = () => {
+        const newPhoto = reader.result;
+        // Mise à jour IMMÉDIATE de l'image
+        setFormData((prev) => ({ ...prev, photo: newPhoto }));
+        setPatient((prev) => (prev ? { ...prev, photo: newPhoto } : null));
+      };
       reader.readAsDataURL(file);
     }
-  };
+  }, []);
 
-  const triggerFileInput = () => fileInputRef.current?.click();
+  const triggerFileInput = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
 
   // Fonction pour retirer un médecin des favoris
-  const removeFromFavorites = async (medecinId) => {
+  const removeFromFavorites = useCallback(async (medecinId) => {
     try {
       await api.delete(`/favorites/${medecinId}`);
+      // Mise à jour IMMÉDIATE de l'état local
       setFavorites((prev) =>
         prev.filter((medecin) => medecin.id !== medecinId)
       );
@@ -260,11 +276,10 @@ const ProfilPatient = () => {
       console.error("Erreur lors de la suppression du favori:", error);
       toast.error("Erreur lors de la suppression du favori");
     }
-  };
+  }, []);
 
   // Fonction pour annuler un rendez-vous
-  const cancelAppointment = async (appointment) => {
-    // Vérifier si l'annulation est possible
+  const cancelAppointment = useCallback(async (appointment) => {
     if (!appointment.can_cancel) {
       toast.error("Impossible d'annuler ce rendez-vous");
       return;
@@ -275,8 +290,10 @@ const ProfilPatient = () => {
     try {
       await api.delete(`/appointments/${appointment.id}/cancel`);
       toast.success("Rendez-vous annulé avec succès");
-      // Recharger les rendez-vous
-      await fetchAppointments();
+      // Mise à jour IMMÉDIATE de l'état local
+      setAppointments((prev) =>
+        prev.filter((app) => app.id !== appointment.id)
+      );
     } catch (error) {
       console.error("Erreur lors de l'annulation du rendez-vous:", error);
       const errorMessage =
@@ -286,21 +303,33 @@ const ProfilPatient = () => {
     } finally {
       setCancellingAppointment(null);
     }
-  };
+  }, []);
 
-  // Statistiques des rendez-vous
-  const appointmentStats = {
-    total: appointments.length,
-    confirmed: appointments.filter(
-      (a) => a.status === "confirmé" || a.status === "confirmé"
-    ).length,
-    pending: appointments.filter(
-      (a) => a.status === "en_attente" || a.status === "en attente"
-    ).length,
-    cancelled: appointments.filter(
-      (a) => a.status === "annulé" || a.status === "refusé"
-    ).length,
-  };
+  // Calcul des statistiques (memoïsé)
+  const appointmentStats = useMemo(
+    () => ({
+      total: appointments.length,
+      confirmed: appointments.filter(
+        (a) => a.status === "confirmé" || a.status === "confirmé"
+      ).length,
+      pending: appointments.filter(
+        (a) => a.status === "en_attente" || a.status === "en attente"
+      ).length,
+      cancelled: appointments.filter(
+        (a) => a.status === "annulé" || a.status === "refusé"
+      ).length,
+    }),
+    [appointments]
+  );
+
+  // Prochain rendez-vous (memoïsé)
+  const nextAppointment = useMemo(
+    () =>
+      appointments.find(
+        (a) => a.status === "confirmé" || a.status === "confirmé"
+      ),
+    [appointments]
+  );
 
   if (loading || !patient) {
     return (
@@ -583,6 +612,28 @@ const ProfilPatient = () => {
                     )}
                   </div>
 
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">
+                      Groupe sanguin
+                    </label>
+                    {editMode ? (
+                      <Input
+                        name="groupe_sanguin"
+                        value={formData.groupe_sanguin || ""}
+                        onChange={handleChange}
+                        className="border-slate-300"
+                        disabled
+                      />
+                    ) : (
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                        <Droplet className="w-5 h-5 text-red-500" />
+                        <span className="text-slate-700">
+                          {patient.groupe_sanguin || "Non renseigné"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Adresse */}
                   <div>
                     <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">
@@ -608,10 +659,20 @@ const ProfilPatient = () => {
                   {editMode && (
                     <Button
                       onClick={handleSave}
-                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                      disabled={saving}
+                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
                     >
-                      <Save className="w-4 h-4 mr-2" />
-                      Enregistrer les modifications
+                      {saving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Enregistrement...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Enregistrer les modifications
+                        </>
+                      )}
                     </Button>
                   )}
                 </CardContent>
@@ -657,17 +718,8 @@ const ProfilPatient = () => {
                           Prochain RDV
                         </p>
                         <p className="text-xs text-slate-600">
-                          {appointments.find(
-                            (a) =>
-                              a.status === "confirmé" || a.status === "confirmé"
-                          )
-                            ? `Avec ${
-                                appointments.find(
-                                  (a) =>
-                                    a.status === "confirmé" ||
-                                    a.status === "confirmé"
-                                ).medecin
-                              }`
+                          {nextAppointment
+                            ? `Avec ${nextAppointment.medecin}`
                             : "Aucun RDV confirmé"}
                         </p>
                       </div>
@@ -963,13 +1015,6 @@ const ProfilPatient = () => {
                     Actions irréversibles concernant votre compte
                   </p>
                   <div className="space-y-3">
-                    <Button
-                      variant="outline"
-                      className="border-red-300 text-red-600 hover:bg-red-100 hover:text-red-700 w-full justify-start"
-                    >
-                      <XCircle className="w-4 h-4 mr-2" />
-                      Désactiver le compte temporairement
-                    </Button>
                     <Button
                       variant="outline"
                       className="border-red-300 text-red-600 hover:bg-red-100 hover:text-red-700 w-full justify-start"

@@ -90,6 +90,102 @@ const SimpleSelect = ({
   );
 };
 
+// getCurrentAvailability (adaptée au format tableau [{day, hours, enabled}, ...])
+const getCurrentAvailability = (workingHours) => {
+  if (!workingHours || !Array.isArray(workingHours)) {
+    return {
+      is_available: false,
+      status: "unavailable",
+      message: "Horaires non définis",
+      next_available: null,
+    };
+  }
+
+  const now = new Date();
+  const today = now
+    .toLocaleDateString("fr-FR", { weekday: "long" })
+    .toLowerCase();
+  const currentTime = now.toTimeString().slice(0, 5); // "HH:MM"
+
+  const todaySchedule = workingHours.find(
+    (d) => d.day && d.day.toLowerCase() === today
+  );
+
+  if (!todaySchedule || !todaySchedule.enabled || !todaySchedule.hours) {
+    return {
+      is_available: false,
+      status: "unavailable",
+      message: "Fermé aujourd'hui",
+      next_available: null,
+    };
+  }
+
+  const timeSlots = todaySchedule.hours
+    .split(" | ")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  for (const slot of timeSlots) {
+    const [start, end] = slot.split(" - ").map((s) => s.trim());
+    if (!start || !end) continue;
+    if (currentTime >= start && currentTime <= end) {
+      return {
+        is_available: true,
+        status: "available",
+        message: `Ouvert jusqu'à ${end}`,
+        next_available: null,
+      };
+    }
+  }
+
+  const firstSlot = timeSlots[0]?.split(" - ")[0]?.trim();
+  if (firstSlot && currentTime < firstSlot) {
+    return {
+      is_available: false,
+      status: "later_today",
+      message: `Ouvre à ${firstSlot}`,
+      next_available: firstSlot,
+    };
+  }
+
+  const days = [
+    "lundi",
+    "mardi",
+    "mercredi",
+    "jeudi",
+    "vendredi",
+    "samedi",
+    "dimanche",
+  ];
+  const todayIndex = days.indexOf(today);
+
+  for (let i = 1; i <= 7; i++) {
+    const nextDayIndex = (todayIndex + i) % 7;
+    const nextDay = days[nextDayIndex];
+
+    const nextDaySchedule = workingHours.find(
+      (d) => d.day && d.day.toLowerCase() === nextDay && d.enabled && d.hours
+    );
+    if (nextDaySchedule) {
+      const nextStart =
+        nextDaySchedule.hours.split(" | ")[0]?.split(" - ")[0]?.trim() || null;
+      return {
+        is_available: false,
+        status: "next_day",
+        message: `Réouverture ${nextDay} à ${nextStart}`,
+        next_available: { day: nextDay, time: nextStart },
+      };
+    }
+  }
+
+  return {
+    is_available: false,
+    status: "unavailable",
+    message: "Indisponible",
+    next_available: null,
+  };
+};
+
 // Composant Carte Médecin avec système de favoris fonctionnel
 const MedecinCard = ({
   medecin,
@@ -123,6 +219,21 @@ const MedecinCard = ({
     fetchRating();
   }, [medecin.id]);
 
+  // Parser si le backend renvoie une string JSON
+  const parsedWorkingHours =
+    typeof medecin.working_hours === "string"
+      ? (() => {
+          try {
+            return JSON.parse(medecin.working_hours);
+          } catch (e) {
+            console.warn("working_hours JSON parse error:", e);
+            return null;
+          }
+        })()
+      : medecin.working_hours;
+
+  const availability = getCurrentAvailability(parsedWorkingHours);
+
   // Fonction pour obtenir les informations du type de pratique
   const getPracticeTypeInfo = (medecin) => {
     if (medecin.type === "clinique" && medecin.clinique) {
@@ -145,17 +256,52 @@ const MedecinCard = ({
   const PracticeIcon = practiceInfo.icon;
 
   const handleFavoriteClick = async () => {
-    if (!isAuthenticated || role !== "patient") {
-      toast.error(
-        "Veuillez vous connecter en tant que patient pour ajouter aux favoris"
-      );
+    if (!isAuthenticated) {
+      toast.error("Veuillez vous connecter pour gérer vos favoris");
       navigate("/login");
       return;
     }
 
+    if (role !== "patient") {
+      toast.error("Seuls les patients peuvent ajouter aux favoris");
+      return; // NE PAS naviguer, juste empêcher l'ajout
+    }
+
     setIsFavoriting(true);
     try {
-      await toggleFavorite(medecin.id);
+      // Vérifier si le médecin est déjà en favori
+      const isCurrentlyFavorite = Array.isArray(favorites)
+        ? favorites.some((fav) => fav.id === medecin.id)
+        : false;
+
+      if (isCurrentlyFavorite) {
+        // Retirer des favoris
+        await api.delete(`/favorites/${medecin.id}`);
+        setFavorites((prev) =>
+          Array.isArray(prev) ? prev.filter((fav) => fav.id !== medecin.id) : []
+        );
+        toast.success("Médecin retiré des favoris");
+      } else {
+        // Ajouter aux favoris
+        await api.post(`/favorites/${medecin.id}`);
+
+        // Recharger les favoris pour avoir les données complètes du médecin
+        const favoritesResponse = await api.get("/favorites");
+        setFavorites(favoritesResponse.data);
+
+        toast.success("Médecin ajouté aux favoris");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour des favoris:", error);
+
+      if (error.response?.status === 401) {
+        toast.error("Veuillez vous connecter pour gérer vos favoris");
+        navigate("/login-patient");
+      } else if (error.response?.status === 404) {
+        toast.error("Médecin non trouvé");
+      } else {
+        toast.error("Erreur lors de la mise à jour des favoris");
+      }
     } finally {
       setIsFavoriting(false);
     }
@@ -194,8 +340,13 @@ const MedecinCard = ({
 
         <button
           onClick={handleFavoriteClick}
-          disabled={isFavoriting}
+          disabled={isFavoriting || role !== "patient"} // Désactivé si pas patient ou en train de cliquer
           className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:scale-110 transition-transform disabled:opacity-50"
+          title={
+            role !== "patient"
+              ? "Seuls les patients peuvent ajouter aux favoris"
+              : ""
+          }
         >
           <Heart
             className={`w-5 h-5 transition-colors ${
@@ -270,22 +421,30 @@ const MedecinCard = ({
             <MapPin className="w-4 h-4 text-blue-500 flex-shrink-0" />
             <span>{medecin.address || "Adresse non renseignée"}</span>
           </div>
+          <div className="flex items-center gap-2 text-slate-600 text-sm">
+            <Building2 className="w-4 h-4 text-purple-500 flex-shrink-0" />
+            <span>{medecin.commune || "Commune non renseignée"}</span>
+          </div>
 
           <div className="flex items-center gap-2 text-slate-600 text-sm">
             <Clock className="w-4 h-4 text-green-500 flex-shrink-0" />
-            <span
-              className={
-                medecin.working_hours === "Aujourd'hui"
-                  ? "text-green-600 font-semibold"
-                  : ""
-              }
-            >
-              {medecin.working_hours === "Aujourd'hui"
-                ? "Disponible aujourd'hui"
-                : medecin.working_hours === "Demain"
-                ? "Disponible demain"
-                : "Disponibilité à confirmer"}
-            </span>
+            {availability.is_available ? (
+              <span className="text-green-600 font-semibold">
+                {availability.message}
+              </span>
+            ) : availability.status === "later_today" ? (
+              <span className="text-amber-600 font-semibold">
+                {availability.message}
+              </span>
+            ) : availability.status === "next_day" ? (
+              <span className="text-blue-600 font-semibold">
+                {availability.message}
+              </span>
+            ) : (
+              <span className="text-slate-500 italic">
+                {availability.message}
+              </span>
+            )}
           </div>
         </div>
 
@@ -427,7 +586,7 @@ const TrouverMedecinPremium = () => {
       medecin.nom?.toLowerCase().includes(search.toLowerCase()) ||
       medecin.prenom?.toLowerCase().includes(search.toLowerCase()) ||
       medecin.specialite?.toLowerCase().includes(search.toLowerCase()) ||
-      medecin.address?.toLowerCase().includes(search.toLowerCase());
+      medecin.commune?.toLowerCase().includes(search.toLowerCase());
 
     const matchesSpecialty =
       !specialty ||
@@ -437,7 +596,7 @@ const TrouverMedecinPremium = () => {
     const matchesLocation =
       !location ||
       location === "all" ||
-      medecin.address?.toLowerCase().includes(location.toLowerCase());
+      medecin.commune?.toLowerCase().includes(location.toLowerCase());
 
     const matchesAvailability =
       filters.availability === "all" ||
@@ -504,13 +663,13 @@ const TrouverMedecinPremium = () => {
     })),
   ];
 
-  const villesUniques = [
-    { value: "all", label: "Toutes les villes" },
+  const communesUniques = [
+    { value: "all", label: "Toutes les communes" },
     ...Array.from(
-      new Set(medecins.map((m) => m.address?.split(",")[0]).filter(Boolean))
-    ).map((ville) => ({
-      value: ville,
-      label: ville,
+      new Set(medecins.map((m) => m.commune?.split(",")[0]).filter(Boolean))
+    ).map((commune) => ({
+      value: commune,
+      label: commune,
     })),
   ];
 
@@ -529,8 +688,8 @@ const TrouverMedecinPremium = () => {
 
   const ratingOptions = [
     { value: "all", label: "Toutes notes" },
-    { value: "4+", label: "4+ étoiles" },
-    { value: "4.5+", label: "4.5+ étoiles" },
+    { value: "4.0", label: "4+ étoiles" },
+    { value: "4.5", label: "4.5+ étoiles" },
   ];
 
   const priceOptions = [
@@ -712,7 +871,7 @@ const TrouverMedecinPremium = () => {
               </label>
               <Input
                 type="text"
-                placeholder="Nom, Spécialité, Clinique, Ville..."
+                placeholder="Nom, Spécialité, Clinique, Commune..."
                 className="w-full h-14 pl-5 pr-4 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -735,12 +894,12 @@ const TrouverMedecinPremium = () => {
             <div className="lg:col-span-3">
               <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-blue-600" />
-                Ville
+                Commune
               </label>
               <SimpleSelect
                 value={location}
                 onValueChange={setLocation}
-                options={villesUniques}
+                options={communesUniques}
                 placeholder="Partout"
               />
             </div>
