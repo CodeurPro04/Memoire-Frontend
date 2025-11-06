@@ -70,14 +70,17 @@ const Navbar = () => {
           >
             <div className="w-24 h-24 flex items-center justify-center">
               <img
-                src="/logo/meetmed2.png"
-                alt="Meetmed Logo"
+                src="/logo/meetmed4.png"
+                alt="MeetMed Logo"
                 className="w-20 h-20 object-contain"
               />
             </div>
-            <span className="text-2xl font-bold text-primary dark:text-white">
-              Meetmed
-            </span>
+
+            {/* Nom du logo avec MeetMed collé */}
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 bg-clip-text text-transparent dark:from-sky-400 dark:via-blue-400 dark:to-teal-300">
+              Meet
+              <span className="text-green-500 dark:text-green-400">Med</span>
+            </h1>
           </motion.div>
 
           {/* Nav centrée */}
@@ -91,7 +94,7 @@ const Navbar = () => {
                   onClick={() => navigate(link.path)}
                   className={`transition-all duration-300 px-3 py-2 rounded-lg text-sm font-medium flex items-center ${
                     isActive
-                      ? "text-white dark:text-green-400 font-bold bg-gradient-to-r from-sky-500 to-teal-400 dark:bg-green-900/20"
+                      ? "text-white dark:text-green-500 font-bold bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 dark:bg-green-900/20"
                       : "text-black dark:text-white hover:text-black dark:hover:text-green-400 hover:bg-green-100/40 dark:hover:bg-green-900/20"
                   }`}
                 >
@@ -109,6 +112,7 @@ const Navbar = () => {
               variant={i18n.language === "fr" ? "default" : "ghost"}
               size="sm"
               onClick={() => changeLanguage("fr")}
+              className="from-sky-600 via-blue-600 to-teal-400 hover:from-teal-400 hover:to-sky-600"
             >
               <img src="/flags/fr.png" alt="FR" className="w-4 h-4" /> FR
             </Button>
@@ -116,6 +120,7 @@ const Navbar = () => {
               variant={i18n.language === "en" ? "default" : "ghost"}
               size="sm"
               onClick={() => changeLanguage("en")}
+              className="from-sky-600 via-blue-600 to-teal-400 hover:from-teal-400 hover:to-sky-600"
             >
               <img src="/flags/eng.png" alt="EN" className="w-4 h-4" /> EN
             </Button>
@@ -131,7 +136,7 @@ const Navbar = () => {
                     else if (role === "medecin") navigate("/profil-medecin");
                     else if (role === "clinique") navigate("/profil-clinique");
                   }}
-                  className="flex items-center justify-center rounded-full bg-gradient-to-r from-sky-500 to-teal-400 hover:from-teal-400 hover:to-sky-500 text-white w-10 h-10 p-2 shadow-lg transition-all duration-300"
+                  className="flex items-center justify-center rounded-full bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 hover:from-teal-400 hover:to-sky-600 text-white w-10 h-10 p-2 shadow-lg transition-all duration-300"
                 >
                   <User className="w-5 h-5" />
                 </Button>
@@ -152,7 +157,7 @@ const Navbar = () => {
               <Button
                 variant="default"
                 onClick={() => navigate("/login")}
-                className="flex items-center justify-center rounded-full bg-gradient-to-r from-sky-500 to-teal-400 hover:from-teal-400 hover:to-sky-500 text-white w-10 h-10 p-2 shadow-lg transition-all duration-300"
+                className="flex items-center justify-center rounded-full bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 hover:from-teal-400 hover:to-sky-600 text-white w-10 h-10 p-2 shadow-lg transition-all duration-300"
               >
                 <LogIn className="w-5 h-5" />
               </Button>
@@ -162,7 +167,7 @@ const Navbar = () => {
           {/* Mobile toggle */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 text-black dark:text-white hover:text-green-700 dark:hover:text-green-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-600 rounded-md"
+            className="md:hidden p-2 text-black dark:text-white hover:text-green-500 dark:hover:text-green-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500 rounded-md"
             aria-label={t("nav.openMenu")}
           >
             {isMenuOpen ? (
@@ -203,6 +208,7 @@ const Navbar = () => {
                 variant={i18n.language === "fr" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => changeLanguage("fr")}
+                className="from-sky-600 via-blue-600 to-teal-400 hover:from-teal-400 hover:to-sky-600"
               >
                 <img src="/flags/fr.png" alt="FR" className="w-4 h-4" /> FR
               </Button>
@@ -210,6 +216,7 @@ const Navbar = () => {
                 variant={i18n.language === "en" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => changeLanguage("en")}
+                className="from-sky-600 via-blue-600 to-teal-400 hover:from-teal-400 hover:to-sky-600"
               >
                 <img src="/flags/eng.png" alt="EN" className="w-4 h-4" /> EN
               </Button>
@@ -229,7 +236,7 @@ const Navbar = () => {
                       );
                       setIsMenuOpen(false);
                     }}
-                    className="w-full flex items-center justify-start gap-2 px-4 py-3 bg-gradient-to-r from-sky-500 to-teal-400 hover:from-teal-400 hover:to-sky-500 text-white rounded-lg shadow-lg transition-all duration-300"
+                    className="w-full flex items-center justify-start gap-2 px-4 py-3 bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 hover:from-teal-400 hover:to-sky-600 text-white rounded-lg shadow-lg transition-all duration-300"
                   >
                     <User className="w-5 h-5" />
                     {t("nav.profile")}
@@ -254,7 +261,7 @@ const Navbar = () => {
                     navigate("/login");
                     setIsMenuOpen(false);
                   }}
-                  className="w-full flex items-center justify-start gap-2 px-4 py-3 bg-gradient-to-r from-sky-500 to-teal-400 hover:from-teal-400 hover:to-sky-500 text-white rounded-lg shadow-lg transition-all duration-300"
+                  className="w-full flex items-center justify-start gap-2 px-4 py-3 bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 hover:from-teal-400 hover:to-sky-600 text-white rounded-lg shadow-lg transition-all duration-300"
                 >
                   <LogIn className="w-5 h-5" />
                   {t("nav.login")}

@@ -63,7 +63,7 @@ const EmptyState = ({
     {buttonText && onButtonClick && (
       <Button
         onClick={onButtonClick}
-        className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
+        className="bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 hover:from-blue-600 hover:to-cyan-600 text-white"
       >
         {buttonText}
       </Button>
@@ -356,7 +356,7 @@ const ProfilPatient = () => {
       `}</style>
 
       {/* Header Hero */}
-      <div className="relative bg-gradient-to-br from-blue-600 via-cyan-600 to-teal-500 px-4 md:px-6 py-20 md:py-32 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-teal-400 px-4 md:px-6 py-20 md:py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div
             className="absolute inset-0"
@@ -374,7 +374,7 @@ const ProfilPatient = () => {
           <div className="flex flex-col md:flex-row items-center gap-8">
             {/* Photo de profil */}
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full blur opacity-75 group-hover:opacity-100 transition"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 rounded-full blur opacity-75 group-hover:opacity-100 transition"></div>
               <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white/50 shadow-2xl backdrop-blur-xl bg-white/10">
                 <img
                   src={formData.photo || patient.photo || defaultAvatar}
@@ -513,7 +513,7 @@ const ProfilPatient = () => {
               onClick={() => setActiveTab("profil")}
               className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
                 activeTab === "profil"
-                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 text-white shadow-lg"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -524,7 +524,7 @@ const ProfilPatient = () => {
               onClick={() => setActiveTab("agenda")}
               className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
                 activeTab === "agenda"
-                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 text-white shadow-lg"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -535,7 +535,7 @@ const ProfilPatient = () => {
               onClick={() => setActiveTab("favoris")}
               className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
                 activeTab === "favoris"
-                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-red-500 to-red-500 text-white shadow-lg"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -546,7 +546,7 @@ const ProfilPatient = () => {
               onClick={() => setActiveTab("parametres")}
               className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
                 activeTab === "parametres"
-                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 text-white shadow-lg"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -612,18 +612,29 @@ const ProfilPatient = () => {
                     )}
                   </div>
 
+                  {/* Groupe sanguin */}
                   <div>
                     <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">
                       Groupe sanguin
                     </label>
+
                     {editMode ? (
-                      <Input
+                      <select
                         name="groupe_sanguin"
                         value={formData.groupe_sanguin || ""}
                         onChange={handleChange}
-                        className="border-slate-300"
-                        disabled
-                      />
+                        className="w-full border border-slate-300 rounded-md p-2 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      >
+                        <option value="">Sélectionner un groupe sanguin</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                      </select>
                     ) : (
                       <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                         <Droplet className="w-5 h-5 text-red-500" />
@@ -735,7 +746,7 @@ const ProfilPatient = () => {
           <Card className="glass-card border-0 shadow-xl">
             <CardHeader className="border-b border-slate-200/50">
               <CardTitle className="flex items-center gap-3 text-slate-800">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-sky-600 via-blue-600 to-teal-400 rounded-xl flex items-center justify-center">
                   <Calendar className="w-5 h-5 text-white" />
                 </div>
                 Mes Rendez-vous ({appointments.length})
@@ -861,7 +872,7 @@ const ProfilPatient = () => {
           <Card className="glass-card border-0 shadow-xl">
             <CardHeader className="border-b border-slate-200/50">
               <CardTitle className="flex items-center gap-3 text-slate-800">
-                <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-500 rounded-xl flex items-center justify-center">
                   <Heart className="w-5 h-5 text-white" />
                 </div>
                 Mes Médecins Favoris ({favorites.length})

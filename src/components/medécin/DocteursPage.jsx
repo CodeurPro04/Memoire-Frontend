@@ -337,7 +337,7 @@ const MedecinCard = ({
             {practiceInfo.label}
           </Badge>
         </div>
-
+        {/* Bouton favoris
         <button
           onClick={handleFavoriteClick}
           disabled={isFavoriting || role !== "patient"} // Désactivé si pas patient ou en train de cliquer
@@ -353,7 +353,7 @@ const MedecinCard = ({
               isFavorite ? "text-red-500 fill-current" : "text-slate-400"
             }`}
           />
-        </button>
+        </button>  */}
       </div>
 
       <div className="p-6 -mt-12 relative">
