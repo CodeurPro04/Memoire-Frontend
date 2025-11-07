@@ -32,6 +32,16 @@ import {
   Stethoscope,
   Loader2,
   Droplet,
+  Key,
+  LogOut,
+  Lock,
+  Info,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  Trash2,
+  AlertTriangle,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +49,14 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import defaultAvatar from "@/assets/default-avatar.png";
 import { useNavigate } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Composant de chargement réutilisable
 const LoadingSpinner = ({ message = "Chargement..." }) => (
@@ -92,6 +110,505 @@ const StatCard = ({ icon: Icon, value, label, gradientFrom, gradientTo }) => (
   </Card>
 );
 
+// ============ MODALES POUR LES PARAMÈTRES ============
+
+const ChangePasswordDialog = ({ open, onOpenChange, onPasswordChange }) => {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Les mots de passe ne correspondent pas");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("Le mot de passe doit contenir au moins 6 caractères");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await onPasswordChange(currentPassword, newPassword);
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+
+      onOpenChange(false);
+      toast.success("Mot de passe modifié avec succès");
+    } catch (error) {
+      // L'erreur est gérée dans le composant parent
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        onOpenChange(newOpen);
+        if (!newOpen) resetForm();
+      }}
+    >
+      <DialogContent className="sm:max-w-md bg-gradient-to-br from-white to-slate-50/80 backdrop-blur-xl border-0 shadow-2xl rounded-3xl p-0 overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-600 to-cyan-600 p-6 text-white">
+          <DialogHeader className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/30">
+              <Key className="w-8 h-8 text-white" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-white">
+              Modifier le mot de passe
+            </DialogTitle>
+            <DialogDescription className="text-white text-base mt-2">
+              Pour votre sécurité, choisissez un mot de passe fort et unique
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-blue-500" />
+              Mot de passe actuel
+            </label>
+            <div className="relative group">
+              <Input
+                type={showCurrentPassword ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Entrez votre mot de passe actuel"
+                required
+                className="pr-12 h-12 border-slate-300/80 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 rounded-xl bg-white/50 backdrop-blur-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-lg hover:bg-slate-100"
+              >
+                {showCurrentPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <Lock className="w-4 h-4 text-green-500" />
+              Nouveau mot de passe
+            </label>
+            <div className="relative group">
+              <Input
+                type={showNewPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Créez votre nouveau mot de passe"
+                required
+                className="pr-12 h-12 border-slate-300/80 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all duration-300 rounded-xl bg-white/50 backdrop-blur-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-lg hover:bg-slate-100"
+              >
+                {showNewPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-slate-500 flex items-center gap-1">
+              <Info className="w-3 h-3" />
+              Minimum 6 caractères
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-amber-500" />
+              Confirmer le mot de passe
+            </label>
+            <div className="relative group">
+              <Input
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Retapez votre nouveau mot de passe"
+                required
+                className="pr-12 h-12 border-slate-300/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all duration-300 rounded-xl bg-white/50 backdrop-blur-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-lg hover:bg-slate-100"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+            {newPassword &&
+              confirmPassword &&
+              newPassword !== confirmPassword && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <XCircle className="w-3 h-3" />
+                  Les mots de passe ne correspondent pas
+                </p>
+              )}
+          </div>
+
+          {newPassword && (
+            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200/80">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-slate-700">
+                  Sécurité du mot de passe
+                </span>
+                <span
+                  className={`text-xs font-semibold ${
+                    newPassword.length >= 8
+                      ? "text-green-600"
+                      : newPassword.length >= 6
+                      ? "text-amber-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {newPassword.length >= 8
+                    ? "Fort"
+                    : newPassword.length >= 6
+                    ? "Moyen"
+                    : "Faible"}
+                </span>
+              </div>
+              <div className="w-full bg-slate-200 rounded-full h-2">
+                <div
+                  className={`h-2 rounded-full transition-all duration-500 ${
+                    newPassword.length >= 8
+                      ? "bg-green-500 w-full"
+                      : newPassword.length >= 6
+                      ? "bg-amber-500 w-2/3"
+                      : "bg-red-500 w-1/3"
+                  }`}
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex flex-col sm:flex-row gap-3 sm:gap-0 pt-4 border-t border-slate-200/60">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                onOpenChange(false);
+                resetForm();
+              }}
+              disabled={loading}
+              className="flex-1 h-12 border-slate-300/80 text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-300"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Annuler
+            </Button>
+            <Button
+              type="submit"
+              disabled={
+                loading ||
+                !currentPassword ||
+                !newPassword ||
+                !confirmPassword ||
+                newPassword !== confirmPassword
+              }
+              className="flex-1 h-12 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Modification...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Enregistrer
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
+  const [confirmText, setConfirmText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (step === 1) {
+      setStep(2);
+      return;
+    }
+
+    if (confirmText !== "SUPPRIMER MON COMPTE") {
+      toast.error(
+        "Veuillez taper exactement 'SUPPRIMER MON COMPTE' pour confirmer"
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await onDeleteAccount();
+      onOpenChange(false);
+    } catch (error) {
+      // L'erreur est gérée dans le composant parent
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setConfirmText("");
+    setStep(1);
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        onOpenChange(newOpen);
+        if (!newOpen) resetForm();
+      }}
+    >
+      <DialogContent className="sm:max-w-lg bg-gradient-to-br from-white to-slate-50/80 backdrop-blur-xl border-0 shadow-2xl rounded-3xl p-0 overflow-hidden">
+        <div className="bg-gradient-to-r from-red-600 to-pink-600 p-6 text-white">
+          <DialogHeader className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/30">
+              <AlertTriangle className="w-8 h-8 text-white" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-white">
+              {step === 1 ? "Supprimer votre compte" : "Dernière confirmation"}
+            </DialogTitle>
+            <DialogDescription className="text-white text-base mt-2">
+              {step === 1
+                ? "Cette action est irréversible. Veuillez lire attentivement les conséquences."
+                : "Dernière étape avant la suppression définitive."}
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {step === 1 ? (
+            <>
+              <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <AlertCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-red-900 mb-3 text-lg">
+                      Attention ! Action irréversible
+                    </h4>
+                    <div className="space-y-3 text-sm text-red-800">
+                      <div className="flex items-start gap-3">
+                        <div className="w-5 h-5 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-red-600 text-xs font-bold">
+                            !
+                          </span>
+                        </div>
+                        <span className="font-medium">
+                          Tous vos rendez-vous seront immédiatement annulés
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-5 h-5 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-red-600 text-xs font-bold">
+                            !
+                          </span>
+                        </div>
+                        <span className="font-medium">
+                          Vos données personnelles seront définitivement
+                          effacées
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-5 h-5 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-red-600 text-xs font-bold">
+                            !
+                          </span>
+                        </div>
+                        <span className="font-medium">
+                          Vos favoris et historiques seront supprimés
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-5 h-5 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-red-600 text-xs font-bold">
+                            !
+                          </span>
+                        </div>
+                        <span className="font-medium">
+                          Cette action ne peut pas être annulée
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4">
+                <div className="flex items-center gap-3">
+                  <Info className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                  <p className="text-sm text-amber-800">
+                    <strong>Conseil :</strong> Si vous avez des préoccupations,
+                    contactez d'abord notre support avant de supprimer votre
+                    compte.
+                  </p>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <AlertTriangle className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-red-900 mb-3 text-lg">
+                      Dernière confirmation requise
+                    </h4>
+                    <p className="text-red-800 text-sm mb-4">
+                      Pour confirmer la suppression définitive de votre compte,
+                      veuillez taper exactement :
+                    </p>
+                    <div className="bg-white border border-red-300 rounded-xl p-4 text-center">
+                      <code className="text-red-600 font-mono font-bold text-lg tracking-wider">
+                        SUPPRIMER MON COMPTE
+                      </code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <Edit className="w-4 h-4 text-red-500" />
+                  Tapez la phrase de confirmation
+                </label>
+                <Input
+                  type="text"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder="SUPPRIMER MON COMPTE"
+                  className="h-12 border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all duration-300 rounded-xl text-center font-mono tracking-wider"
+                  required
+                />
+                {confirmText && confirmText !== "SUPPRIMER MON COMPTE" && (
+                  <p className="text-xs text-red-500 flex items-center gap-1 justify-center">
+                    <XCircle className="w-3 h-3" />
+                    La phrase ne correspond pas exactement
+                  </p>
+                )}
+                {confirmText === "SUPPRIMER MON COMPTE" && (
+                  <p className="text-xs text-green-600 flex items-center gap-1 justify-center">
+                    <CheckCircle className="w-3 h-3" />
+                    Phrase correcte - Vous pouvez procéder à la suppression
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+
+          <DialogFooter
+            className={`flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200/60 ${
+              step === 2 ? "sm:justify-between" : "sm:justify-end"
+            }`}
+          >
+            {step === 2 && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStep(1)}
+                disabled={loading}
+                className="flex-1 h-12 border-slate-300/80 text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-300"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Retour
+              </Button>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3 flex-1">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  onOpenChange(false);
+                  resetForm();
+                }}
+                disabled={loading}
+                className="flex-1 h-12 border-slate-300/80 text-slate-700 hover:bg-slate-100 rounded-xl transition-all duration-300"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                variant="destructive"
+                disabled={
+                  loading ||
+                  (step === 2 && confirmText !== "SUPPRIMER MON COMPTE")
+                }
+                className="flex-1 h-12 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Suppression...
+                  </>
+                ) : step === 1 ? (
+                  <>
+                    <AlertTriangle className="w-4 h-4 mr-2" />
+                    Continuer
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Supprimer définitivement
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const ProfilPatient = () => {
   const [loading, setLoading] = useState(true);
   const { role, isAuthenticated } = useContext(AuthContext);
@@ -105,6 +622,11 @@ const ProfilPatient = () => {
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [cancellingAppointment, setCancellingAppointment] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  // États pour les modales
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -302,6 +824,48 @@ const ProfilPatient = () => {
       toast.error(errorMessage);
     } finally {
       setCancellingAppointment(null);
+    }
+  }, []);
+
+  // Gestionnaire pour changer le mot de passe
+  const handlePasswordChange = useCallback(
+    async (currentPassword, newPassword) => {
+      try {
+        await api.put("/patient/profile/password", {
+          current_password: currentPassword,
+          new_password: newPassword,
+          new_password_confirmation: newPassword,
+        });
+
+        toast.success("Mot de passe modifié avec succès");
+        return true;
+      } catch (error) {
+        console.error("Erreur modification mot de passe:", error);
+        const errorMessage =
+          error.response?.data?.message ||
+          "Erreur lors de la modification du mot de passe";
+        toast.error(errorMessage);
+        throw error;
+      }
+    },
+    []
+  );
+
+  // Gestionnaire pour supprimer le compte
+  const handleAccountDelete = useCallback(async () => {
+    try {
+      await api.delete("/patient/profile");
+
+      toast.success("Compte supprimé avec succès");
+      window.location.href = "/";
+      return true;
+    } catch (error) {
+      console.error("Erreur suppression compte:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Erreur lors de la suppression du compte";
+      toast.error(errorMessage);
+      throw error;
     }
   }, []);
 
@@ -1012,11 +1576,15 @@ const ProfilPatient = () => {
                   <p className="text-slate-600 text-sm mb-4">
                     Gérez vos paramètres de sécurité et de confidentialité
                   </p>
-                  <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white">
+                  <Button
+                    onClick={() => setChangePasswordOpen(true)}
+                    className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
+                  >
+                    <Key className="w-4 h-4 mr-2" />
                     Modifier le mot de passe
                   </Button>
                 </div>
-
+                {/* Zone de danger 
                 <div className="p-6 bg-red-50 border-2 border-red-200 rounded-2xl">
                   <h3 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
                     <AlertCircle className="w-5 h-5 text-red-600" />
@@ -1027,19 +1595,33 @@ const ProfilPatient = () => {
                   </p>
                   <div className="space-y-3">
                     <Button
+                      onClick={() => setDeleteAccountOpen(true)}
                       variant="outline"
                       className="border-red-300 text-red-600 hover:bg-red-100 hover:text-red-700 w-full justify-start"
                     >
-                      <XCircle className="w-4 h-4 mr-2" />
+                      <Trash2 className="w-4 h-4 mr-2" />
                       Supprimer définitivement le compte
                     </Button>
                   </div>
-                </div>
+                </div> */}
               </div>
             </CardContent>
           </Card>
         )}
       </div>
+
+      {/* Modales */}
+      <ChangePasswordDialog
+        open={changePasswordOpen}
+        onOpenChange={setChangePasswordOpen}
+        onPasswordChange={handlePasswordChange}
+      />
+
+      <DeleteAccountDialog
+        open={deleteAccountOpen}
+        onOpenChange={setDeleteAccountOpen}
+        onDeleteAccount={handleAccountDelete}
+      />
     </div>
   );
 };

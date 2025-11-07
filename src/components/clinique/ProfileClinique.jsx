@@ -203,13 +203,17 @@ const ProfilClinique = () => {
           <div className="flex items-start gap-4 mb-5">
             <div className="relative">
               <SafeAvatar
-                src={medecin.photo_profil}
-                alt={`Dr. ${medecin.prenom} ${medecin.nom}`}
-                size={72}
-                initials={`${medecin.prenom?.charAt(0)}${medecin.nom?.charAt(
-                  0
-                )}`}
-                className="rounded-2xl border-4 border-white shadow-xl group-hover:scale-105 transition-transform duration-300"
+                src={
+                  medecin.photo_profil
+                    ? `/assets/images/${medecin.photo_profil}`
+                    : defaultAvatar
+                }
+                alt={`Dr. ${medecin?.prenom || ""} ${medecin?.nom || ""}`}
+                size={96}
+                initials={`${medecin?.prenom?.charAt(0) ?? ""}${
+                  medecin?.nom?.charAt(0) ?? ""
+                }`}
+                className="rounded-2xl border-4 border-white shadow-xl"
               />
               <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center border-2 border-white">
                 <CheckCircle className="w-3 h-3 text-white" />

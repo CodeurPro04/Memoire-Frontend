@@ -56,12 +56,17 @@ const FooterPremium = () => {
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-24 h-24 flex items-center justify-center">
                   <img
-                    src="/logo/meetmed2.png"
+                    src="/logo/meetmed4.png"
                     alt="Meetmed Logo"
                     className="w-20 h-20 object-contain"
                   />
                 </div>
-                <span className="text-xl font-bold text-white">Meetmed</span>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 bg-clip-text text-transparent dark:from-sky-400 dark:via-blue-400 dark:to-teal-300">
+                  Meet
+                  <span className="text-green-500 dark:text-green-400">
+                    Med
+                  </span>
+                </h1>
               </div>
               <p className="text-slate-400 mb-6 leading-relaxed">
                 Votre plateforme de confiance pour des consultations médicales

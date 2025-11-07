@@ -1561,15 +1561,17 @@ const MedecinProfilePage = () => {
           <div className="flex flex-col md:flex-row items-start gap-8">
             <div className="relative">
               <SafeAvatar
-                src={medecinData?.photo_profil}
-                alt={`Dr. ${medecinData?.prenom || ""} ${
-                  medecinData?.nom || ""
-                }`}
+                src={
+                  medecin.photo_profil
+                    ? `/assets/images/${medecin.photo_profil}`
+                    : defaultAvatar
+                }
+                alt={`Dr. ${medecin?.prenom || ""} ${medecin?.nom || ""}`}
                 size={160}
-                initials={`${medecinData?.prenom?.charAt(0) ?? ""}${
-                  medecinData?.nom?.charAt(0) ?? ""
+                initials={`${medecin?.prenom?.charAt(0) ?? ""}${
+                  medecin?.nom?.charAt(0) ?? ""
                 }`}
-                className="rounded-3xl border-4 border-white shadow-2xl"
+                className="rounded-2xl border-4 border-white shadow-xl"
               />
               <div className="absolute -bottom-3 -right-3 w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center border-4 border-white shadow-xl">
                 <CheckCircle className="w-7 h-7 text-white" />

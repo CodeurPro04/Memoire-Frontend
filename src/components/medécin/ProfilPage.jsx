@@ -17,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import Textarea from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
@@ -44,10 +43,8 @@ import {
   X,
   Settings,
   Upload,
-  Plus,
   Trash2,
   ShieldCheck,
-  Globe,
   CreditCard,
   CheckCircle2,
   XCircle,
@@ -64,12 +61,12 @@ import {
   Eye,
   EyeOff,
   Key,
-  LogOut,
   Lock,
   Info,
   ArrowLeft,
   Sun,
   Moon,
+  ShieldOff,
 } from "lucide-react";
 
 // ============ COMPOSANTS RÉUTILISABLES ============
@@ -126,16 +123,16 @@ const TimeSlotPicker = ({ value, onChange, disabled }) => {
   // Initialiser les valeurs depuis le format string
   useEffect(() => {
     if (value) {
-      const parts = value.split(' | ');
+      const parts = value.split(" | ");
       if (parts[0]) {
-        const [start, end] = parts[0].split(' - ');
+        const [start, end] = parts[0].split(" - ");
         if (start && end) {
           setMorningStart(start);
           setMorningEnd(end);
         }
       }
       if (parts[1]) {
-        const [start, end] = parts[1].split(' - ');
+        const [start, end] = parts[1].split(" - ");
         if (start && end) {
           setAfternoonStart(start);
           setAfternoonEnd(end);
@@ -150,25 +147,46 @@ const TimeSlotPicker = ({ value, onChange, disabled }) => {
   }, [value]);
 
   // Générer le format string
-  const updateValue = useCallback((newMorningStart, newMorningEnd, newAfternoonStart, newAfternoonEnd, newHasAfternoon) => {
-    let newValue = `${newMorningStart} - ${newMorningEnd}`;
-    if (newHasAfternoon && newAfternoonStart && newAfternoonEnd) {
-      newValue += ` | ${newAfternoonStart} - ${newAfternoonEnd}`;
-    }
-    onChange(newValue);
-  }, [onChange]);
+  const updateValue = useCallback(
+    (
+      newMorningStart,
+      newMorningEnd,
+      newAfternoonStart,
+      newAfternoonEnd,
+      newHasAfternoon
+    ) => {
+      let newValue = `${newMorningStart} - ${newMorningEnd}`;
+      if (newHasAfternoon && newAfternoonStart && newAfternoonEnd) {
+        newValue += ` | ${newAfternoonStart} - ${newAfternoonEnd}`;
+      }
+      onChange(newValue);
+    },
+    [onChange]
+  );
 
   // Gestionnaires de changement
   const handleMorningStartChange = (e) => {
     const newValue = e.target.value;
     setMorningStart(newValue);
-    updateValue(newValue, morningEnd, afternoonStart, afternoonEnd, hasAfternoon);
+    updateValue(
+      newValue,
+      morningEnd,
+      afternoonStart,
+      afternoonEnd,
+      hasAfternoon
+    );
   };
 
   const handleMorningEndChange = (e) => {
     const newValue = e.target.value;
     setMorningEnd(newValue);
-    updateValue(morningStart, newValue, afternoonStart, afternoonEnd, hasAfternoon);
+    updateValue(
+      morningStart,
+      newValue,
+      afternoonStart,
+      afternoonEnd,
+      hasAfternoon
+    );
   };
 
   const handleAfternoonStartChange = (e) => {
@@ -180,19 +198,33 @@ const TimeSlotPicker = ({ value, onChange, disabled }) => {
   const handleAfternoonEndChange = (e) => {
     const newValue = e.target.value;
     setAfternoonEnd(newValue);
-    updateValue(morningStart, morningEnd, afternoonStart, newValue, hasAfternoon);
+    updateValue(
+      morningStart,
+      morningEnd,
+      afternoonStart,
+      newValue,
+      hasAfternoon
+    );
   };
 
   const handleHasAfternoonChange = (newValue) => {
     setHasAfternoon(newValue);
-    updateValue(morningStart, morningEnd, afternoonStart, afternoonEnd, newValue);
+    updateValue(
+      morningStart,
+      morningEnd,
+      afternoonStart,
+      afternoonEnd,
+      newValue
+    );
   };
 
   // Options d'heures
   const timeOptions = [];
   for (let hour = 7; hour <= 22; hour++) {
     for (let minute = 0; minute < 60; minute += 30) {
-      const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      const time = `${hour.toString().padStart(2, "0")}:${minute
+        .toString()
+        .padStart(2, "0")}`;
       timeOptions.push(time);
     }
   }
@@ -214,7 +246,7 @@ const TimeSlotPicker = ({ value, onChange, disabled }) => {
               disabled={disabled}
               className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
             >
-              {timeOptions.map(time => (
+              {timeOptions.map((time) => (
                 <option key={`morning-start-${time}`} value={time}>
                   {time}
                 </option>
@@ -229,7 +261,7 @@ const TimeSlotPicker = ({ value, onChange, disabled }) => {
               disabled={disabled}
               className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
             >
-              {timeOptions.map(time => (
+              {timeOptions.map((time) => (
                 <option key={`morning-end-${time}`} value={time}>
                   {time}
                 </option>
@@ -250,14 +282,14 @@ const TimeSlotPicker = ({ value, onChange, disabled }) => {
             disabled={disabled}
             className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
               hasAfternoon
-                ? 'bg-green-500 border-green-500'
-                : 'bg-white border-slate-400'
+                ? "bg-green-500 border-green-500"
+                : "bg-white border-slate-400"
             }`}
           >
             {hasAfternoon && <CheckCircle2 className="w-3 h-3 text-white" />}
           </button>
         </div>
-        
+
         {hasAfternoon && (
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -268,7 +300,7 @@ const TimeSlotPicker = ({ value, onChange, disabled }) => {
                 disabled={disabled}
                 className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
               >
-                {timeOptions.map(time => (
+                {timeOptions.map((time) => (
                   <option key={`afternoon-start-${time}`} value={time}>
                     {time}
                   </option>
@@ -283,7 +315,7 @@ const TimeSlotPicker = ({ value, onChange, disabled }) => {
                 disabled={disabled}
                 className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
               >
-                {timeOptions.map(time => (
+                {timeOptions.map((time) => (
                   <option key={`afternoon-end-${time}`} value={time}>
                     {time}
                   </option>
@@ -309,215 +341,251 @@ const TimeSlotPicker = ({ value, onChange, disabled }) => {
   );
 };
 
-const WorkingHoursManager = React.memo(({ workingHours, setWorkingHours, editMode }) => {
-  const [localHours, setLocalHours] = useState([]);
-  
-  // Jours de la semaine standards avec horaires par défaut
-  const daysOfWeek = [
-    { id: 'monday', label: 'Lundi', defaultHours: '' },
-    { id: 'tuesday', label: 'Mardi', defaultHours: '' },
-    { id: 'wednesday', label: 'Mercredi', defaultHours: '' },
-    { id: 'thursday', label: 'Jeudi', defaultHours: '' },
-    { id: 'friday', label: 'Vendredi', defaultHours: '' },
-    { id: 'saturday', label: 'Samedi', defaultHours: '' },
-    { id: 'sunday', label: 'Dimanche', defaultHours: '' },
-  ];
+const WorkingHoursManager = React.memo(
+  ({ workingHours, setWorkingHours, editMode }) => {
+    const [localHours, setLocalHours] = useState([]);
 
-  // Initialiser les horaires une seule fois
-  useEffect(() => {
-    if (workingHours && workingHours.length > 0) {
-      setLocalHours(workingHours);
-    } else {
-      const defaultHours = daysOfWeek.map(day => ({
-        day: day.label,
-        hours: day.defaultHours,
-        enabled: !!day.defaultHours
-      }));
-      setLocalHours(defaultHours);
-    }
-  }, [workingHours]);
+    // Jours de la semaine standards avec horaires par défaut
+    const daysOfWeek = [
+      { id: "monday", label: "Lundi", defaultHours: "" },
+      { id: "tuesday", label: "Mardi", defaultHours: "" },
+      { id: "wednesday", label: "Mercredi", defaultHours: "" },
+      { id: "thursday", label: "Jeudi", defaultHours: "" },
+      { id: "friday", label: "Vendredi", defaultHours: "" },
+      { id: "saturday", label: "Samedi", defaultHours: "" },
+      { id: "sunday", label: "Dimanche", defaultHours: "" },
+    ];
 
-  // Mettre à jour les horaires parent de manière optimisée
-  useEffect(() => {
-    if (localHours.length > 0) {
-      setWorkingHours(localHours);
-    }
-  }, [localHours, setWorkingHours]);
-
-  const handleHoursChange = useCallback((index, newHours) => {
-    setLocalHours(prev => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], hours: newHours };
-      return updated;
-    });
-  }, []);
-
-  const toggleDay = useCallback((index) => {
-    setLocalHours(prev => {
-      const updated = [...prev];
-      const currentDay = updated[index];
-      
-      if (currentDay.enabled) {
-        updated[index] = { ...currentDay, hours: '', enabled: false };
+    // Initialiser les horaires une seule fois
+    useEffect(() => {
+      if (workingHours && workingHours.length > 0) {
+        setLocalHours(workingHours);
       } else {
-        const defaultDay = daysOfWeek.find(d => d.label === currentDay.day);
-        updated[index] = { 
-          ...currentDay, 
-          hours: defaultDay?.defaultHours || '09:00 - 17:00', 
-          enabled: true 
-        };
+        const defaultHours = daysOfWeek.map((day) => ({
+          day: day.label,
+          hours: day.defaultHours,
+          enabled: !!day.defaultHours,
+        }));
+        setLocalHours(defaultHours);
       }
-      return updated;
-    });
-  }, [daysOfWeek]);
+    }, [workingHours]);
 
-  const hasWorkingHours = localHours.some(day => day.enabled && day.hours.trim());
+    // Mettre à jour les horaires parent de manière optimisée
+    useEffect(() => {
+      if (localHours.length > 0) {
+        setWorkingHours(localHours);
+      }
+    }, [localHours, setWorkingHours]);
 
-  if (!hasWorkingHours && !editMode) {
-    return (
-      <div className="text-center py-12 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border-2 border-amber-200">
-        <div className="w-20 h-20 mx-auto mb-4 bg-amber-100 rounded-full flex items-center justify-center">
-          <Clock className="w-10 h-10 text-amber-500" />
+    const handleHoursChange = useCallback((index, newHours) => {
+      setLocalHours((prev) => {
+        const updated = [...prev];
+        updated[index] = { ...updated[index], hours: newHours };
+        return updated;
+      });
+    }, []);
+
+    const toggleDay = useCallback(
+      (index) => {
+        setLocalHours((prev) => {
+          const updated = [...prev];
+          const currentDay = updated[index];
+
+          if (currentDay.enabled) {
+            updated[index] = { ...currentDay, hours: "", enabled: false };
+          } else {
+            const defaultDay = daysOfWeek.find(
+              (d) => d.label === currentDay.day
+            );
+            updated[index] = {
+              ...currentDay,
+              hours: defaultDay?.defaultHours || "09:00 - 17:00",
+              enabled: true,
+            };
+          }
+          return updated;
+        });
+      },
+      [daysOfWeek]
+    );
+
+    const hasWorkingHours = localHours.some(
+      (day) => day.enabled && day.hours.trim()
+    );
+
+    if (!hasWorkingHours && !editMode) {
+      return (
+        <div className="text-center py-12 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border-2 border-amber-200">
+          <div className="w-20 h-20 mx-auto mb-4 bg-amber-100 rounded-full flex items-center justify-center">
+            <Clock className="w-10 h-10 text-amber-500" />
+          </div>
+          <h3 className="text-2xl font-bold text-amber-900 mb-3">
+            Aucun horaire de consultation configuré
+          </h3>
+          <p className="text-amber-700 mb-6 max-w-md mx-auto text-lg">
+            Les patients ne peuvent pas prendre rendez-vous tant que vous n'avez
+            pas défini vos horaires de consultation.
+          </p>
         </div>
-        <h3 className="text-2xl font-bold text-amber-900 mb-3">
-          Aucun horaire de consultation configuré
-        </h3>
-        <p className="text-amber-700 mb-6 max-w-md mx-auto text-lg">
-          Les patients ne peuvent pas prendre rendez-vous tant que vous n'avez pas défini vos horaires de consultation.
-        </p>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="grid gap-3">
+          {localHours.map((day, index) => (
+            <div
+              key={day.day}
+              className={`flex items-start justify-between p-5 rounded-xl transition-all duration-200 ${
+                day.enabled
+                  ? "bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 shadow-sm"
+                  : "bg-slate-100/80 border-2 border-slate-200"
+              }`}
+            >
+              <div className="flex items-start gap-4 flex-1">
+                {editMode && (
+                  <button
+                    onClick={() => toggleDay(index)}
+                    className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300 transform hover:scale-110 mt-1 ${
+                      day.enabled
+                        ? "bg-green-500 border-green-500 shadow-lg"
+                        : "bg-white border-slate-400 hover:border-slate-600"
+                    }`}
+                  >
+                    {day.enabled && (
+                      <CheckCircle2 className="w-4 h-4 text-white" />
+                    )}
+                  </button>
+                )}
+
+                <div className="flex-1">
+                  <span
+                    className={`font-bold text-lg block mb-3 ${
+                      day.enabled ? "text-green-900" : "text-slate-500"
+                    }`}
+                  >
+                    {day.day}
+                  </span>
+
+                  {editMode && day.enabled ? (
+                    <TimeSlotPicker
+                      value={day.hours}
+                      onChange={(newHours) =>
+                        handleHoursChange(index, newHours)
+                      }
+                      disabled={!day.enabled}
+                    />
+                  ) : (
+                    <span
+                      className={`text-lg font-medium block ${
+                        day.enabled && day.hours
+                          ? "text-green-800"
+                          : "text-slate-500"
+                      }`}
+                    >
+                      {day.enabled && day.hours ? (
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-green-600" />
+                          {day.hours}
+                        </div>
+                      ) : (
+                        "Fermé"
+                      )}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {!editMode && (
+                <Badge
+                  className={
+                    day.enabled
+                      ? "bg-green-100 text-green-800 text-sm px-3 py-1 border border-green-200"
+                      : "bg-slate-200 text-slate-600 text-sm px-3 py-1"
+                  }
+                >
+                  {day.enabled ? (
+                    <>
+                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      Ouvert
+                    </>
+                  ) : (
+                    "Fermé"
+                  )}
+                </Badge>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {editMode && (
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 border-2 border-blue-200 mt-6">
+            <h4 className="font-bold text-blue-900 mb-4 flex items-center gap-3 text-lg">
+              <Info className="w-5 h-5 text-blue-500" />
+              Guide de configuration des horaires
+            </h4>
+            <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-800">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-xs font-bold">1</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Activation des jours</span>
+                    <p className="text-blue-700 mt-1">
+                      Cliquez sur le cercle vert pour activer ou désactiver un
+                      jour de consultation
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-xs font-bold">2</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Créneaux horaires</span>
+                    <p className="text-blue-700 mt-1">
+                      Définissez les horaires du matin et de l'après-midi avec
+                      les sélecteurs
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-xs font-bold">3</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Après-midi optionnel</span>
+                    <p className="text-blue-700 mt-1">
+                      Activez/désactivez le créneau de l'après-midi selon vos
+                      disponibilités
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-xs font-bold">4</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">
+                      Sauvegarde automatique
+                    </span>
+                    <p className="text-blue-700 mt-1">
+                      Les modifications sont sauvegardées automatiquement quand
+                      vous cliquez sur "Enregistrer"
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
-
-  return (
-    <div className="space-y-4">
-      <div className="grid gap-3">
-        {localHours.map((day, index) => (
-          <div
-            key={day.day}
-            className={`flex items-start justify-between p-5 rounded-xl transition-all duration-200 ${
-              day.enabled 
-                ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 shadow-sm' 
-                : 'bg-slate-100/80 border-2 border-slate-200'
-            }`}
-          >
-            <div className="flex items-start gap-4 flex-1">
-              {editMode && (
-                <button
-                  onClick={() => toggleDay(index)}
-                  className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300 transform hover:scale-110 mt-1 ${
-                    day.enabled
-                      ? 'bg-green-500 border-green-500 shadow-lg'
-                      : 'bg-white border-slate-400 hover:border-slate-600'
-                  }`}
-                >
-                  {day.enabled && <CheckCircle2 className="w-4 h-4 text-white" />}
-                </button>
-              )}
-              
-              <div className="flex-1">
-                <span className={`font-bold text-lg block mb-3 ${
-                  day.enabled ? 'text-green-900' : 'text-slate-500'
-                }`}>
-                  {day.day}
-                </span>
-
-                {editMode && day.enabled ? (
-                  <TimeSlotPicker
-                    value={day.hours}
-                    onChange={(newHours) => handleHoursChange(index, newHours)}
-                    disabled={!day.enabled}
-                  />
-                ) : (
-                  <span className={`text-lg font-medium block ${
-                    day.enabled && day.hours ? 'text-green-800' : 'text-slate-500'
-                  }`}>
-                    {day.enabled && day.hours ? (
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-green-600" />
-                        {day.hours}
-                      </div>
-                    ) : (
-                      'Fermé'
-                    )}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {!editMode && (
-              <Badge className={
-                day.enabled 
-                  ? "bg-green-100 text-green-800 text-sm px-3 py-1 border border-green-200"
-                  : "bg-slate-200 text-slate-600 text-sm px-3 py-1"
-              }>
-                {day.enabled ? (
-                  <>
-                    <CheckCircle2 className="w-3 h-3 mr-1" />
-                    Ouvert
-                  </>
-                ) : (
-                  "Fermé"
-                )}
-              </Badge>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {editMode && (
-        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 border-2 border-blue-200 mt-6">
-          <h4 className="font-bold text-blue-900 mb-4 flex items-center gap-3 text-lg">
-            <Info className="w-5 h-5 text-blue-500" />
-            Guide de configuration des horaires
-          </h4>
-          <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-800">
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white text-xs font-bold">1</span>
-                </div>
-                <div>
-                  <span className="font-semibold">Activation des jours</span>
-                  <p className="text-blue-700 mt-1">Cliquez sur le cercle vert pour activer ou désactiver un jour de consultation</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white text-xs font-bold">2</span>
-                </div>
-                <div>
-                  <span className="font-semibold">Créneaux horaires</span>
-                  <p className="text-blue-700 mt-1">Définissez les horaires du matin et de l'après-midi avec les sélecteurs</p>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white text-xs font-bold">3</span>
-                </div>
-                <div>
-                  <span className="font-semibold">Après-midi optionnel</span>
-                  <p className="text-blue-700 mt-1">Activez/désactivez le créneau de l'après-midi selon vos disponibilités</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white text-xs font-bold">4</span>
-                </div>
-                <div>
-                  <span className="font-semibold">Sauvegarde automatique</span>
-                  <p className="text-blue-700 mt-1">Les modifications sont sauvegardées automatiquement quand vous cliquez sur "Enregistrer"</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-});
+);
 
 WorkingHoursManager.displayName = "WorkingHoursManager";
 
@@ -645,7 +713,7 @@ const ChangePasswordDialog = ({ open, onOpenChange, onPasswordChange }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (newPassword !== confirmPassword) {
       toast.error("Les mots de passe ne correspondent pas");
       return;
@@ -659,11 +727,11 @@ const ChangePasswordDialog = ({ open, onOpenChange, onPasswordChange }) => {
     try {
       setLoading(true);
       await onPasswordChange(currentPassword, newPassword);
-      
+
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      
+
       onOpenChange(false);
       toast.success("Mot de passe modifié avec succès");
     } catch (error) {
@@ -683,10 +751,13 @@ const ChangePasswordDialog = ({ open, onOpenChange, onPasswordChange }) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(newOpen) => {
-      onOpenChange(newOpen);
-      if (!newOpen) resetForm();
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        onOpenChange(newOpen);
+        if (!newOpen) resetForm();
+      }}
+    >
       <DialogContent className="sm:max-w-md bg-gradient-to-br from-white to-slate-50/80 backdrop-blur-xl border-0 shadow-2xl rounded-3xl p-0 overflow-hidden">
         <div className="bg-gradient-to-r from-blue-600 to-cyan-600 p-6 text-white">
           <DialogHeader className="text-center">
@@ -722,10 +793,11 @@ const ChangePasswordDialog = ({ open, onOpenChange, onPasswordChange }) => {
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-lg hover:bg-slate-100"
               >
-                {showCurrentPassword ? 
-                  <EyeOff className="w-5 h-5" /> : 
+                {showCurrentPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
                   <Eye className="w-5 h-5" />
-                }
+                )}
               </button>
             </div>
           </div>
@@ -749,10 +821,11 @@ const ChangePasswordDialog = ({ open, onOpenChange, onPasswordChange }) => {
                 onClick={() => setShowNewPassword(!showNewPassword)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-lg hover:bg-slate-100"
               >
-                {showNewPassword ? 
-                  <EyeOff className="w-5 h-5" /> : 
+                {showNewPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
                   <Eye className="w-5 h-5" />
-                }
+                )}
               </button>
             </div>
             <p className="text-xs text-slate-500 flex items-center gap-1">
@@ -780,37 +853,53 @@ const ChangePasswordDialog = ({ open, onOpenChange, onPasswordChange }) => {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-lg hover:bg-slate-100"
               >
-                {showConfirmPassword ? 
-                  <EyeOff className="w-5 h-5" /> : 
+                {showConfirmPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
                   <Eye className="w-5 h-5" />
-                }
+                )}
               </button>
             </div>
-            {newPassword && confirmPassword && newPassword !== confirmPassword && (
-              <p className="text-xs text-red-500 flex items-center gap-1">
-                <XCircle className="w-3 h-3" />
-                Les mots de passe ne correspondent pas
-              </p>
-            )}
+            {newPassword &&
+              confirmPassword &&
+              newPassword !== confirmPassword && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <XCircle className="w-3 h-3" />
+                  Les mots de passe ne correspondent pas
+                </p>
+              )}
           </div>
 
           {newPassword && (
             <div className="bg-slate-50 rounded-xl p-4 border border-slate-200/80">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-700">Sécurité du mot de passe</span>
-                <span className={`text-xs font-semibold ${
-                  newPassword.length >= 8 ? 'text-green-600' : 
-                  newPassword.length >= 6 ? 'text-amber-600' : 'text-red-600'
-                }`}>
-                  {newPassword.length >= 8 ? 'Fort' : 
-                   newPassword.length >= 6 ? 'Moyen' : 'Faible'}
+                <span className="text-sm font-medium text-slate-700">
+                  Sécurité du mot de passe
+                </span>
+                <span
+                  className={`text-xs font-semibold ${
+                    newPassword.length >= 8
+                      ? "text-green-600"
+                      : newPassword.length >= 6
+                      ? "text-amber-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {newPassword.length >= 8
+                    ? "Fort"
+                    : newPassword.length >= 6
+                    ? "Moyen"
+                    : "Faible"}
                 </span>
               </div>
               <div className="w-full bg-slate-200 rounded-full h-2">
-                <div 
+                <div
                   className={`h-2 rounded-full transition-all duration-500 ${
-                    newPassword.length >= 8 ? 'bg-green-500 w-full' : 
-                    newPassword.length >= 6 ? 'bg-amber-500 w-2/3' : 'bg-red-500 w-1/3'
+                    newPassword.length >= 8
+                      ? "bg-green-500 w-full"
+                      : newPassword.length >= 6
+                      ? "bg-amber-500 w-2/3"
+                      : "bg-red-500 w-1/3"
                   }`}
                 />
               </div>
@@ -831,9 +920,15 @@ const ChangePasswordDialog = ({ open, onOpenChange, onPasswordChange }) => {
               <X className="w-4 h-4 mr-2" />
               Annuler
             </Button>
-            <Button 
-              type="submit" 
-              disabled={loading || !currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+            <Button
+              type="submit"
+              disabled={
+                loading ||
+                !currentPassword ||
+                !newPassword ||
+                !confirmPassword ||
+                newPassword !== confirmPassword
+              }
               className="flex-1 h-12 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
@@ -862,14 +957,16 @@ const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (step === 1) {
       setStep(2);
       return;
     }
 
     if (confirmText !== "SUPPRIMER MON COMPTE") {
-      toast.error("Veuillez taper exactement 'SUPPRIMER MON COMPTE' pour confirmer");
+      toast.error(
+        "Veuillez taper exactement 'SUPPRIMER MON COMPTE' pour confirmer"
+      );
       return;
     }
 
@@ -890,10 +987,13 @@ const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(newOpen) => {
-      onOpenChange(newOpen);
-      if (!newOpen) resetForm();
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        onOpenChange(newOpen);
+        if (!newOpen) resetForm();
+      }}
+    >
       <DialogContent className="sm:max-w-lg bg-gradient-to-br from-white to-slate-50/80 backdrop-blur-xl border-0 shadow-2xl rounded-3xl p-0 overflow-hidden">
         <div className="bg-gradient-to-r from-red-600 to-pink-600 p-6 text-white">
           <DialogHeader className="text-center">
@@ -904,10 +1004,9 @@ const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
               {step === 1 ? "Supprimer votre compte" : "Dernière confirmation"}
             </DialogTitle>
             <DialogDescription className="text-white text-base mt-2">
-              {step === 1 
+              {step === 1
                 ? "Cette action est irréversible. Veuillez lire attentivement les conséquences."
-                : "Dernière étape avant la suppression définitive."
-              }
+                : "Dernière étape avant la suppression définitive."}
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -927,27 +1026,44 @@ const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
                     <div className="space-y-3 text-sm text-red-800">
                       <div className="flex items-start gap-3">
                         <div className="w-5 h-5 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-red-600 text-xs font-bold">!</span>
+                          <span className="text-red-600 text-xs font-bold">
+                            !
+                          </span>
                         </div>
-                        <span className="font-medium">Tous vos rendez-vous seront immédiatement annulés</span>
+                        <span className="font-medium">
+                          Tous vos rendez-vous seront immédiatement annulés
+                        </span>
                       </div>
                       <div className="flex items-start gap-3">
                         <div className="w-5 h-5 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-red-600 text-xs font-bold">!</span>
+                          <span className="text-red-600 text-xs font-bold">
+                            !
+                          </span>
                         </div>
-                        <span className="font-medium">Vos données personnelles seront définitivement effacées</span>
+                        <span className="font-medium">
+                          Vos données personnelles seront définitivement
+                          effacées
+                        </span>
                       </div>
                       <div className="flex items-start gap-3">
                         <div className="w-5 h-5 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-red-600 text-xs font-bold">!</span>
+                          <span className="text-red-600 text-xs font-bold">
+                            !
+                          </span>
                         </div>
-                        <span className="font-medium">Vos avis et notes seront supprimés</span>
+                        <span className="font-medium">
+                          Vos avis et notes seront supprimés
+                        </span>
                       </div>
                       <div className="flex items-start gap-3">
                         <div className="w-5 h-5 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-red-600 text-xs font-bold">!</span>
+                          <span className="text-red-600 text-xs font-bold">
+                            !
+                          </span>
                         </div>
-                        <span className="font-medium">Cette action ne peut pas être annulée</span>
+                        <span className="font-medium">
+                          Cette action ne peut pas être annulée
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -958,7 +1074,9 @@ const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
                 <div className="flex items-center gap-3">
                   <Info className="w-5 h-5 text-amber-600 flex-shrink-0" />
                   <p className="text-sm text-amber-800">
-                    <strong>Conseil :</strong> Si vous avez des préoccupations, contactez d'abord notre support avant de supprimer votre compte.
+                    <strong>Conseil :</strong> Si vous avez des préoccupations,
+                    contactez d'abord notre support avant de supprimer votre
+                    compte.
                   </p>
                 </div>
               </div>
@@ -975,7 +1093,8 @@ const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
                       Dernière confirmation requise
                     </h4>
                     <p className="text-red-800 text-sm mb-4">
-                      Pour confirmer la suppression définitive de votre compte, veuillez taper exactement :
+                      Pour confirmer la suppression définitive de votre compte,
+                      veuillez taper exactement :
                     </p>
                     <div className="bg-white border border-red-300 rounded-xl p-4 text-center">
                       <code className="text-red-600 font-mono font-bold text-lg tracking-wider">
@@ -1015,7 +1134,11 @@ const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
             </>
           )}
 
-          <DialogFooter className={`flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200/60 ${step === 2 ? 'sm:justify-between' : 'sm:justify-end'}`}>
+          <DialogFooter
+            className={`flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200/60 ${
+              step === 2 ? "sm:justify-between" : "sm:justify-end"
+            }`}
+          >
             {step === 2 && (
               <Button
                 type="button"
@@ -1042,10 +1165,13 @@ const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
                 <X className="w-4 h-4 mr-2" />
                 Annuler
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 variant="destructive"
-                disabled={loading || (step === 2 && confirmText !== "SUPPRIMER MON COMPTE")}
+                disabled={
+                  loading ||
+                  (step === 2 && confirmText !== "SUPPRIMER MON COMPTE")
+                }
                 className="flex-1 h-12 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
@@ -1082,6 +1208,7 @@ const ProfilMedecin = () => {
   const [medecin, setMedecin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState("profil");
   const [workingHours, setWorkingHours] = useState([]);
@@ -1112,42 +1239,77 @@ const ProfilMedecin = () => {
 
   const fileInputRef = useRef(null);
 
+  // Fonction utilitaire pour construire l'URL de l'image
+  const getImageUrl = useCallback((photoProfil, photoUrl) => {
+    console.log("🔍 Debug image:", { photoProfil, photoUrl });
+
+    // Si l'API retourne une URL complète (photo_url), l'utiliser en priorité
+    if (photoUrl) {
+      console.log("✅ Utilisation photo_url:", photoUrl);
+      return photoUrl;
+    }
+
+    // Si on a un chemin en base (photos/medecins/xxx.jpg)
+    if (photoProfil) {
+      // Construire l'URL complète vers le fichier dans assets
+      const baseUrl = "http://localhost:8000"; // Votre URL Laravel
+
+      // Le chemin est relatif au dossier public/assets/images/
+      const fullUrl = `${baseUrl}/assets/images/${photoProfil}`;
+
+      console.log("🔧 URL construite:", fullUrl);
+      return fullUrl;
+    }
+
+    // Fallback vers l'avatar par défaut
+    console.log("🚨 Aucune image trouvée, utilisation avatar par défaut");
+    return defaultAvatar;
+  }, []);
+
   // Fonction pour déterminer si le médecin est ouvert actuellement
   const getCurrentAvailability = useCallback(() => {
     if (!workingHours || workingHours.length === 0) {
-      return { isOpen: false, status: "Fermé", badgeColor: "bg-red-500/20 text-red-200 border-red-300/30" };
+      return {
+        isOpen: false,
+        status: "Fermé",
+        badgeColor: "bg-red-500/20 text-red-200 border-red-300/30",
+      };
     }
 
     const now = new Date();
-    const today = now.toLocaleDateString('fr-FR', { weekday: 'long' });
+    const today = now.toLocaleDateString("fr-FR", { weekday: "long" });
     const currentTime = now.toTimeString().slice(0, 5); // Format HH:MM
 
-    const todaySchedule = workingHours.find(day => 
-      day.day.toLowerCase() === today.toLowerCase() && day.enabled
+    const todaySchedule = workingHours.find(
+      (day) => day.day.toLowerCase() === today.toLowerCase() && day.enabled
     );
 
     if (!todaySchedule || !todaySchedule.hours) {
-      return { isOpen: false, status: "Fermé", badgeColor: "bg-red-500/20 text-red-200 border-red-300/30" };
+      return {
+        isOpen: false,
+        status: "Fermé",
+        badgeColor: "bg-red-500/20 text-red-200 border-red-300/30",
+      };
     }
 
     // Vérifier si l'heure actuelle est dans les créneaux horaires
-    const timeSlots = todaySchedule.hours.split(' | ');
-    
+    const timeSlots = todaySchedule.hours.split(" | ");
+
     for (const slot of timeSlots) {
-      const [start, end] = slot.split(' - ');
+      const [start, end] = slot.split(" - ");
       if (currentTime >= start && currentTime <= end) {
-        return { 
-          isOpen: true, 
-          status: "Ouvert maintenant", 
-          badgeColor: "bg-green-500/20 text-green-200 border-green-300/30" 
+        return {
+          isOpen: true,
+          status: "Ouvert maintenant",
+          badgeColor: "bg-green-500/20 text-green-200 border-green-300/30",
         };
       }
     }
 
-    return { 
-      isOpen: false, 
-      status: "Fermé aujourd'hui", 
-      badgeColor: "bg-red-500/20 text-red-200 border-red-300/30" 
+    return {
+      isOpen: false,
+      status: "Fermé aujourd'hui",
+      badgeColor: "bg-red-500/20 text-red-200 border-red-300/30",
     };
   }, [workingHours]);
 
@@ -1185,13 +1347,17 @@ const ProfilMedecin = () => {
       });
 
       // Initialiser les horaires de travail
-      if (profil.working_hours && Array.isArray(profil.working_hours) && profil.working_hours.length > 0) {
+      if (
+        profil.working_hours &&
+        Array.isArray(profil.working_hours) &&
+        profil.working_hours.length > 0
+      ) {
         setWorkingHours(profil.working_hours);
       }
 
       setAppointments(rdvsResponse.data);
     } catch (err) {
-      console.error("❌ Erreur chargement données :", err);
+      console.error("Erreur chargement données :", err);
       toast.error("Erreur lors du chargement du profil");
     } finally {
       setLoading(false);
@@ -1235,10 +1401,14 @@ const ProfilMedecin = () => {
         telephone: formData.telephone,
         address: formData.address,
         specialite: formData.specialite,
-        experience_years: formData.experience_years ? parseInt(formData.experience_years) : null,
+        experience_years: formData.experience_years
+          ? parseInt(formData.experience_years)
+          : null,
         languages: formData.languages,
         professional_background: formData.professional_background,
-        consultation_price: formData.consultation_price ? parseInt(formData.consultation_price) : null,
+        consultation_price: formData.consultation_price
+          ? parseInt(formData.consultation_price)
+          : null,
         insurance_accepted: formData.insurance_accepted === "1" ? 1 : 0,
         bio: formData.bio,
         working_hours: workingHours,
@@ -1246,15 +1416,17 @@ const ProfilMedecin = () => {
 
       const profileRes = await api.put("/medecin/profile", updateData);
       const updatedMedecin = profileRes.data;
-      
+
       setMedecin(updatedMedecin);
       setEditMode(false);
-      toast.success("✅ Profil mis à jour avec succès !");
+      toast.success("Profil mis à jour avec succès !");
 
       await fetchAllData();
     } catch (error) {
       console.error("Erreur de mise à jour :", error);
-      const errorMessage = error.response?.data?.message || "Erreur lors de la mise à jour du profil";
+      const errorMessage =
+        error.response?.data?.message ||
+        "Erreur lors de la mise à jour du profil";
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -1265,27 +1437,59 @@ const ProfilMedecin = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("L'image doit faire moins de 2MB");
+    //Vérification côté frontend : max 5 Mo
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("L'image doit faire moins de 5 Mo");
       return;
     }
 
     try {
+      setUploadingPhoto(true);
+
       const formDataUpload = new FormData();
       formDataUpload.append("photo_profil", file);
 
-      const response = await api.post("/medecin/profile/photo", formDataUpload, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await api.post(
+        "/medecin/profile/photo",
+        formDataUpload,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
-      const newPhoto = response.data.photo_profil;
-      setMedecin((prev) => ({ ...prev, photo_profil: newPhoto }));
-      setFormData((prev) => ({ ...prev, photo_profil: newPhoto }));
-      toast.success("Photo de profil mise à jour");
-      
+      const newPhotoUrl = response.data.photo_url;
+      const newPhotoPath = response.data.photo_profil;
+
+      //Mise à jour des états
+      setMedecin((prev) => ({
+        ...prev,
+        photo_profil: newPhotoPath,
+        photo_url: newPhotoUrl,
+      }));
+
+      setFormData((prev) => ({
+        ...prev,
+        photo_profil: newPhotoPath,
+      }));
+
+      toast.success("Photo de profil mise à jour avec succès !");
     } catch (error) {
       console.error("Erreur upload photo:", error);
-      toast.error("Erreur lors du téléchargement de la photo");
+
+      //Gestion précise des erreurs backend Laravel
+      if (error.response?.status === 422) {
+        const msg =
+          error.response?.data?.message ||
+          "Le fichier est invalide ou trop volumineux.";
+        toast.error(msg);
+      } else if (error.response?.status === 413) {
+        // Cas où le serveur refuse carrément le fichier trop gros
+        toast.error("Le fichier dépasse la taille maximale autorisée (5 Mo).");
+      } else {
+        toast.error("Erreur lors du téléchargement de la photo.");
+      }
+    } finally {
+      setUploadingPhoto(false);
     }
   }, []);
 
@@ -1403,14 +1607,17 @@ const ProfilMedecin = () => {
     };
   }, [appointments, reviewStats]);
 
-  const availability = useMemo(() => getCurrentAvailability(), [getCurrentAvailability]);
+  const availability = useMemo(
+    () => getCurrentAvailability(),
+    [getCurrentAvailability]
+  );
 
   // Composants d'onglets
   const AgendaContent = () => (
     <Card className="glass-card border-0 shadow-xl">
       <CardHeader className="border-b border-slate-200/50">
         <CardTitle className="flex items-center gap-3 text-slate-800">
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-br from-sky-600 via-blue-600 to-teal-400 rounded-xl flex items-center justify-center">
             <Calendar className="w-5 h-5 text-white" />
           </div>
           Mes Rendez-vous ({appointments.length})
@@ -1664,7 +1871,7 @@ const ProfilMedecin = () => {
       `}</style>
 
       {/* Header Hero */}
-      <div className="relative bg-gradient-to-br from-blue-600 via-cyan-600 to-teal-500 px-4 md:px-6 py-20 md:py-32 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-sky-600 via-blue-600 to-teal-400 px-4 md:px-6 py-20 md:py-32 overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-300/10 rounded-full blur-3xl"></div>
 
@@ -1673,7 +1880,7 @@ const ProfilMedecin = () => {
             <div className="relative group">
               <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white/50 shadow-2xl backdrop-blur-xl bg-white/10">
                 <img
-                  src={medecin.photo_profil || defaultAvatar}
+                  src={getImageUrl(medecin.photo_profil, medecin.photo_url)}
                   alt={`${medecin.prenom} ${medecin.nom}`}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -1696,12 +1903,18 @@ const ProfilMedecin = () => {
                     onChange={handleImageUpload}
                     accept="image/*"
                     className="hidden"
+                    disabled={uploadingPhoto}
                   />
                   <button
                     onClick={triggerFileInput}
-                    className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 bg-black/60 flex items-center justify-center transition-opacity rounded-full cursor-pointer"
+                    disabled={uploadingPhoto}
+                    className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 bg-black/60 flex items-center justify-center transition-opacity rounded-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Upload className="w-8 h-8 text-white" />
+                    {uploadingPhoto ? (
+                      <Loader2 className="w-8 h-8 text-white animate-spin" />
+                    ) : (
+                      <Upload className="w-8 h-8 text-white" />
+                    )}
                   </button>
                 </>
               )}
@@ -1730,7 +1943,9 @@ const ProfilMedecin = () => {
                     : "Expérience non spécifiée"}
                 </Badge>
 
-                <Badge className={`${availability.badgeColor} backdrop-blur-md border px-4 py-2 text-sm`}>
+                <Badge
+                  className={`${availability.badgeColor} backdrop-blur-md border px-4 py-2 text-sm`}
+                >
                   <Clock className="w-4 h-4 mr-2" />
                   {availability.status}
                 </Badge>
@@ -1747,7 +1962,7 @@ const ProfilMedecin = () => {
 
             <Button
               onClick={() => setEditMode(!editMode)}
-              disabled={saving}
+              disabled={saving || uploadingPhoto}
               className={`${
                 editMode
                   ? "bg-red-500 hover:bg-red-600"
@@ -1830,7 +2045,7 @@ const ProfilMedecin = () => {
               onClick={() => setActiveTab("profil")}
               className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
                 activeTab === "profil"
-                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 text-white shadow-lg"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -1841,7 +2056,7 @@ const ProfilMedecin = () => {
               onClick={() => setActiveTab("horaires")}
               className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
                 activeTab === "horaires"
-                  ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 text-white shadow-lg"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -1852,7 +2067,7 @@ const ProfilMedecin = () => {
               onClick={() => setActiveTab("agenda")}
               className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
                 activeTab === "agenda"
-                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 text-white shadow-lg"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -1874,7 +2089,7 @@ const ProfilMedecin = () => {
               onClick={() => setActiveTab("parametres")}
               className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
                 activeTab === "parametres"
-                  ? "bg-gradient-to-r from-slate-500 to-slate-700 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 text-white shadow-lg"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -1903,7 +2118,12 @@ const ProfilMedecin = () => {
                     <Textarea
                       name="bio"
                       value={formData.bio}
-                      onChange={(e) => setFormData(prev => ({...prev, bio: e.target.value}))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          bio: e.target.value,
+                        }))
+                      }
                       placeholder="Décrivez votre parcours, spécialités et approche médicale..."
                       className="min-h-[150px] border-slate-300 focus:border-blue-500 focus:ring-blue-500"
                     />
@@ -1919,7 +2139,7 @@ const ProfilMedecin = () => {
                 <CardHeader className="border-b border-slate-200/50">
                   <CardTitle className="flex items-center gap-3 text-slate-800">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-white" />
+                      <Briefcase className="w-5 h-5 text-white" />
                     </div>
                     Expérience Professionnelle
                   </CardTitle>
@@ -1929,13 +2149,19 @@ const ProfilMedecin = () => {
                     <Textarea
                       name="experience"
                       value={formData.professional_background}
-                      onChange={(e) => setFormData(prev => ({...prev, professional_background: e.target.value}))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          professional_background: e.target.value,
+                        }))
+                      }
                       placeholder="Décrivez votre expérience professionnelle..."
                       className="min-h-[150px] border-slate-300 focus:border-blue-500 focus:ring-blue-500"
                     />
                   ) : (
                     <p className="text-slate-700 leading-relaxed whitespace-pre-line">
-                      {medecin.professional_background || "Aucune expérience professionnelle renseignée"}
+                      {medecin.professional_background ||
+                        "Aucune expérience professionnelle renseignée"}
                     </p>
                   )}
                 </CardContent>
@@ -1963,54 +2189,18 @@ const ProfilMedecin = () => {
                       <Input
                         name="email"
                         value={formData.email}
-                        onChange={(e) => setFormData(prev => ({...prev, email: e.target.value}))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            email: e.target.value,
+                          }))
+                        }
                         className="border-slate-300"
-                        disabled
                       />
                     ) : (
                       <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                         <Mail className="w-5 h-5 text-blue-500" />
                         <span className="text-slate-700">{medecin.email}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Nom */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">
-                      Nom
-                    </label>
-                    {editMode ? (
-                      <Input
-                        name="nom"
-                        value={formData.nom}
-                        onChange={(e) => setFormData(prev => ({...prev, nom: e.target.value}))}
-                        className="border-slate-300"                
-                      />
-                    ) : (
-                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                        <User className="w-5 h-5 text-blue-500" />
-                        <span className="text-slate-700">{medecin.nom}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Prenom */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">
-                      Prénom
-                    </label>
-                    {editMode ? (
-                      <Input
-                        name="prenom"
-                        value={formData.prenom}
-                        onChange={(e) => setFormData(prev => ({...prev, prenom: e.target.value}))}
-                        className="border-slate-300"
-                      />
-                    ) : (
-                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                        <User className="w-5 h-5 text-blue-500" />
-                        <span className="text-slate-700">{medecin.prenom}</span>
                       </div>
                     )}
                   </div>
@@ -2024,7 +2214,12 @@ const ProfilMedecin = () => {
                       <Input
                         name="telephone"
                         value={formData.telephone}
-                        onChange={(e) => setFormData(prev => ({...prev, telephone: e.target.value}))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            telephone: e.target.value,
+                          }))
+                        }
                         className="border-slate-300"
                       />
                     ) : (
@@ -2046,7 +2241,12 @@ const ProfilMedecin = () => {
                       <Input
                         name="address"
                         value={formData.address}
-                        onChange={(e) => setFormData(prev => ({...prev, address: e.target.value}))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            address: e.target.value,
+                          }))
+                        }
                         className="border-slate-300"
                       />
                     ) : (
@@ -2068,7 +2268,12 @@ const ProfilMedecin = () => {
                       <Input
                         name="specialite"
                         value={formData.specialite}
-                        onChange={(e) => setFormData(prev => ({...prev, specialite: e.target.value}))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            specialite: e.target.value,
+                          }))
+                        }
                         className="border-slate-300"
                         disabled
                       />
@@ -2091,7 +2296,12 @@ const ProfilMedecin = () => {
                       <Input
                         name="consultation_price"
                         value={formData.consultation_price}
-                        onChange={(e) => setFormData(prev => ({...prev, consultation_price: e.target.value}))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            consultation_price: e.target.value,
+                          }))
+                        }
                         type="number"
                         min={0}
                         className="border-slate-300"
@@ -2118,7 +2328,12 @@ const ProfilMedecin = () => {
                       <Input
                         name="experience_years"
                         value={formData.experience_years}
-                        onChange={(e) => setFormData(prev => ({...prev, experience_years: e.target.value}))}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            experience_years: e.target.value,
+                          }))
+                        }
                         type="number"
                         min={0}
                         className="border-slate-300"
@@ -2133,6 +2348,50 @@ const ProfilMedecin = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Assurance acceptée */}
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">
+                      Assurance
+                    </label>
+
+                    {editMode ? (
+                      <select
+                        name="insurance_accepted"
+                        value={formData.insurance_accepted}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            insurance_accepted: e.target.value,
+                          }))
+                        }
+                        className="w-full border border-slate-300 rounded-lg p-2 text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="1">Acceptées</option>
+                        <option value="0">Non acceptées</option>
+                      </select>
+                    ) : (
+                      <Badge
+                        className={`px-4 py-2 text-sm border-white/30 backdrop-blur-md ${
+                          medecin.insurance_accepted === 1
+                            ? "bg-green-500/20 text-green-700 border-green-300"
+                            : "bg-red-500/20 text-red-700 border-red-300"
+                        }`}
+                      >
+                        {medecin.insurance_accepted === 1 ? (
+                          <>
+                            <ShieldCheck className="w-4 h-4 mr-2" />
+                            Assurances acceptées
+                          </>
+                        ) : (
+                          <>
+                            <ShieldOff className="w-4 h-4 mr-2" />
+                            Assurances non acceptées
+                          </>
+                        )}
+                      </Badge>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -2143,7 +2402,7 @@ const ProfilMedecin = () => {
           <Card className="glass-card border-0 shadow-xl">
             <CardHeader className="border-b border-slate-200/50">
               <CardTitle className="flex items-center gap-3 text-slate-800">
-                <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-sky-600 via-blue-600 to-teal-400 rounded-xl flex items-center justify-center">
                   <Clock className="w-5 h-5 text-white" />
                 </div>
                 Gestion des Horaires de Consultation
@@ -2182,7 +2441,8 @@ const ProfilMedecin = () => {
                   languages: Array.isArray(medecin.languages)
                     ? medecin.languages.join(", ")
                     : medecin.languages || "",
-                  professional_background: medecin.professional_background || "",
+                  professional_background:
+                    medecin.professional_background || "",
                   consultation_price: medecin.consultation_price || "",
                   insurance_accepted: medecin.insurance_accepted ? "1" : "0",
                   bio: medecin.bio || "",

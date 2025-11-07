@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import api from "@/api/axios";
 import SafeAvatar from "@/components/common/SafeAvatar";
 import { toast } from "sonner";
+import defaultAvatar from "@/assets/default-avatar.png";
 
 // Composant Select simple et fonctionnel
 const SimpleSelect = ({
@@ -359,7 +360,11 @@ const MedecinCard = ({
       <div className="p-6 -mt-12 relative">
         <div className="relative inline-block mb-4">
           <SafeAvatar
-            src={medecin?.photo_profil}
+            src={
+              medecin.photo_profil
+                ? `/assets/images/${medecin.photo_profil}`
+                : defaultAvatar
+            }
             alt={`Dr. ${medecin?.prenom || ""} ${medecin?.nom || ""}`}
             size={96}
             initials={`${medecin?.prenom?.charAt(0) ?? ""}${
