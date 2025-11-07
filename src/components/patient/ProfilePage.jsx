@@ -622,6 +622,7 @@ const ProfilPatient = () => {
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [cancellingAppointment, setCancellingAppointment] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [showVih, setShowVih] = useState(false);
 
   // États pour les modales
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
@@ -1133,10 +1134,10 @@ const ProfilPatient = () => {
                     Informations Personnelles
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6 space-y-4">
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 pt-6">
                   {/* Email */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
                       Email
                     </label>
                     {editMode ? (
@@ -1149,14 +1150,16 @@ const ProfilPatient = () => {
                     ) : (
                       <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                         <Mail className="w-5 h-5 text-blue-500" />
-                        <span className="text-slate-700">{patient.email}</span>
+                        <span className="text-slate-700 break-all">
+                          {patient.email}
+                        </span>
                       </div>
                     )}
                   </div>
 
                   {/* Téléphone */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
                       Téléphone
                     </label>
                     {editMode ? (
@@ -1177,11 +1180,10 @@ const ProfilPatient = () => {
                   </div>
 
                   {/* Groupe sanguin */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
                       Groupe sanguin
                     </label>
-
                     {editMode ? (
                       <select
                         name="groupe_sanguin"
@@ -1198,6 +1200,7 @@ const ProfilPatient = () => {
                         <option value="AB-">AB-</option>
                         <option value="O+">O+</option>
                         <option value="O-">O-</option>
+                        <option value="inconnu">inconnu</option>
                       </select>
                     ) : (
                       <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
@@ -1209,9 +1212,116 @@ const ProfilPatient = () => {
                     )}
                   </div>
 
+                  {/* Sérologie VIH (masquable) */}
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                      Sérologie VIH
+                    </label>
+                    {editMode ? (
+                      <select
+                        name="serologie_vih"
+                        value={formData.serologie_vih || ""}
+                        onChange={handleChange}
+                        className="w-full border border-slate-300 rounded-md p-2 text-slate-700 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                      >
+                        <option value="">Sélectionner le statut</option>
+                        <option value="positif">Positif</option>
+                        <option value="negatif">Négatif</option>
+                        <option value="inconnu">Inconnu</option>
+                      </select>
+                    ) : (
+                      <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Activity className="w-5 h-5 text-pink-500" />
+                          <span className="text-slate-700">
+                            {showVih
+                              ? patient.serologie_vih || "Non renseignée"
+                              : "•••••••"}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowVih(!showVih)}
+                          className="text-slate-500 hover:text-slate-700 transition"
+                        >
+                          {showVih ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Antécédents médicaux */}
+                  <div className="flex flex-col md:col-span-2">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                      Antécédents médicaux
+                    </label>
+                    {editMode ? (
+                      <textarea
+                        name="antecedents_medicaux"
+                        value={formData.antecedents_medicaux || ""}
+                        onChange={handleChange}
+                        rows="3"
+                        className="w-full border border-slate-300 rounded-md p-2 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        placeholder="Décrire les antécédents médicaux..."
+                      />
+                    ) : (
+                      <div className="p-3 bg-slate-50 rounded-lg text-slate-700">
+                        {patient.antecedents_medicaux ||
+                          "Aucun antécédent renseigné"}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Allergies */}
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                      Allergies
+                    </label>
+                    {editMode ? (
+                      <textarea
+                        name="allergies"
+                        value={formData.allergies || ""}
+                        onChange={handleChange}
+                        rows="2"
+                        className="w-full border border-slate-300 rounded-md p-2 text-slate-700 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                        placeholder="Lister les allergies éventuelles..."
+                      />
+                    ) : (
+                      <div className="p-3 bg-slate-50 rounded-lg text-slate-700">
+                        {patient.allergies || "Aucune allergie renseignée"}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Traitements chroniques */}
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                      Traitements chroniques
+                    </label>
+                    {editMode ? (
+                      <textarea
+                        name="traitements_chroniques"
+                        value={formData.traitements_chroniques || ""}
+                        onChange={handleChange}
+                        rows="2"
+                        className="w-full border border-slate-300 rounded-md p-2 text-slate-700 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                        placeholder="Lister les traitements chroniques..."
+                      />
+                    ) : (
+                      <div className="p-3 bg-slate-50 rounded-lg text-slate-700">
+                        {patient.traitements_chroniques ||
+                          "Aucun traitement renseigné"}
+                      </div>
+                    )}
+                  </div>
+
                   {/* Adresse */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 block">
+                  <div className="flex flex-col md:col-span-2">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
                       Adresse
                     </label>
                     {editMode ? (
@@ -1231,24 +1341,27 @@ const ProfilPatient = () => {
                     )}
                   </div>
 
+                  {/* Bouton de sauvegarde */}
                   {editMode && (
-                    <Button
-                      onClick={handleSave}
-                      disabled={saving}
-                      className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
-                    >
-                      {saving ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Enregistrement...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="w-4 h-4 mr-2" />
-                          Enregistrer les modifications
-                        </>
-                      )}
-                    </Button>
+                    <div className="md:col-span-2">
+                      <Button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+                      >
+                        {saving ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Enregistrement...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            Enregistrer les modifications
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   )}
                 </CardContent>
               </Card>

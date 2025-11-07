@@ -49,6 +49,7 @@ import {
 import api from "@/api/axios";
 import SafeAvatar from "@/components/common/SafeAvatar";
 import { AuthContext } from "@/context/AuthContext";
+import defaultAvatar from "@/assets/default-avatar.png";
 
 // Composants optimisés
 const StarRating = React.memo(
@@ -1823,6 +1824,7 @@ const MedecinProfilePage = () => {
                       </>
                     )}
                   </Button>
+                  {/* Message de confirmation ou d'erreur 
                   {rdvMessage && (
                     <div
                       className={`p-4 rounded-xl ${
@@ -1834,7 +1836,7 @@ const MedecinProfilePage = () => {
                     >
                       <p className="text-sm font-medium">{rdvMessage}</p>
                     </div>
-                  )}
+                  )} */}
                 </div>
                 <div className="mt-6 pt-6 border-t border-slate-200">
                   <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">

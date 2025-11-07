@@ -63,9 +63,17 @@ const Chatbot = () => {
             <div className="relative">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 p-0.5">
                 <img
-                  src={m.photo_profil || "/medécin/default-avatar.png"}
-                  alt={`Dr ${m.prenom} ${m.nom}`}
-                  className="w-full h-full rounded-full object-cover border-2 border-slate-900"
+                  src={
+                    medecin.photo_profil
+                      ? `/assets/images/${medecin.photo_profil}`
+                      : defaultAvatar
+                  }
+                  alt={`Dr. ${medecin?.prenom || ""} ${medecin?.nom || ""}`}
+                  size={96}
+                  initials={`${medecin?.prenom?.charAt(0) ?? ""}${
+                    medecin?.nom?.charAt(0) ?? ""
+                  }`}
+                  className="rounded-2xl border-4 border-white shadow-xl"
                 />
               </div>
               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-slate-900 animate-pulse" />

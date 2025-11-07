@@ -10,6 +10,7 @@ import { AuthContext } from "@/context/AuthContext";
 import api from "@/api/axios";
 import { toast } from "sonner";
 import defaultAvatar from "@/assets/default-avatar.png";
+import { useToast } from "@/components/ui/use-toast";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -1203,6 +1204,7 @@ const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
 
 const ProfilMedecin = () => {
   const { role } = useContext(AuthContext);
+  const { toast } = useToast();
 
   // États
   const [medecin, setMedecin] = useState(null);
@@ -1228,7 +1230,7 @@ const ProfilMedecin = () => {
     languages: "",
     professional_background: "",
     consultation_price: "",
-    insurance_accepted: "0",
+    insurance_accepted: "",
     bio: "",
     photo_profil: "",
   });
@@ -1419,7 +1421,11 @@ const ProfilMedecin = () => {
 
       setMedecin(updatedMedecin);
       setEditMode(false);
-      toast.success("Profil mis à jour avec succès !");
+      toast({
+        title: "Succès",
+        description: "Profil mis à jour avec succès !",
+        variant: "default",
+      });
 
       await fetchAllData();
     } catch (error) {
@@ -1427,7 +1433,11 @@ const ProfilMedecin = () => {
       const errorMessage =
         error.response?.data?.message ||
         "Erreur lors de la mise à jour du profil";
-      toast.error(errorMessage);
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
@@ -1439,7 +1449,11 @@ const ProfilMedecin = () => {
 
     //Vérification côté frontend : max 5 Mo
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("L'image doit faire moins de 5 Mo");
+      toast({
+        title: "Erreur",
+        description: "L'image doit faire moins de 5 Mo",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -1472,7 +1486,11 @@ const ProfilMedecin = () => {
         photo_profil: newPhotoPath,
       }));
 
-      toast.success("Photo de profil mise à jour avec succès !");
+      toast({
+        title: "Succès",
+        description: "Photo de profil mise à jour avec succès !",
+        variant: "default",
+      });
     } catch (error) {
       console.error("Erreur upload photo:", error);
 
@@ -1481,12 +1499,25 @@ const ProfilMedecin = () => {
         const msg =
           error.response?.data?.message ||
           "Le fichier est invalide ou trop volumineux.";
-        toast.error(msg);
+        toast({
+          title: "Erreur",
+          description: msg,
+          variant: "destructive",
+        });
       } else if (error.response?.status === 413) {
         // Cas où le serveur refuse carrément le fichier trop gros
-        toast.error("Le fichier dépasse la taille maximale autorisée (5 Mo).");
+        toast({
+          title: "Erreur",
+          description:
+            "Le fichier dépasse la taille maximale autorisée (5 Mo).",
+          variant: "destructive",
+        });
       } else {
-        toast.error("Erreur lors du téléchargement de la photo.");
+        toast({
+          title: "Erreur",
+          description: "Erreur lors du téléchargement de la photo.",
+          variant: "destructive",
+        });
       }
     } finally {
       setUploadingPhoto(false);
@@ -1507,10 +1538,18 @@ const ProfilMedecin = () => {
         )
       );
 
-      toast.success("Rendez-vous confirmé avec succès");
+      toast({
+        title: "Succès",
+        description: "Rendez-vous confirmé avec succès",
+        variant: "default",
+      });
     } catch (error) {
       console.error("Erreur confirmation rendez-vous:", error);
-      toast.error("Erreur lors de la confirmation du rendez-vous");
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la confirmation du rendez-vous",
+        variant: "destructive",
+      });
     }
   }, []);
 
@@ -1526,10 +1565,18 @@ const ProfilMedecin = () => {
         )
       );
 
-      toast.success("Rendez-vous refusé");
+      toast({
+        title: "Succès",
+        description: "Rendez-vous refusé",
+        variant: "default",
+      });
     } catch (error) {
       console.error("Erreur refus rendez-vous:", error);
-      toast.error("Erreur lors du refus du rendez-vous");
+      toast({
+        title: "Erreur",
+        description: "Erreur lors du refus du rendez-vous",
+        variant: "destructive",
+      });
     }
   }, []);
 
@@ -1542,14 +1589,22 @@ const ProfilMedecin = () => {
           new_password_confirmation: newPassword,
         });
 
-        toast.success("Mot de passe modifié avec succès");
+        toast({
+          title: "Succès",
+          description: "Mot de passe modifié avec succès",
+          variant: "default",
+        });
         return true;
       } catch (error) {
         console.error("Erreur modification mot de passe:", error);
         const errorMessage =
           error.response?.data?.message ||
           "Erreur lors de la modification du mot de passe";
-        toast.error(errorMessage);
+        toast({
+          title: "Erreur",
+          description: errorMessage,
+          variant: "destructive",
+        });
         throw error;
       }
     },
@@ -1560,7 +1615,11 @@ const ProfilMedecin = () => {
     try {
       await api.delete("/medecin/profile");
 
-      toast.success("Compte supprimé avec succès");
+      toast({
+        title: "Succès",
+        description: "Compte supprimé avec succès",
+        variant: "default",
+      });
       window.location.href = "/";
       return true;
     } catch (error) {
@@ -1568,7 +1627,11 @@ const ProfilMedecin = () => {
       const errorMessage =
         error.response?.data?.message ||
         "Erreur lors de la suppression du compte";
-      toast.error(errorMessage);
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
       throw error;
     }
   }, []);
@@ -1805,7 +1868,7 @@ const ProfilMedecin = () => {
               Modifier le mot de passe
             </Button>
           </div>
-
+          {/* Danger Zone 
           <div className="p-6 bg-red-50 border-2 border-red-200 rounded-2xl">
             <h3 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-red-600" />
@@ -1824,7 +1887,7 @@ const ProfilMedecin = () => {
                 Supprimer définitivement le compte
               </Button>
             </div>
-          </div>
+          </div>*/}
         </div>
       </CardContent>
     </Card>
