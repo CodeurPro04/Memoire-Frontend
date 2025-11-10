@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import api from "@/api/axios";
 import { AuthContext } from "@/context/AuthContext";
+import { GoogleLogin } from '@react-oauth/google';
+import { useGoogleAuth } from '@/context/GoogleAuthContext';
 
 const SPECIALITES = [
   "Médecine générale",
@@ -50,10 +52,12 @@ const TYPE_ETABLISSEMENT = [
 const UnifiedAuthPage = () => {
   const navigate = useNavigate();
   const { loginUser } = useContext(AuthContext);
+  const { handleGoogleLogin, loading: googleLoading } = useGoogleAuth();
 
   const [mode, setMode] = useState("login");
   const [userType, setUserType] = useState("");
   const [step, setStep] = useState(1);
+  const [pendingGoogleAuth, setPendingGoogleAuth] = useState(null);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -128,6 +132,83 @@ const UnifiedAuthPage = () => {
     }
   }, [medecinData.type]);
 
+  // Fonction pour la connexion Google
+  const onGoogleLoginSuccess = async (credentialResponse) => {
+    if (!userType) {
+      setError("Veuillez sélectionner un type de compte");
+      return;
+    }
+
+    try {
+      const result = await handleGoogleLogin(credentialResponse, userType);
+      
+      // Votre API Laravel Sanctum retourne un token d'accès
+      const userData = result.user || result[userType];
+      const accessToken = result.access_token || result.token;
+
+      loginUser(userData, userType, accessToken);
+
+      const redirects = {
+        patient: "/profil-patient",
+        medecin: "/profil-medecin",
+        clinique: "/profil-clinique",
+      };
+
+      navigate(redirects[userType]);
+    } catch (error) {
+      setError(error.response?.data?.message || "Erreur lors de la connexion Google");
+    }
+  };
+
+  // Inscription Google - étape 1
+  const onGoogleSignupInit = (credentialResponse) => {
+    setPendingGoogleAuth(credentialResponse);
+    setMode("select-type-for-google");
+  };
+
+  // Inscription Google - étape 2
+  const onGoogleSignupComplete = async (selectedUserType) => {
+    if (!pendingGoogleAuth) {
+      setError("Erreur lors de l'inscription Google");
+      return;
+    }
+
+    setUserType(selectedUserType);
+    setLoading(true);
+    
+    try {
+      const result = await handleGoogleLogin(pendingGoogleAuth, selectedUserType);
+      
+      // Votre API Laravel peut retourner différentes structures
+      const userData = result.user || result[selectedUserType] || result.data;
+      const accessToken = result.access_token || result.token;
+
+      if (userData && accessToken) {
+        // Connexion directe réussie
+        loginUser(userData, selectedUserType, accessToken);
+        
+        const redirects = {
+          patient: "/profil-patient",
+          medecin: "/profil-medecin",
+          clinique: "/profil-clinique",
+        };
+        navigate(redirects[selectedUserType]);
+      } else {
+        // Si des informations supplémentaires sont nécessaires
+        setMode('google-complete-signup');
+      }
+    } catch (error) {
+      setError(error.response?.data?.message || "Erreur lors de l'inscription Google");
+    } finally {
+      setLoading(false);
+      setPendingGoogleAuth(null);
+    }
+  };
+
+  const onGoogleLoginFailure = () => {
+    setError("Échec de la connexion Google. Vérifiez votre configuration OAuth.");
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!loginEmail || !loginPassword || !userType) {
@@ -152,7 +233,8 @@ const UnifiedAuthPage = () => {
         password: loginPassword,
       });
 
-      const userData = response.data[userType];
+      // Adaptation pour Laravel Sanctum
+      const userData = response.data.user || response.data[userType];
       const accessToken = response.data.access_token;
 
       loginUser(userData, userType, accessToken);
@@ -212,7 +294,7 @@ const UnifiedAuthPage = () => {
       setError("");
 
       try {
-        await api.post("/patient/register", {
+        const response = await api.post("/patient/register", {
           nom: patientData.nom,
           prenom: patientData.prenom,
           email: patientData.email,
@@ -226,8 +308,18 @@ const UnifiedAuthPage = () => {
           traitements_chroniques: patientData.traitements_chroniques || null,
         });
 
-        setMode("login");
-        setUserType("patient");
+        // Connexion automatique après inscription
+        const userData = response.data.user || response.data.patient;
+        const accessToken = response.data.access_token;
+
+        if (userData && accessToken) {
+          loginUser(userData, "patient", accessToken);
+          navigate("/profil-patient");
+        } else {
+          setMode("login");
+          setUserType("patient");
+        }
+
         setStep(1);
         setError("");
       } catch (err) {
@@ -297,10 +389,20 @@ const UnifiedAuthPage = () => {
         signupData.fonction = medecinData.fonction || "Médecin";
       }
 
-      await api.post("/medecin/register", signupData);
+      const response = await api.post("/medecin/register", signupData);
 
-      setMode("login");
-      setUserType("medecin");
+      // Connexion automatique après inscription
+      const userData = response.data.user || response.data.medecin;
+      const accessToken = response.data.access_token;
+
+      if (userData && accessToken) {
+        loginUser(userData, "medecin", accessToken);
+        navigate("/profil-medecin");
+      } else {
+        setMode("login");
+        setUserType("medecin");
+      }
+
       setStep(1);
       setError("");
     } catch (err) {
@@ -337,10 +439,20 @@ const UnifiedAuthPage = () => {
     setError("");
 
     try {
-      await api.post("/clinique/register", cliniqueData);
+      const response = await api.post("/clinique/register", cliniqueData);
 
-      setMode("login");
-      setUserType("clinique");
+      // Connexion automatique après inscription
+      const userData = response.data.user || response.data.clinique;
+      const accessToken = response.data.access_token;
+
+      if (userData && accessToken) {
+        loginUser(userData, "clinique", accessToken);
+        navigate("/profil-clinique");
+      } else {
+        setMode("login");
+        setUserType("clinique");
+      }
+
       setStep(1);
       setError("");
     } catch (err) {
@@ -354,12 +466,14 @@ const UnifiedAuthPage = () => {
     setMode("login");
     setStep(1);
     setError("");
+    setPendingGoogleAuth(null);
   };
 
   const resetToSelectType = () => {
     setMode("select-type");
     setStep(1);
     setError("");
+    setPendingGoogleAuth(null);
   };
 
   return (
@@ -384,7 +498,7 @@ const UnifiedAuthPage = () => {
           >
             <div className="text-center mb-6">
               <img
-                src="/logo/meetmed2.png"
+                src="/logo/meetmed4.png"
                 alt="Medical Logo"
                 className="mx-auto w-20 h-20 object-contain rounded-full shadow-lg mb-3"
               />
@@ -507,6 +621,35 @@ const UnifiedAuthPage = () => {
               </Button>
             </form>
 
+            {/* Section Google Login */}
+            <div className="mt-4">
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white dark:bg-black text-gray-500">Ou</span>
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={onGoogleLoginSuccess}
+                  onError={onGoogleLoginFailure}
+                  shape="rectangular"
+                  size="large"
+                  text="continue_with"
+                  locale="fr"
+                  useOneTap={false}
+                />
+              </div>
+              {!userType && (
+                <p className="text-xs text-center text-red-500 mt-2">
+                  Veuillez d'abord sélectionner un type de compte
+                </p>
+              )}
+            </div>
+
             <div className="mt-5 text-center">
               <p className="text-xs text-gray-600 dark:text-gray-300">
                 Vous n'avez pas de compte ?{" "}
@@ -595,6 +738,34 @@ const UnifiedAuthPage = () => {
               ))}
             </div>
 
+            {/* Section Google Signup */}
+            <div className="mt-6 text-center">
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white dark:bg-black text-gray-500">
+                    Ou s'inscrire avec Google
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={onGoogleSignupInit}
+                  onError={onGoogleLoginFailure}
+                  shape="rectangular"
+                  size="large"
+                  text="signup_with"
+                  locale="fr"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Vous sélectionnerez votre type de compte après l'authentification Google
+              </p>
+            </div>
+
             <div className="mt-6 text-center">
               <p className="text-xs text-gray-600 dark:text-gray-300">
                 Vous avez déjà un compte ?{" "}
@@ -607,7 +778,144 @@ const UnifiedAuthPage = () => {
               </p>
             </div>
           </motion.div>
+        ) : mode === "select-type-for-google" ? (
+          <motion.div
+            key="select-type-for-google"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+            className="relative bg-white/95 dark:bg-black/85 backdrop-blur-xl rounded-3xl shadow-2xl p-8 w-full max-w-3xl z-10"
+          >
+            <button
+              onClick={() => {
+                setPendingGoogleAuth(null);
+                setMode("select-type");
+              }}
+              className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            </button>
+
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-extrabold text-sky-600 dark:text-green-400">
+                Complétez votre inscription
+              </h2>
+              <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                Sélectionnez votre type de compte pour finaliser l'inscription avec Google
+              </p>
+            </div>
+
+            {loading && (
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-600 text-xs text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin" />
+                  Finalisation de l'inscription...
+                </div>
+              </div>
+            )}
+
+            <div className="grid md:grid-cols-3 gap-4">
+              {[
+                {
+                  type: "patient",
+                  icon: User,
+                  label: "Patient",
+                  desc: "Trouvez et consultez des médecins",
+                  color: "emerald",
+                },
+                {
+                  type: "medecin",
+                  icon: Stethoscope,
+                  label: "Médecin",
+                  desc: "Gérez vos consultations",
+                  color: "blue",
+                },
+                {
+                  type: "clinique",
+                  icon: Building2,
+                  label: "Clinique",
+                  desc: "Enregistrez votre établissement",
+                  color: "purple",
+                },
+              ].map(({ type, icon: Icon, label, desc, color }) => (
+                <motion.div
+                  key={type}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => !loading && onGoogleSignupComplete(type)}
+                  className={`cursor-pointer p-6 rounded-2xl border-2 transition-all ${
+                    loading 
+                      ? "opacity-50 cursor-not-allowed border-gray-300 dark:border-gray-600" 
+                      : `border-gray-300 dark:border-gray-600 hover:border-${color}-500 hover:bg-${color}-50 dark:hover:bg-${color}-900/20`
+                  }`}
+                >
+                  <div className="text-center">
+                    <div
+                      className={`w-16 h-16 mx-auto mb-3 bg-${color}-100 dark:bg-${color}-900/30 rounded-full flex items-center justify-center`}
+                    >
+                      <Icon className={`w-8 h-8 text-${color}-600`} />
+                    </div>
+                    <h3 className="text-lg font-bold mb-1 text-gray-800 dark:text-gray-200">
+                      {label}
+                    </h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {desc}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        ) : mode === "google-complete-signup" ? (
+          <motion.div
+            key="google-complete-signup"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+            className="relative bg-white/95 dark:bg-black/85 backdrop-blur-xl rounded-3xl shadow-2xl p-8 w-full max-w-2xl z-10"
+          >
+            <button
+              onClick={() => setMode("select-type-for-google")}
+              className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            </button>
+
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-extrabold text-sky-600 dark:text-green-400">
+                Informations supplémentaires
+              </h2>
+              <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                Complétez votre profil {userType}
+              </p>
+            </div>
+
+            {error && (
+              <div className="mb-4 p-2.5 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs text-center">
+                {error}
+              </div>
+            )}
+
+            <div className="text-center p-8">
+              <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+                <UserPlus className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Informations manquantes</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Votre compte Google a été authentifié avec succès, mais certaines informations sont nécessaires pour compléter votre profil {userType}.
+              </p>
+              <Button
+                onClick={() => setMode("signup")}
+                className="bg-gradient-to-r from-sky-500 via-teal-400 to-cyan-400 text-white"
+              >
+                Compléter mon profil
+              </Button>
+            </div>
+          </motion.div>
         ) : (
+          // MODE SIGNUP NORMAL (le reste de votre code existant)
           <motion.div
             key="signup"
             initial={{ opacity: 0, y: 20 }}
@@ -648,7 +956,6 @@ const UnifiedAuthPage = () => {
             {userType === "patient" && (
               <form onSubmit={handlePatientSignup} className="space-y-4">
                 {step === 1 ? (
-                  // Étape 1: Informations personnelles
                   <>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
@@ -744,7 +1051,6 @@ const UnifiedAuthPage = () => {
                     </div>
                   </>
                 ) : step === 2 ? (
-                  // Étape 2: Informations médicales facultatives
                   <>
                     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-900/50">
                       <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
@@ -854,7 +1160,6 @@ const UnifiedAuthPage = () => {
                     </div>
                   </>
                 ) : (
-                  // Étape 3: Mot de passe
                   <>
                     <div className="text-center mb-4">
                       <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
@@ -1245,7 +1550,6 @@ const UnifiedAuthPage = () => {
                       />
                     </div>
 
-                    {/* Nouveaux champs commune et ville */}
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
