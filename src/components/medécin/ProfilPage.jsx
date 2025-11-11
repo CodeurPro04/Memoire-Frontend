@@ -49,7 +49,7 @@ import {
   CreditCard,
   CheckCircle2,
   XCircle,
-  Sparkles,
+  Droplet,
   TrendingUp,
   Users,
   Star,
@@ -68,6 +68,7 @@ import {
   Sun,
   Moon,
   ShieldOff,
+  Activity,
 } from "lucide-react";
 
 // ============ COMPOSANTS RÉUTILISABLES ============
@@ -623,77 +624,184 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
   const config = statusConfig[appointment.status] || statusConfig["en_attente"];
   const StatusIcon = config.icon;
 
+  // Fonction pour calculer l'âge
+  const calculateAge = (birthDate) => {
+    if (!birthDate) return "Non renseigné";
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    return `${age} ans`;
+  };
+
+  // Fonction pour formater la date de naissance
+  const formatBirthDate = (birthDate) => {
+    if (!birthDate) return "Non renseignée";
+    return new Date(birthDate).toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+  };
+
   return (
     <div
       className={`${config.bg} ${config.border} border-2 p-6 rounded-2xl hover:shadow-lg transition-all duration-300`}
     >
-      <div className="flex flex-col md:flex-row justify-between gap-4">
-        <div className="flex-1 space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-              {appointment.patient?.charAt(0) || "P"}
+      <div className="flex flex-col lg:flex-row justify-between gap-6">
+        {/* Section Informations Patient */}
+        <div className="flex-1">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+              {appointment.patient_prenom?.charAt(0) || appointment.patient_nom?.charAt(0) || "P"}
             </div>
-            <div>
-              <p className="font-bold text-slate-800 text-lg">
-                {appointment.patient || "Patient"}
-              </p>
-              <Badge className={config.badge}>
-                <StatusIcon className="w-3 h-3 mr-1" />
-                {config.label}
-              </Badge>
-            </div>
-          </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <h3 className="font-bold text-slate-800 text-xl">
+                  {appointment.patient_prenom || "Prénom"} {appointment.patient_nom || "Nom"}
+                </h3>
+                <Badge className={config.badge}>
+                  <StatusIcon className="w-3 h-3 mr-1" />
+                  {config.label}
+                </Badge>
+              </div>
+              
+              {/* Informations de base du patient */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mb-4">
+                <div className="flex items-center gap-2 text-slate-600">
+                  <User className="w-4 h-4 text-blue-500" />
+                  <span>Sérologie: {appointment.patient_serologie_vih || "Non renseigné"}</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-600">
+                  <Mail className="w-4 h-4 text-amber-500" />
+                  <span className="truncate">{appointment.patient_email || "Email non renseigné"}</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-600">
+                  <Phone className="w-4 h-4 text-green-500" />
+                  <span>{appointment.patient_telephone || "Tél. non renseigné"}</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-600">
+                  <Droplet className="w-4 h-4 text-red-500" />
+                  <span>Groupe: {appointment.patient_groupe_sanguin || "Non renseigné"}</span>
+                </div>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center gap-2 text-slate-600">
-              <Phone className="w-4 h-4 text-blue-500" />
-              {appointment.telephone || "Non renseigné"}
+              {/* Informations médicales importantes */}
+              {(appointment.patient_antecedents_medicaux || 
+                appointment.patient_allergies || 
+                appointment.patient_traitements_chroniques) && (
+                <div className="bg-white/50 rounded-xl p-4 border border-slate-200/80 mb-4">
+                  <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-purple-500" />
+                    Informations médicales
+                  </h4>
+                  <div className="space-y-2 text-sm">
+                    {appointment.patient_antecedents_medicaux && (
+                      <div className="flex items-start gap-2">
+                        <Activity className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="font-medium text-slate-700">Antécédents:</span>
+                          <p className="text-slate-600">{appointment.patient_antecedents_medicaux}</p>
+                        </div>
+                      </div>
+                    )}
+                    {appointment.patient_allergies && (
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="font-medium text-slate-700">Allergies:</span>
+                          <p className="text-slate-600">{appointment.patient_allergies}</p>
+                        </div>
+                      </div>
+                    )}
+                    {appointment.patient_traitements_chroniques && (
+                      <div className="flex items-start gap-2">
+                        <Stethoscope className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="font-medium text-slate-700">Traitements:</span>
+                          <p className="text-slate-600">{appointment.patient_traitements_chroniques}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-2 text-slate-600">
-              <MapPin className="w-4 h-4 text-red-500" />
-              {appointment.address || "Non renseignée"}
-            </div>
-            <div className="flex items-center gap-2 text-slate-600">
-              <Calendar className="w-4 h-4 text-purple-500" />
-              {new Date(appointment.date).toLocaleDateString("fr-FR", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </div>
-            <div className="flex items-center gap-2 text-slate-600">
-              <Clock className="w-4 h-4 text-green-500" />
-              {appointment.time}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-sm">
-            <Stethoscope className="w-4 h-4 text-cyan-500" />
-            <span className="text-slate-600">
-              Type: {appointment.consultation_type}
-            </span>
           </div>
         </div>
 
-        {appointment.status === "en_attente" && (
-          <div className="flex md:flex-col gap-2">
-            <Button
-              onClick={() => onConfirm(appointment.id)}
-              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <CheckCircle2 className="w-4 h-4 mr-2" />
-              Confirmer
-            </Button>
-            <Button
-              onClick={() => onReject(appointment.id)}
-              className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <XCircle className="w-4 h-4 mr-2" />
-              Refuser
-            </Button>
+        {/* Section Détails du RDV et Actions */}
+        <div className="lg:w-80 space-y-4">
+          {/* Détails du rendez-vous */}
+          <div className="bg-white/50 rounded-xl p-4 border border-slate-200/80">
+            <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-purple-500" />
+              Détails du rendez-vous
+            </h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2 text-slate-600">
+                <Calendar className="w-4 h-4 text-purple-500" />
+                <span>
+                  {new Date(appointment.date).toLocaleDateString("fr-FR", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-600">
+                <Clock className="w-4 h-4 text-green-500" />
+                <span>{appointment.time}</span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-600">
+                <MapPin className="w-4 h-4 text-red-500" />
+                <span>{appointment.patient_address || "Adresse non renseignée"}</span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-600">
+                <Stethoscope className="w-4 h-4 text-cyan-500" />
+                <span>Type: {appointment.consultation_type}</span>
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Actions */}
+          {appointment.status === "en_attente" && (
+            <div className="space-y-2">
+              <Button
+                onClick={() => onConfirm(appointment.id)}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 h-12"
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Confirmer le RDV
+              </Button>
+              <Button
+                onClick={() => onReject(appointment.id)}
+                className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 h-12"
+              >
+                <XCircle className="w-4 h-4 mr-2" />
+                Refuser le RDV
+              </Button>
+            </div>
+          )}
+
+          {/* Statut pour RDV confirmés/refusés */}
+          {appointment.status !== "en_attente" && (
+            <div className="text-center p-3 bg-white/50 rounded-xl border border-slate-200/80">
+              <p className="text-sm text-slate-600">
+                RDV {appointment.status === "confirmé" ? "confirmé" : "refusé"} le{" "}
+                {appointment.updated_at && 
+                  new Date(appointment.updated_at).toLocaleDateString("fr-FR")
+                }
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -2005,14 +2113,6 @@ const ProfilMedecin = () => {
                     ? `${medecin.experience_years} ans d'expérience`
                     : "Expérience non spécifiée"}
                 </Badge>
-
-                <Badge
-                  className={`${availability.badgeColor} backdrop-blur-md border px-4 py-2 text-sm`}
-                >
-                  <Clock className="w-4 h-4 mr-2" />
-                  {availability.status}
-                </Badge>
-
                 <Badge className="bg-white/20 backdrop-blur-md text-white border-white/30 px-4 py-2 text-sm">
                   <ShieldCheck className="w-4 h-4 mr-2" />
                   Assurances{" "}

@@ -285,10 +285,10 @@ const AproposContent = React.memo(({ medecinData }) => (
     </div>
 
     <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-      <div className="h-2 bg-gradient-to-r from-purple-500 to-pink-500" />
+      <div className="h-2 bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 dark:bg-green-900/20" />
       <div className="p-8">
         <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-3">
-          <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
+          <div className="w-2 h-8 bg-gradient-to-b from-sky-600 via-blue-600 to-teal-400 dark:bg-green-900/20 rounded-full" />
           Spécialités et Domaines d'Expertise
         </h2>
         <div className="grid md:grid-cols-2 gap-4">
@@ -324,16 +324,16 @@ AproposContent.displayName = "AproposContent";
 const ExperienceContent = React.memo(({ medecinData }) => (
   <div className="space-y-6">
     <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-      <div className="h-2 bg-gradient-to-r from-purple-500 to-pink-500" />
+      <div className="h-2 bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 dark:bg-green-900/20" />
       <div className="p-8">
         <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-          <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
+          <div className="w-2 h-8 bg-gradient-to-b from-sky-600 via-blue-600 to-teal-400 dark:bg-green-900/20 rounded-full" />
           Expérience Professionnelle
         </h2>
         {medecinData.professional_background ? (
           <div className="space-y-4">
             <div className="flex items-start gap-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 bg-gradient-to-br from-sky-600 via-blue-600 to-teal-400 dark:bg-green-900/20 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Briefcase className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -911,16 +911,16 @@ const ContactContent = React.memo(({ medecinData }) => {
       </div>
 
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-        <div className="h-2 bg-gradient-to-r from-amber-500 to-orange-500" />
+        <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
         <div className="p-8">
           <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-            <div className="w-2 h-8 bg-gradient-to-b from-amber-500 to-orange-500 rounded-full" />
+            <div className="w-2 h-8 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full" />
             Informations Pratiques
           </h2>
           <div className="grid md:grid-cols-1 gap-6">
             <div className="space-y-4">
               <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-amber-600" />
+                <Clock className="w-5 h-5 text-emerald-600" />
                 Horaires de consultation
               </h3>
               {formatWorkingHours(medecinData.working_hours)}
@@ -1551,10 +1551,10 @@ const MedecinProfilePage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 pt-24 pb-24 mb-12">
+      <div className="relative overflow-hidden bg-gradient-to-br from-sky-600 via-blue-600 to-teal-400 dark:bg-green-900/20 pt-24 pb-24 mb-12">
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-cyan-600/20 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-600/20 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-sky-600/20 via-transparent to-transparent" />
           <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
         </div>
 
@@ -1583,8 +1583,8 @@ const MedecinProfilePage = () => {
               <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6">
                 <div>
                   <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-4">
-                    <Sparkles className="w-4 h-4 text-cyan-400" />
-                    <span className="text-sm font-medium text-cyan-200">
+                    <Sparkles className="w-4 h-4 text-white" />
+                    <span className="text-sm font-medium text-white">
                       Médecin vérifié
                     </span>
                   </div>
@@ -1664,7 +1664,7 @@ const MedecinProfilePage = () => {
                         : "0.0"}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-300">
+                  <p className="text-sm text-white">
                     {reviewStats?.total_reviews || 0} avis
                   </p>
                 </div>
@@ -1682,7 +1682,7 @@ const MedecinProfilePage = () => {
                         : "Non spécifié"}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-300">Années d'exp.</p>
+                  <p className="text-sm text-white">Années d'exp.</p>
                 </div>
 
                 {/* AvailabilityBadge */}
@@ -1716,7 +1716,7 @@ const MedecinProfilePage = () => {
                       %
                     </span>
                   </div>
-                  <p className="text-sm text-slate-300">Satisfaction</p>
+                  <p className="text-sm text-white">Satisfaction</p>
                 </div>
               </div>
             </div>
@@ -1764,10 +1764,10 @@ const MedecinProfilePage = () => {
           {/* Sidebar RDV */}
           <div className="space-y-6">
             <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden sticky top-6">
-              <div className="h-2 bg-gradient-to-r from-amber-500 to-orange-500" />
+              <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
               <div className="p-6">
                 <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                  <Calendar className="w-6 h-6 text-amber-600" />
+                  <Calendar className="w-6 h-6 text-emerald-600" />
                   Prendre rendez-vous
                 </h2>
                 <div className="space-y-4">
@@ -1801,7 +1801,7 @@ const MedecinProfilePage = () => {
                     <Input
                       value={consultationType}
                       onChange={(e) => setConsultationType(e.target.value)}
-                      className="w-full h-12 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                      className="w-full h-12 rounded-xl border-2 border-emerald-200 focus:border-emerald-500 focus:ring-4 focus:ring-blue-500/10"
                       placeholder="Décrivez le motif de votre consultation..."
                       required
                     />
@@ -1840,10 +1840,10 @@ const MedecinProfilePage = () => {
                 </div>
                 <div className="mt-6 pt-6 border-t border-slate-200">
                   <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                    <Award className="w-5 h-5 text-amber-600" />
+                    <Award className="w-5 h-5 text-emerald-600" />
                     Tarifs
                   </h3>
-                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200">
+                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-200">
                     <div className="flex justify-between items-center">
                       <span className="text-slate-700 font-medium">
                         Consultation
@@ -1862,7 +1862,7 @@ const MedecinProfilePage = () => {
       </div>
 
       {/* Footer */}
-      <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-16 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-sky-600 via-blue-600 to-teal-400 dark:bg-green-900/20 text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent" />
           <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
@@ -1870,7 +1870,7 @@ const MedecinProfilePage = () => {
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full px-6 py-3 mb-6">
-              <Shield className="w-4 h-4 text-blue-400" />
+              <Shield className="w-4 h-4 text-white" />
               <span className="text-sm font-medium">
                 Besoin d'autres médecins ?
               </span>

@@ -746,10 +746,10 @@ const TrouverMedecinPremium = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+      <div className="relative overflow-hidden bg-gradient-to-br from-sky-600 via-blue-600 to-teal-400 dark:bg-green-900/20">
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-cyan-600/20 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-600/20 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-sky-600/20 via-transparent to-transparent" />
           <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
         </div>
 
@@ -766,8 +766,8 @@ const TrouverMedecinPremium = () => {
               transition={{ delay: 0.2 }}
               className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 backdrop-blur-xl border border-blue-400/20 rounded-full px-6 py-3 mb-8"
             >
-              <Sparkles className="w-4 h-4 text-blue-400" />
-              <span className="text-sm font-medium text-blue-200">
+              <Sparkles className="w-4 h-4 text-white" />
+              <span className="text-sm font-medium text-white">
                 Plateforme médicale de confiance
               </span>
               <BadgeCheck className="w-4 h-4 text-cyan-400" />
@@ -783,7 +783,7 @@ const TrouverMedecinPremium = () => {
               </span>
             </h1>
 
-            <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-white mb-12 max-w-2xl mx-auto leading-relaxed">
               Accédez aux meilleurs professionnels de santé certifiés. Prenez
               rendez-vous en ligne, consultation rapide et sécurisée.
             </p>
@@ -811,7 +811,7 @@ const TrouverMedecinPremium = () => {
                     <div className="text-3xl font-bold text-white mb-1">
                       {stat.value}
                     </div>
-                    <div className="text-sm text-slate-400">{stat.label}</div>
+                    <div className="text-sm text-white">{stat.label}</div>
                   </div>
                 </motion.div>
               ))}
@@ -1133,13 +1133,13 @@ const TrouverMedecinPremium = () => {
                       transition={{ delay: index * 0.05 }}
                       className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-200 hover:border-purple-200"
                     >
-                      <div className="relative h-32 bg-gradient-to-br from-purple-500 to-pink-500">
+                      <div className="relative h-32 bg-gradient-to-br from-emerald-500 to-teal-500">
                         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]" />
 
                         {/* Badge type d'établissement */}
                         {clinique.type_etablissement && (
                           <div className="absolute top-4 left-4">
-                            <Badge className="bg-white/90 backdrop-blur-sm text-purple-700 border-0 px-3 py-1">
+                            <Badge className="bg-white/90 backdrop-blur-sm text-blue-700 border-0 px-3 py-1">
                               {clinique.type_etablissement}
                             </Badge>
                           </div>
@@ -1162,8 +1162,27 @@ const TrouverMedecinPremium = () => {
 
                       <div className="p-6">
                         <div className="flex items-start gap-4 mb-4">
-                          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                            <Building2 className="w-8 h-8" />
+                          <div className="relative inline-block mb-4">
+                            <SafeAvatar
+                              src={
+                                clinique.photo_profil
+                                  ? `/assets/images/${clinique.photo_profil}`
+                                  : defaultAvatar
+                              }
+                              alt={`Dr. ${clinique?.prenom || ""} ${
+                                clinique?.nom || ""
+                              }`}
+                              size={96}
+                              initials={`${clinique?.prenom?.charAt(0) ?? ""}${
+                                clinique?.nom?.charAt(0) ?? ""
+                              }`}
+                              className="rounded-2xl border-4 border-white shadow-xl"
+                            />
+                            {clinique.verified && (
+                              <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center border-4 border-white">
+                                <CheckCircle className="w-4 h-4 text-white" />
+                              </div>
+                            )}
                           </div>
                           <div className="flex-1">
                             <h3 className="text-xl font-bold text-slate-900 mb-1">
@@ -1202,7 +1221,7 @@ const TrouverMedecinPremium = () => {
                         <div className="flex gap-3">
                           <Button
                             variant="outline"
-                            className="flex-1 h-11 border-2 border-slate-200 text-slate-700 rounded-xl font-semibold hover:border-purple-500 hover:text-purple-600 hover:bg-purple-50"
+                            className="flex-1 h-11 border-2 border-slate-200 text-slate-700 rounded-xl font-semibold hover:border-emerald-500 hover:text-emerald-600 hover:bg-purple-50"
                             onClick={() =>
                               navigate(`/profil-clinique/${clinique.id}`)
                             }
@@ -1210,7 +1229,7 @@ const TrouverMedecinPremium = () => {
                             Voir profil
                           </Button>
                           <Button
-                            className="flex-1 h-11 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2"
+                            className="flex-1 h-11 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold hover:from-emerald-500  hover:to-to-teal-500 shadow-lg shadow-purple-500/25 flex items-center justify-center gap-2"
                             onClick={() =>
                               navigate(`/profil-clinique/${clinique.id}`)
                             }
@@ -1230,7 +1249,7 @@ const TrouverMedecinPremium = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-24 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-sky-600 via-blue-600 to-teal-400 dark:bg-green-900/20 text-white py-24 relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent" />
           <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
@@ -1244,7 +1263,7 @@ const TrouverMedecinPremium = () => {
             className="max-w-4xl mx-auto text-center"
           >
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full px-6 py-3 mb-8">
-              <Shield className="w-4 h-4 text-blue-400" />
+              <Shield className="w-4 h-4 text-white" />
               <span className="text-sm font-medium">
                 Plateforme 100% sécurisée
               </span>
@@ -1256,7 +1275,7 @@ const TrouverMedecinPremium = () => {
               </span>
             </h2>
 
-            <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-white mb-10 max-w-2xl mx-auto leading-relaxed">
               Rejoignez des milliers de patients satisfaits. Consultation
               rapide, médecins certifiés, rendez-vous en ligne 24/7.
             </p>
@@ -1266,15 +1285,15 @@ const TrouverMedecinPremium = () => {
                 <div className="text-3xl font-bold text-white mb-1">
                   {medecins.length}+
                 </div>
-                <div className="text-sm text-slate-400">Médecins</div>
+                <div className="text-sm text-white">Médecins</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-white mb-1">2K+</div>
-                <div className="text-sm text-slate-400">Consultations</div>
+                <div className="text-sm text-white">Consultations</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-white mb-1">98%</div>
-                <div className="text-sm text-slate-400">Satisfaction</div>
+                <div className="text-sm text-white">Satisfaction</div>
               </div>
             </div>
 

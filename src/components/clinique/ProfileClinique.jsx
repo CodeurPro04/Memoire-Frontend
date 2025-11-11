@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import defaultAvatar from "@/assets/default-avatar.png";
 import {
   Building2,
   MapPin,
@@ -170,7 +171,7 @@ const ProfilClinique = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`px-6 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-3 ${
                 activeTab === tab.id
-                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg"
                   : "text-slate-700 hover:bg-slate-100/50"
               }`}
             >
@@ -278,7 +279,7 @@ const ProfilClinique = () => {
             </div>
           </div>
 
-          {/* Specialités tags */}
+          {/* Specialités tags 
           <div className="flex flex-wrap gap-2 mb-4">
             <Badge
               variant="outline"
@@ -300,7 +301,7 @@ const ProfilClinique = () => {
                 {medecin.specialite}
               </Badge>
             )}
-          </div>
+          </div> */}
 
           {/* CTA Button */}
           <Button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-green-500/25 hover:shadow-green-500/40 transition-all duration-300 group/btn">
@@ -325,10 +326,10 @@ const ProfilClinique = () => {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden"
             >
-              <div className="h-2 bg-gradient-to-r from-purple-500 to-pink-500" />
+              <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
               <div className="p-8">
                 <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-3">
-                  <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
+                  <div className="w-2 h-8 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full" />
                   À propos de {clinique.nom}
                 </h2>
                 <p className="text-slate-700 leading-relaxed mb-6">
@@ -337,7 +338,7 @@ const ProfilClinique = () => {
                 </p>
 
                 <div className="flex flex-wrap gap-3">
-                  <Badge className="bg-purple-100 text-purple-700 border-0 px-4 py-2">
+                  <Badge className="bg-purple-500 text-white border-0 px-4 py-2">
                     <Building2 className="w-4 h-4 mr-2" />
                     {clinique.type_etablissement || "Clinique médicale"}
                   </Badge>
@@ -363,10 +364,10 @@ const ProfilClinique = () => {
               transition={{ delay: 0.1 }}
               className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden"
             >
-              <div className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500" />
+              <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
               <div className="p-8">
                 <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-3">
-                  <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full" />
+                  <div className="w-2 h-8 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full" />
                   Services et Équipements
                 </h2>
                 <div className="grid md:grid-cols-2 gap-6">
@@ -488,10 +489,10 @@ const ProfilClinique = () => {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden"
             >
-              <div className="h-2 bg-gradient-to-r from-amber-500 to-orange-500" />
+              <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
               <div className="p-8">
                 <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
-                  <div className="w-2 h-8 bg-gradient-to-b from-amber-500 to-orange-500 rounded-full" />
+                  <div className="w-2 h-8 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full" />
                   Informations de Contact
                 </h2>
 
@@ -674,7 +675,7 @@ const ProfilClinique = () => {
                         <div className="space-y-3">
                           {clinique.telephone && (
                             <Button
-                              className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 rounded-xl font-semibold shadow-lg shadow-purple-500/25"
+                              className="w-full h-12 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 rounded-xl font-semibold shadow-lg shadow-purple-500/25"
                               onClick={() =>
                                 window.open(`tel:${clinique.telephone}`)
                               }
@@ -687,7 +688,7 @@ const ProfilClinique = () => {
                           {clinique.email && (
                             <Button
                               variant="outline"
-                              className="w-full h-12 border-2 border-slate-200 text-slate-700 hover:border-blue-500 hover:text-blue-600 rounded-xl font-semibold"
+                              className="w-full h-12 border-2 border-slate-200 text-slate-700 hover:from-emerald-500 hover:to-teal-500 rounded-xl font-semibold hover:bg-white/90"
                               onClick={() =>
                                 window.open(`mailto:${clinique.email}`)
                               }
@@ -700,7 +701,7 @@ const ProfilClinique = () => {
                           {clinique.address && (
                             <Button
                               variant="outline"
-                              className="w-full h-12 border-2 border-slate-200 text-slate-700 hover:border-green-500 hover:text-green-600 rounded-xl font-semibold"
+                              className="w-full h-12 border-2 border-slate-200 text-slate-700 hover:from-emerald-500 hover:to-teal-500 rounded-xl font-semibold hover:bg-white/90"
                               onClick={() => {
                                 const address = encodeURIComponent(
                                   clinique.address
@@ -738,7 +739,7 @@ const ProfilClinique = () => {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center p-12 bg-white rounded-2xl shadow-2xl max-w-md"
         >
-          <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center animate-pulse">
+          <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center animate-pulse">
             <Building2 className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">
@@ -771,7 +772,7 @@ const ProfilClinique = () => {
           </p>
           <Button
             onClick={() => navigate("/trouver-medecin")}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
+            className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour à la liste
@@ -784,7 +785,7 @@ const ProfilClinique = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-slate-100">
       {/* Header Premium */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 pt-24 pb-24 mb-12">
+      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-500 pt-24 pb-24 mb-12">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-cyan-600/20 via-transparent to-transparent" />
@@ -815,7 +816,11 @@ const ProfilClinique = () => {
               <div className="w-32 h-32 bg-white rounded-3xl flex items-center justify-center shadow-2xl border-4 border-white">
                 {clinique.photo_profil ? (
                   <img
-                    src={clinique.photo_profil}
+                    src={
+                      clinique.photo_profil
+                        ? `/assets/images/${clinique.photo_profil}`
+                        : defaultAvatar
+                    }
                     alt={clinique.nom}
                     className="w-full h-full object-cover rounded-2xl"
                   />
@@ -833,15 +838,15 @@ const ProfilClinique = () => {
               <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6">
                 <div>
                   <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-4">
-                    <Sparkles className="w-4 h-4 text-cyan-400" />
-                    <span className="text-sm font-medium text-cyan-200">
+                    <Sparkles className="w-4 h-4 text-white" />
+                    <span className="text-sm font-medium text-white">
                       Établissement vérifié
                     </span>
                   </div>
                   <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
                     {clinique.nom}
                   </h1>
-                  <p className="text-2xl text-cyan-300 font-semibold">
+                  <p className="text-2xl text-white font-semibold">
                     {clinique.type_etablissement || "Clinique médicale"}
                   </p>
                 </div>
@@ -873,7 +878,7 @@ const ProfilClinique = () => {
                       {cliniqueStats.totalMedecins}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-300">Médecins</p>
+                  <p className="text-sm text-white">Médecins</p>
                 </div>
 
                 <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
@@ -883,7 +888,7 @@ const ProfilClinique = () => {
                       {cliniqueStats.satisfactionRate}%
                     </span>
                   </div>
-                  <p className="text-sm text-slate-300">Satisfaction</p>
+                  <p className="text-sm text-white">Satisfaction</p>
                 </div>
 
                 <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
@@ -895,7 +900,7 @@ const ProfilClinique = () => {
                         : "Non spécifié"}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-300">Exp. moyenne</p>
+                  <p className="text-sm text-white">Exp. moyenne</p>
                 </div>
 
                 <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4">
@@ -903,7 +908,7 @@ const ProfilClinique = () => {
                     <Shield className="w-5 h-5 text-cyan-400" />
                     <span className="text-2xl font-bold text-white">100%</span>
                   </div>
-                  <p className="text-sm text-slate-300">Certifié</p>
+                  <p className="text-sm text-white">Certifié</p>
                 </div>
               </div>
             </div>

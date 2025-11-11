@@ -209,7 +209,7 @@ const InfoPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100">
       {/* Hero Section Premium */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+      <div className="relative overflow-hidden bg-gradient-to-br from-sky-600 via-blue-600 to-teal-400 dark:bg-green-900/20">
         {/* Animated background */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent" />
@@ -249,8 +249,8 @@ const InfoPage = () => {
               transition={{ delay: 0.2 }}
               className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 backdrop-blur-xl border border-blue-400/20 rounded-full px-6 py-3 mb-8"
             >
-              <Sparkles className="w-4 h-4 text-blue-400" />
-              <span className="text-sm font-medium text-blue-200">
+              <Sparkles className="w-4 h-4 text-white" />
+              <span className="text-sm font-medium text-white">
                 Comment ça marche
               </span>
               <BadgeCheck className="w-4 h-4 text-cyan-400" />
@@ -267,7 +267,7 @@ const InfoPage = () => {
               </span>
             </h1>
 
-            <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-white mb-12 max-w-2xl mx-auto leading-relaxed">
               Découvrez comment notre plateforme révolutionne votre accès aux
               soins médicaux avec une expérience simple et sécurisée.
             </p>
@@ -297,7 +297,7 @@ const InfoPage = () => {
                     <div className="text-3xl font-bold text-white mb-1">
                       {stat.value}
                     </div>
-                    <div className="text-sm text-slate-400">{stat.label}</div>
+                    <div className="text-sm text-white">{stat.label}</div>
                   </div>
                 </motion.div>
               ))}
@@ -492,7 +492,7 @@ const InfoPage = () => {
       </div>
 
       {/* CTA Section Premium */}
-      <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-24 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-sky-600 via-blue-600 to-teal-400 dark:bg-green-900/20 text-white py-24 relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent" />
           <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
@@ -506,7 +506,7 @@ const InfoPage = () => {
             className="max-w-4xl mx-auto text-center"
           >
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full px-6 py-3 mb-8">
-              <Shield className="w-4 h-4 text-blue-400" />
+              <Shield className="w-4 h-4 text-white" />
               <span className="text-sm font-medium">
                 Rejoignez-nous aujourd'hui
               </span>
@@ -518,7 +518,7 @@ const InfoPage = () => {
               </span>
             </h2>
 
-            <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-white mb-10 max-w-2xl mx-auto leading-relaxed">
               Rejoignez les milliers de patients qui simplifient déjà leur
               parcours médical avec notre plateforme.
             </p>
@@ -530,7 +530,7 @@ const InfoPage = () => {
                   <div className="text-3xl font-bold text-white mb-1">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-slate-400">{stat.label}</div>
+                  <div className="text-sm text-white">{stat.label}</div>
                 </div>
               ))}
             </div>

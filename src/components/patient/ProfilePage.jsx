@@ -46,7 +46,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 import defaultAvatar from "@/assets/default-avatar.png";
 import { useNavigate } from "react-router-dom";
 import {
@@ -114,6 +114,7 @@ const StatCard = ({ icon: Icon, value, label, gradientFrom, gradientTo }) => (
 
 const ChangePasswordDialog = ({ open, onOpenChange, onPasswordChange }) => {
   const [currentPassword, setCurrentPassword] = useState("");
+  const { toast } = useToast();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -125,12 +126,20 @@ const ChangePasswordDialog = ({ open, onOpenChange, onPasswordChange }) => {
     e.preventDefault();
 
     if (newPassword !== confirmPassword) {
-      toast.error("Les mots de passe ne correspondent pas");
+      toast({
+        title: "Erreur",
+        description: "Les mots de passe ne correspondent pas",
+        variant: "destructive",
+      });
       return;
     }
 
     if (newPassword.length < 6) {
-      toast.error("Le mot de passe doit contenir au moins 6 caractères");
+      toast({
+        title: "Erreur",
+        description: "Le mot de passe doit contenir au moins 6 caractères",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -143,7 +152,11 @@ const ChangePasswordDialog = ({ open, onOpenChange, onPasswordChange }) => {
       setConfirmPassword("");
 
       onOpenChange(false);
-      toast.success("Mot de passe modifié avec succès");
+      toast({
+        title: "Succès",
+        description: "Mot de passe modifié avec succès",
+        variant: "default",
+      });
     } catch (error) {
       // L'erreur est gérée dans le composant parent
     } finally {
@@ -364,6 +377,7 @@ const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
   const [confirmText, setConfirmText] = useState("");
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
+  const { toast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -374,9 +388,11 @@ const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
     }
 
     if (confirmText !== "SUPPRIMER MON COMPTE") {
-      toast.error(
-        "Veuillez taper exactement 'SUPPRIMER MON COMPTE' pour confirmer"
-      );
+      toast({
+        title: "Erreur",
+        description: "Veuillez taper exactement 'SUPPRIMER MON COMPTE' pour confirmer",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -623,6 +639,8 @@ const ProfilPatient = () => {
   const [cancellingAppointment, setCancellingAppointment] = useState(null);
   const [saving, setSaving] = useState(false);
   const [showVih, setShowVih] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const { toast } = useToast();
 
   // États pour les modales
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
@@ -680,7 +698,6 @@ const ProfilPatient = () => {
     try {
       setLoading(true);
 
-      // Charger toutes les données en parallèle
       const [profileRes, appointmentsRes, favoritesRes] = await Promise.all([
         api.get("/patient/profile"),
         api.get("/patient/appointments"),
@@ -693,11 +710,15 @@ const ProfilPatient = () => {
       setFavorites(favoritesRes.data);
     } catch (error) {
       console.error("Erreur chargement des données :", error);
-      toast.error("Erreur lors du chargement des données");
+      toast({
+        title: "Erreur",
+        description: "Erreur lors du chargement des données",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
-  }, [role]);
+  }, [role, toast]);
 
   // Chargement initial
   useEffect(() => {
@@ -722,11 +743,15 @@ const ProfilPatient = () => {
       setAppointments(response.data);
     } catch (error) {
       console.error("Erreur lors du chargement des rendez-vous:", error);
-      toast.error("Erreur lors du chargement des rendez-vous");
+      toast({
+        title: "Erreur",
+        description: "Erreur lors du chargement des rendez-vous",
+        variant: "destructive",
+      });
     } finally {
       setLoadingAppointments(false);
     }
-  }, []);
+  }, [toast]);
 
   const fetchFavorites = useCallback(async () => {
     try {
@@ -735,11 +760,15 @@ const ProfilPatient = () => {
       setFavorites(response.data);
     } catch (error) {
       console.error("Erreur lors du chargement des favoris:", error);
-      toast.error("Erreur lors du chargement des favoris");
+      toast({
+        title: "Erreur",
+        description: "Erreur lors du chargement des favoris",
+        variant: "destructive",
+      });
     } finally {
       setLoadingFavorites(false);
     }
-  }, []);
+  }, [toast]);
 
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
@@ -749,84 +778,232 @@ const ProfilPatient = () => {
   const handleSave = useCallback(async () => {
     try {
       setSaving(true);
-      const res = await api.put("/patient/profile", formData);
+      
+      // Préparer les données pour l'envoi
+      const dataToSend = {
+        nom: formData.nom || "",
+        prenom: formData.prenom || "",
+        email: formData.email || "",
+        telephone: formData.telephone || "",
+        address: formData.address || "",
+        groupe_sanguin: formData.groupe_sanguin || "",
+        serologie_vih: formData.serologie_vih || "",
+        antecedents_medicaux: formData.antecedents_medicaux || "",
+        allergies: formData.allergies || "",
+        traitements_chroniques: formData.traitements_chroniques || "",
+      };
 
-      // Mise à jour IMMÉDIATE de toutes les données
-      setPatient(res.data);
-      setFormData(res.data);
+      console.log("📤 Données envoyées:", dataToSend);
 
+      const response = await api.put("/patient/profile", dataToSend);
+
+      console.log("✅ Réponse du serveur:", response.data);
+
+      setPatient(response.data);
+      setFormData(response.data);
       setEditMode(false);
-      toast.success("Profil mis à jour avec succès !");
 
-      // Recharger les données pour s'assurer que tout est synchronisé
+      toast({
+        title: "Succès",
+        description: "Profil mis à jour avec succès !",
+        variant: "default",
+      });
+
+      // Recharger les données
       await fetchAllData();
     } catch (error) {
-      toast.error("Erreur lors de la mise à jour du profil");
-      console.error(error);
+      console.error("❌ Erreur lors de la mise à jour:", error);
+      
+      let errorMessage = "Erreur lors de la mise à jour du profil";
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.errors) {
+        // Gestion des erreurs de validation Laravel
+        const errors = error.response.data.errors;
+        errorMessage = Object.values(errors).flat().join(', ');
+      } else if (error.response?.status === 422) {
+        errorMessage = "Données invalides. Veuillez vérifier les informations saisies.";
+      }
+
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
-  }, [formData, fetchAllData]);
+  }, [formData, fetchAllData, toast]);
 
-  const handleImageUpload = useCallback((e) => {
+  const handleImageUpload = useCallback(async (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const newPhoto = reader.result;
-        // Mise à jour IMMÉDIATE de l'image
-        setFormData((prev) => ({ ...prev, photo: newPhoto }));
-        setPatient((prev) => (prev ? { ...prev, photo: newPhoto } : null));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Vérification côté frontend : max 5 Mo
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Erreur",
+        description: "L'image doit faire moins de 5 Mo",
+        variant: "destructive",
+      });
+      return;
     }
-  }, []);
+
+    try {
+      setUploadingPhoto(true);
+
+      const formDataUpload = new FormData();
+      formDataUpload.append("photo_profil", file);
+
+      const response = await api.post(
+        "/patient/profile/photo",
+        formDataUpload,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
+      const newPhotoUrl = response.data.photo_url;
+      const newPhotoPath = response.data.photo_profil;
+
+      // Mise à jour des états
+      setPatient((prev) => ({
+        ...prev,
+        photo_profil: newPhotoPath,
+        photo_url: newPhotoUrl,
+      }));
+
+      setFormData((prev) => ({
+        ...prev,
+        photo_profil: newPhotoPath,
+      }));
+
+      toast({
+        title: "Succès",
+        description: "Photo de profil mise à jour avec succès !",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Erreur upload photo:", error);
+
+      // Gestion précise des erreurs backend Laravel
+      if (error.response?.status === 422) {
+        const msg =
+          error.response?.data?.message ||
+          "Le fichier est invalide ou trop volumineux.";
+        toast({
+          title: "Erreur",
+          description: msg,
+          variant: "destructive",
+        });
+      } else if (error.response?.status === 413) {
+        toast({
+          title: "Erreur",
+          description:
+            "Le fichier dépasse la taille maximale autorisée (5 Mo).",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Erreur lors du téléchargement de la photo.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }, [toast]);
 
   const triggerFileInput = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
 
-  // Fonction pour retirer un médecin des favoris
-  const removeFromFavorites = useCallback(async (medecinId) => {
-    try {
-      await api.delete(`/favorites/${medecinId}`);
-      // Mise à jour IMMÉDIATE de l'état local
-      setFavorites((prev) =>
-        prev.filter((medecin) => medecin.id !== medecinId)
-      );
-      toast.success("Médecin retiré des favoris");
-    } catch (error) {
-      console.error("Erreur lors de la suppression du favori:", error);
-      toast.error("Erreur lors de la suppression du favori");
+  // Fonction utilitaire pour construire l'URL de l'image
+  const getImageUrl = useCallback((photoProfil, photoUrl) => {
+    // Si l'API retourne une URL complète (photo_url), l'utiliser en priorité
+    if (photoUrl) {
+      return photoUrl;
     }
+
+    // Si on a un chemin en base (photos/patients/xxx.jpg)
+    if (photoProfil) {
+      // Construire l'URL complète vers le fichier dans ASSETS/IMAGES
+      const baseUrl = "http://localhost:8000";
+      const fullUrl = `${baseUrl}/assets/images/${photoProfil}`;
+      return fullUrl;
+    }
+
+    // Fallback vers l'avatar par défaut
+    return defaultAvatar;
   }, []);
+
+  // Fonction pour retirer un médecin des favoris
+  const removeFromFavorites = useCallback(
+    async (medecinId) => {
+      try {
+        await api.delete(`/favorites/${medecinId}`);
+        setFavorites((prev) =>
+          prev.filter((medecin) => medecin.id !== medecinId)
+        );
+        toast({
+          title: "Succès",
+          description: "Médecin retiré des favoris",
+          variant: "default",
+        });
+      } catch (error) {
+        console.error("Erreur lors de la suppression du favori:", error);
+        toast({
+          title: "Erreur",
+          description: "Erreur lors de la suppression du favori",
+          variant: "destructive",
+        });
+      }
+    },
+    [toast]
+  );
 
   // Fonction pour annuler un rendez-vous
-  const cancelAppointment = useCallback(async (appointment) => {
-    if (!appointment.can_cancel) {
-      toast.error("Impossible d'annuler ce rendez-vous");
-      return;
-    }
+  const cancelAppointment = useCallback(
+    async (appointment) => {
+      if (!appointment.can_cancel) {
+        toast({
+          title: "Erreur",
+          description: "Impossible d'annuler ce rendez-vous",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    setCancellingAppointment(appointment.id);
+      setCancellingAppointment(appointment.id);
 
-    try {
-      await api.delete(`/appointments/${appointment.id}/cancel`);
-      toast.success("Rendez-vous annulé avec succès");
-      // Mise à jour IMMÉDIATE de l'état local
-      setAppointments((prev) =>
-        prev.filter((app) => app.id !== appointment.id)
-      );
-    } catch (error) {
-      console.error("Erreur lors de l'annulation du rendez-vous:", error);
-      const errorMessage =
-        error.response?.data?.error ||
-        "Erreur lors de l'annulation du rendez-vous";
-      toast.error(errorMessage);
-    } finally {
-      setCancellingAppointment(null);
-    }
-  }, []);
+      try {
+        await api.delete(`/appointments/${appointment.id}/cancel`);
+        toast({
+          title: "Succès",
+          description: "Rendez-vous annulé avec succès",
+          variant: "default",
+        });
+        setAppointments((prev) =>
+          prev.filter((app) => app.id !== appointment.id)
+        );
+      } catch (error) {
+        console.error("Erreur lors de l'annulation du rendez-vous:", error);
+        const errorMessage =
+          error.response?.data?.error ||
+          "Erreur lors de l'annulation du rendez-vous";
+        toast({
+          title: "Erreur",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } finally {
+        setCancellingAppointment(null);
+      }
+    },
+    [toast]
+  );
 
   // Gestionnaire pour changer le mot de passe
   const handlePasswordChange = useCallback(
@@ -838,18 +1015,26 @@ const ProfilPatient = () => {
           new_password_confirmation: newPassword,
         });
 
-        toast.success("Mot de passe modifié avec succès");
+        toast({
+          title: "Succès",
+          description: "Mot de passe modifié avec succès",
+          variant: "default",
+        });
         return true;
       } catch (error) {
         console.error("Erreur modification mot de passe:", error);
         const errorMessage =
           error.response?.data?.message ||
           "Erreur lors de la modification du mot de passe";
-        toast.error(errorMessage);
+        toast({
+          title: "Erreur",
+          description: errorMessage,
+          variant: "destructive",
+        });
         throw error;
       }
     },
-    []
+    [toast]
   );
 
   // Gestionnaire pour supprimer le compte
@@ -857,7 +1042,11 @@ const ProfilPatient = () => {
     try {
       await api.delete("/patient/profile");
 
-      toast.success("Compte supprimé avec succès");
+      toast({
+        title: "Succès",
+        description: "Compte supprimé avec succès",
+        variant: "default",
+      });
       window.location.href = "/";
       return true;
     } catch (error) {
@@ -865,10 +1054,14 @@ const ProfilPatient = () => {
       const errorMessage =
         error.response?.data?.message ||
         "Erreur lors de la suppression du compte";
-      toast.error(errorMessage);
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
       throw error;
     }
-  }, []);
+  }, [toast]);
 
   // Calcul des statistiques (memoïsé)
   const appointmentStats = useMemo(
@@ -942,21 +1135,20 @@ const ProfilPatient = () => {
               <div className="absolute -inset-1 bg-gradient-to-r from-sky-600 via-blue-600 to-teal-400 rounded-full blur opacity-75 group-hover:opacity-100 transition"></div>
               <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white/50 shadow-2xl backdrop-blur-xl bg-white/10">
                 <img
-                  src={formData.photo || patient.photo || defaultAvatar}
-                  alt={`${patient.prenom} ${patient.nom}`}
+                  src={getImageUrl(patient.photo_profil, patient.photo_url)}
+                  alt={`Photo de profil de ${patient.prenom} ${patient.nom}`}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.currentTarget.src = defaultAvatar;
                   }}
                 />
-                {!formData.photo && !patient.photo && (
+                {!patient.photo_profil && (
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-4xl font-bold flex items-center justify-center">
                     {patient.prenom?.charAt(0)}
                     {patient.nom?.charAt(0)}
                   </div>
                 )}
               </div>
-
               {editMode && (
                 <>
                   <input
@@ -965,12 +1157,18 @@ const ProfilPatient = () => {
                     onChange={handleImageUpload}
                     accept="image/*"
                     className="hidden"
+                    disabled={uploadingPhoto}
                   />
                   <button
                     onClick={triggerFileInput}
-                    className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 bg-black/60 flex items-center justify-center transition-opacity rounded-full cursor-pointer"
+                    disabled={uploadingPhoto}
+                    className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 bg-black/60 flex items-center justify-center transition-opacity rounded-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Upload className="w-8 h-8 text-white" />
+                    {uploadingPhoto ? (
+                      <Loader2 className="w-8 h-8 text-white animate-spin" />
+                    ) : (
+                      <Upload className="w-8 h-8 text-white" />
+                    )}
                   </button>
                 </>
               )}
@@ -1135,6 +1333,50 @@ const ProfilPatient = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 pt-6">
+                  {/* Nom */}
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                      Nom
+                    </label>
+                    {editMode ? (
+                      <Input
+                        name="nom"
+                        value={formData.nom || ""}
+                        onChange={handleChange}
+                        className="border-slate-300"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                        <User className="w-5 h-5 text-blue-500" />
+                        <span className="text-slate-700 break-all">
+                          {patient.nom}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Prénom */}
+                  <div className="flex flex-col">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                      Prénom
+                    </label>
+                    {editMode ? (
+                      <Input
+                        name="prenom"
+                        value={formData.prenom || ""}
+                        onChange={handleChange}
+                        className="border-slate-300"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                        <User className="w-5 h-5 text-blue-500" />
+                        <span className="text-slate-700 break-all">
+                          {patient.prenom}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Email */}
                   <div className="flex flex-col">
                     <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
@@ -1571,7 +1813,7 @@ const ProfilPatient = () => {
                   {favorites.map((medecin) => (
                     <div
                       key={medecin.id}
-                      className="bg-white rounded-2xl border border-slate-200 hover:border-amber-200 transition-all duration-300 overflow-hidden group"
+                      className="bg-white rounded-2xl border border-slate-200 transition-all duration-300 overflow-hidden group"
                     >
                       <div className="p-6">
                         <div className="flex items-start justify-between mb-4">
@@ -1579,9 +1821,19 @@ const ProfilPatient = () => {
                             <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-lg">
                               {medecin.photo_profil ? (
                                 <img
-                                  src={medecin.photo_profil}
-                                  alt={`Dr. ${medecin.prenom} ${medecin.nom}`}
-                                  className="w-full h-full rounded-xl object-cover"
+                                  src={
+                                    medecin.photo_profil
+                                      ? `/assets/images/${medecin.photo_profil}`
+                                      : defaultAvatar
+                                  }
+                                  alt={`Dr. ${medecin?.prenom || ""} ${
+                                    medecin?.nom || ""
+                                  }`}
+                                  size={96}
+                                  initials={`${
+                                    medecin?.prenom?.charAt(0) ?? ""
+                                  }${medecin?.nom?.charAt(0) ?? ""}`}
+                                  className="rounded-2xl border-4 border-white shadow-xl"
                                 />
                               ) : (
                                 `${medecin.prenom?.charAt(
@@ -1629,32 +1881,24 @@ const ProfilPatient = () => {
                             </div>
                           )}
                         </div>
-
-                        {medecin.consultation_price && (
-                          <div className="flex items-center justify-between bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl p-3 mb-4">
-                            <span className="text-slate-600 text-sm font-medium">
-                              Consultation
-                            </span>
-                            <span className="text-lg font-bold text-slate-900">
-                              {medecin.consultation_price.toLocaleString()} FCFA
-                            </span>
-                          </div>
-                        )}
-
-                        <div className="flex gap-2">
+                                                <div className="flex gap-2">
                           <Button
-                            variant="outline"
-                            className="flex-1 border-slate-300 text-slate-700 hover:border-blue-500 hover:text-blue-600"
+                            size="sm"
+                            className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
                             onClick={() =>
-                              navigate(`/profil-medecin/${medecin.id}`)
+                              navigate(`/medecin/${medecin.id}`)
                             }
                           >
                             Voir profil
                           </Button>
                           <Button
-                            className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 border-blue-300 text-blue-600 hover:bg-blue-50"
                             onClick={() =>
-                              navigate(`/profil-medecin/${medecin.id}`)
+                              navigate("/prendre-rendezvous", {
+                                state: { medecinId: medecin.id },
+                              })
                             }
                           >
                             Prendre RDV
@@ -1670,56 +1914,93 @@ const ProfilPatient = () => {
         )}
 
         {activeTab === "parametres" && (
-          <Card className="glass-card border-0 shadow-xl">
-            <CardHeader className="border-b border-slate-200/50">
-              <CardTitle className="flex items-center gap-3 text-slate-800">
-                <div className="w-10 h-10 bg-gradient-to-br from-slate-500 to-slate-700 rounded-xl flex items-center justify-center">
-                  <Settings className="w-5 h-5 text-white" />
-                </div>
-                Paramètres du compte
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-6">
-                <div className="p-6 bg-blue-50 border-2 border-blue-200 rounded-2xl">
-                  <h3 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-blue-600" />
-                    Sécurité et confidentialité
-                  </h3>
-                  <p className="text-slate-600 text-sm mb-4">
-                    Gérez vos paramètres de sécurité et de confidentialité
-                  </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Sécurité */}
+            <Card className="glass-card border-0 shadow-xl">
+              <CardHeader className="border-b border-slate-200/50">
+                <CardTitle className="flex items-center gap-3 text-slate-800">
+                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                    <ShieldCheck className="w-5 h-5 text-white" />
+                  </div>
+                  Sécurité du compte
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-4">
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <Key className="w-5 h-5 text-blue-500" />
+                    <div>
+                      <p className="font-medium text-slate-800">
+                        Mot de passe
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        Dernière modification il y a 3 mois
+                      </p>
+                    </div>
+                  </div>
                   <Button
                     onClick={() => setChangePasswordOpen(true)}
-                    className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
+                    variant="outline"
+                    size="sm"
                   >
-                    <Key className="w-4 h-4 mr-2" />
-                    Modifier le mot de passe
+                    Modifier
                   </Button>
                 </div>
-                {/* Zone de danger 
-                <div className="p-6 bg-red-50 border-2 border-red-200 rounded-2xl">
-                  <h3 className="font-semibold text-slate-800 mb-2 flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5 text-red-600" />
-                    Zone de danger
-                  </h3>
-                  <p className="text-slate-600 text-sm mb-4">
-                    Actions irréversibles concernant votre compte
-                  </p>
-                  <div className="space-y-3">
-                    <Button
-                      onClick={() => setDeleteAccountOpen(true)}
-                      variant="outline"
-                      className="border-red-300 text-red-600 hover:bg-red-100 hover:text-red-700 w-full justify-start"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Supprimer définitivement le compte
-                    </Button>
+
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-5 h-5 text-amber-500" />
+                    <div>
+                      <p className="font-medium text-slate-800">
+                        Adresse email
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        {patient.email}
+                      </p>
+                    </div>
                   </div>
-                </div> */}
-              </div>
-            </CardContent>
-          </Card>
+                  <Badge variant="outline" className="text-green-600 border-green-300">
+                    Vérifiée
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Actions critiques */}
+            <Card className="glass-card border-0 shadow-xl">
+              <CardHeader className="border-b border-slate-200/50">
+                <CardTitle className="flex items-center gap-3 text-slate-800">
+                  <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-white" />
+                  </div>
+                  Actions critiques
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-4">
+                <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <Trash2 className="w-5 h-5 text-red-500 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-medium text-red-900 mb-2">
+                        Supprimer le compte
+                      </p>
+                      <p className="text-sm text-red-700 mb-3">
+                        Cette action est irréversible. Toutes vos données seront définitivement supprimées.
+                      </p>
+                      <Button
+                        onClick={() => setDeleteAccountOpen(true)}
+                        variant="destructive"
+                        size="sm"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Supprimer mon compte
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
 
