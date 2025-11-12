@@ -631,11 +631,14 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
     const birth = new Date(birthDate);
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
       age--;
     }
-    
+
     return `${age} ans`;
   };
 
@@ -645,7 +648,7 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
     return new Date(birthDate).toLocaleDateString("fr-FR", {
       day: "numeric",
       month: "long",
-      year: "numeric"
+      year: "numeric",
     });
   };
 
@@ -658,42 +661,55 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
         <div className="flex-1">
           <div className="flex items-start gap-4 mb-4">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-              {appointment.patient_prenom?.charAt(0) || appointment.patient_nom?.charAt(0) || "P"}
+              {appointment.patient_prenom?.charAt(0) ||
+                appointment.patient_nom?.charAt(0) ||
+                "P"}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <h3 className="font-bold text-slate-800 text-xl">
-                  {appointment.patient_prenom || "Prénom"} {appointment.patient_nom || "Nom"}
+                  {appointment.patient_prenom || "Prénom"}{" "}
+                  {appointment.patient_nom || "Nom"}
                 </h3>
                 <Badge className={config.badge}>
                   <StatusIcon className="w-3 h-3 mr-1" />
                   {config.label}
                 </Badge>
               </div>
-              
+
               {/* Informations de base du patient */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mb-4">
                 <div className="flex items-center gap-2 text-slate-600">
                   <User className="w-4 h-4 text-blue-500" />
-                  <span>Sérologie: {appointment.patient_serologie_vih || "Non renseigné"}</span>
+                  <span>
+                    Sérologie:{" "}
+                    {appointment.patient_serologie_vih || "Non renseigné"}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-600">
                   <Mail className="w-4 h-4 text-amber-500" />
-                  <span className="truncate">{appointment.patient_email || "Email non renseigné"}</span>
+                  <span className="truncate">
+                    {appointment.patient_email || "Email non renseigné"}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-600">
                   <Phone className="w-4 h-4 text-green-500" />
-                  <span>{appointment.patient_telephone || "Tél. non renseigné"}</span>
+                  <span>
+                    {appointment.patient_telephone || "Tél. non renseigné"}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-600">
                   <Droplet className="w-4 h-4 text-red-500" />
-                  <span>Groupe: {appointment.patient_groupe_sanguin || "Non renseigné"}</span>
+                  <span>
+                    Groupe:{" "}
+                    {appointment.patient_groupe_sanguin || "Non renseigné"}
+                  </span>
                 </div>
               </div>
 
               {/* Informations médicales importantes */}
-              {(appointment.patient_antecedents_medicaux || 
-                appointment.patient_allergies || 
+              {(appointment.patient_antecedents_medicaux ||
+                appointment.patient_allergies ||
                 appointment.patient_traitements_chroniques) && (
                 <div className="bg-white/50 rounded-xl p-4 border border-slate-200/80 mb-4">
                   <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
@@ -705,8 +721,12 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
                       <div className="flex items-start gap-2">
                         <Activity className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
                         <div>
-                          <span className="font-medium text-slate-700">Antécédents:</span>
-                          <p className="text-slate-600">{appointment.patient_antecedents_medicaux}</p>
+                          <span className="font-medium text-slate-700">
+                            Antécédents:
+                          </span>
+                          <p className="text-slate-600">
+                            {appointment.patient_antecedents_medicaux}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -714,8 +734,12 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
                       <div className="flex items-start gap-2">
                         <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
                         <div>
-                          <span className="font-medium text-slate-700">Allergies:</span>
-                          <p className="text-slate-600">{appointment.patient_allergies}</p>
+                          <span className="font-medium text-slate-700">
+                            Allergies:
+                          </span>
+                          <p className="text-slate-600">
+                            {appointment.patient_allergies}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -723,8 +747,12 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
                       <div className="flex items-start gap-2">
                         <Stethoscope className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                         <div>
-                          <span className="font-medium text-slate-700">Traitements:</span>
-                          <p className="text-slate-600">{appointment.patient_traitements_chroniques}</p>
+                          <span className="font-medium text-slate-700">
+                            Traitements:
+                          </span>
+                          <p className="text-slate-600">
+                            {appointment.patient_traitements_chroniques}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -761,7 +789,9 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
               </div>
               <div className="flex items-center gap-2 text-slate-600">
                 <MapPin className="w-4 h-4 text-red-500" />
-                <span>{appointment.patient_address || "Adresse non renseignée"}</span>
+                <span>
+                  {appointment.patient_address || "Adresse non renseignée"}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-slate-600">
                 <Stethoscope className="w-4 h-4 text-cyan-500" />
@@ -794,10 +824,10 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
           {appointment.status !== "en_attente" && (
             <div className="text-center p-3 bg-white/50 rounded-xl border border-slate-200/80">
               <p className="text-sm text-slate-600">
-                RDV {appointment.status === "confirmé" ? "confirmé" : "refusé"} le{" "}
-                {appointment.updated_at && 
-                  new Date(appointment.updated_at).toLocaleDateString("fr-FR")
-                }
+                RDV {appointment.status === "confirmé" ? "confirmé" : "refusé"}{" "}
+                le{" "}
+                {appointment.updated_at &&
+                  new Date(appointment.updated_at).toLocaleDateString("fr-FR")}
               </p>
             </div>
           )}
@@ -1424,6 +1454,8 @@ const ProfilMedecin = () => {
   }, [workingHours]);
 
   // Chargement des données
+  // Dans votre composant ProfilMedecin, ligne ~130
+
   const fetchAllData = useCallback(async () => {
     if (role !== "medecin") return;
 
@@ -1456,7 +1488,6 @@ const ProfilMedecin = () => {
         photo_profil: profil.photo_profil || "",
       });
 
-      // Initialiser les horaires de travail
       if (
         profil.working_hours &&
         Array.isArray(profil.working_hours) &&
@@ -1468,11 +1499,17 @@ const ProfilMedecin = () => {
       setAppointments(rdvsResponse.data);
     } catch (err) {
       console.error("Erreur chargement données :", err);
-      toast.error("Erreur lors du chargement du profil");
+
+      toast({
+        title: "Erreur",
+        description:
+          err.response?.data?.message || "Erreur lors du chargement du profil",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
-  }, [role]);
+  }, [role, toast]);
 
   const fetchReviews = useCallback(async () => {
     if (!medecin?.id) return;
