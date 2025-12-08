@@ -1422,7 +1422,7 @@ const ProfilPatient = () => {
                   </div>
 
                   {/* Groupe sanguin */}
-                  <div className="flex flex-col">
+                  <div className="flex flex-col md:col-span-2">
                     <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
                       Groupe sanguin
                     </label>
@@ -1454,7 +1454,7 @@ const ProfilPatient = () => {
                     )}
                   </div>
 
-                  {/* Sérologie VIH (masquable) */}
+                  {/* Sérologie VIH (masquable)
                   <div className="flex flex-col">
                     <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
                       Sérologie VIH
@@ -1494,7 +1494,7 @@ const ProfilPatient = () => {
                         </button>
                       </div>
                     )}
-                  </div>
+                  </div> */}
 
                   {/* Antécédents médicaux */}
                   <div className="flex flex-col md:col-span-2">

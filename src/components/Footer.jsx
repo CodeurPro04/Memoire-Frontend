@@ -217,7 +217,7 @@ const FooterPremium = () => {
             <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
               <div className="text-center lg:text-left">
                 <p className="text-sm text-slate-500 flex items-center justify-center lg:justify-start gap-2">
-                  © {currentYear} Meetmed.
+                  © {currentYear} Meetmed. by <a href="https://w-technologie.com/">W.Tech</a>
                   <div className="flex items-center gap-6 text-sm">
                     <span className="text-slate-500">Tous droits réservés</span>
                   </div>

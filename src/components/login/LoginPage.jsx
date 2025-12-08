@@ -1083,6 +1083,7 @@ const UnifiedAuthPage = () => {
                             <option value="O-">O-</option>
                           </select>
                         </div>
+                        {/*
                         <div>
                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Sérologie VIH
@@ -1102,7 +1103,7 @@ const UnifiedAuthPage = () => {
                             <option value="positif">Positif</option>
                             <option value="inconnu">Inconnu</option>
                           </select>
-                        </div>
+                        </div> */}
                       </div>
 
                       <div className="mt-3 space-y-3">

@@ -69,6 +69,9 @@ import {
   Moon,
   ShieldOff,
   Activity,
+  Share2,
+  Pill,
+  ClipboardList,
 } from "lucide-react";
 
 // ============ COMPOSANTS RÉUTILISABLES ============
@@ -591,9 +594,145 @@ const WorkingHoursManager = React.memo(
 
 WorkingHoursManager.displayName = "WorkingHoursManager";
 
+// ============ MODALES POUR LES ACTIONS MÉDICALES ============
+
+const ShareMedicalRecordDialog = ({ 
+  open, 
+  onOpenChange, 
+  appointment, 
+  onShare 
+}) => {
+  const [selectedDoctor, setSelectedDoctor] = useState('');
+  const [shareReason, setShareReason] = useState('');
+  const [doctorsList, setDoctorsList] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      fetchDoctors();
+    }
+  }, [open]);
+
+  const fetchDoctors = async () => {
+    try {
+      const response = await api.get('/api/medecins');
+      setDoctorsList(response.data);
+    } catch (error) {
+      console.error('Erreur chargement médecins:', error);
+      toast.error('Erreur lors du chargement de la liste des médecins');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedDoctor) {
+      toast.error('Veuillez sélectionner un médecin');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await onShare(appointment.id, selectedDoctor, shareReason);
+      onOpenChange(false);
+      setSelectedDoctor('');
+      setShareReason('');
+    } catch (error) {
+      // L'erreur est gérée dans la fonction parente
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Share2 className="w-5 h-5" />
+            Partager le dossier médical
+          </DialogTitle>
+          <DialogDescription>
+            Partagez le dossier médical de {appointment?.patient_prenom} {appointment?.patient_nom} avec un autre médecin.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">
+              Sélectionner un médecin
+            </label>
+            <select 
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={selectedDoctor}
+              onChange={(e) => setSelectedDoctor(e.target.value)}
+              required
+            >
+              <option value="">Choisir un médecin</option>
+              {doctorsList.map(doctor => (
+                <option key={doctor.id} value={doctor.id}>
+                  Dr. {doctor.prenom} {doctor.nom} - {doctor.specialite}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">
+              Motif du partage
+            </label>
+            <textarea 
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 h-20"
+              placeholder="Ex: Consultation spécialisée, avis médical, suivi de traitement..."
+              value={shareReason}
+              onChange={(e) => setShareReason(e.target.value)}
+              required
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={loading}
+            >
+              Annuler
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading || !selectedDoctor}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Partage...
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Partager
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 // ============ COMPOSANT CARTE DE RENDEZ-VOUS ============
 
-const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
+const AppointmentCard = React.memo(({ 
+  appointment, 
+  onConfirm, 
+  onReject,
+  onPrescription,
+  onSickLeave,
+  onShareMedicalRecord,
+  onViewMedicalRecord 
+}) => {
   const statusConfig = useMemo(
     () => ({
       en_attente: {
@@ -624,33 +763,8 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
   const config = statusConfig[appointment.status] || statusConfig["en_attente"];
   const StatusIcon = config.icon;
 
-  // Fonction pour calculer l'âge
-  const calculateAge = (birthDate) => {
-    if (!birthDate) return "Non renseigné";
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birth.getDate())
-    ) {
-      age--;
-    }
-
-    return `${age} ans`;
-  };
-
-  // Fonction pour formater la date de naissance
-  const formatBirthDate = (birthDate) => {
-    if (!birthDate) return "Non renseignée";
-    return new Date(birthDate).toLocaleDateString("fr-FR", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
+  // États pour les modales
+  const [showShareModal, setShowShareModal] = useState(false);
 
   return (
     <div
@@ -679,13 +793,6 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
 
               {/* Informations de base du patient */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mb-4">
-                <div className="flex items-center gap-2 text-slate-600">
-                  <User className="w-4 h-4 text-blue-500" />
-                  <span>
-                    Sérologie:{" "}
-                    {appointment.patient_serologie_vih || "Non renseigné"}
-                  </span>
-                </div>
                 <div className="flex items-center gap-2 text-slate-600">
                   <Mail className="w-4 h-4 text-amber-500" />
                   <span className="truncate">
@@ -788,19 +895,13 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
                 <span>{appointment.time}</span>
               </div>
               <div className="flex items-center gap-2 text-slate-600">
-                <MapPin className="w-4 h-4 text-red-500" />
-                <span>
-                  {appointment.patient_address || "Adresse non renseignée"}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-600">
                 <Stethoscope className="w-4 h-4 text-cyan-500" />
                 <span>Type: {appointment.consultation_type}</span>
               </div>
             </div>
           </div>
 
-          {/* Actions */}
+          {/* Actions pour RDV en attente */}
           {appointment.status === "en_attente" && (
             <div className="space-y-2">
               <Button
@@ -820,12 +921,55 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
             </div>
           )}
 
-          {/* Statut pour RDV confirmés/refusés */}
-          {appointment.status !== "en_attente" && (
+          {/* Actions médicales pour RDV confirmés */}
+          {appointment.status === "confirmé" && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                {/* Émission d'ordonnance */}
+                <Button
+                  onClick={() => onPrescription(appointment)}
+                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 h-12"
+                >
+                  <Pill className="w-4 h-4 mr-1" />
+                  Ordonnance
+                </Button>
+
+                {/* Arrêt maladie */}
+                <Button
+                  onClick={() => onSickLeave(appointment)}
+                  className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 h-12"
+                >
+                  <ClipboardList className="w-4 h-4 mr-1" />
+                  Arrêt maladie
+                </Button>
+              </div>
+
+              {/* Partage dossier médical */}
+              <Button
+                onClick={() => setShowShareModal(true)}
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 h-12"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Partager dossier
+              </Button>
+
+              {/* Voir dossier complet */}
+              <Button
+                onClick={() => onViewMedicalRecord(appointment)}
+                variant="outline"
+                className="w-full border-slate-300 hover:bg-slate-50 text-slate-700 transition-all duration-300 h-10"
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Voir dossier complet
+              </Button>
+            </div>
+          )}
+
+          {/* Statut pour RDV refusés */}
+          {appointment.status === "refusé" && (
             <div className="text-center p-3 bg-white/50 rounded-xl border border-slate-200/80">
               <p className="text-sm text-slate-600">
-                RDV {appointment.status === "confirmé" ? "confirmé" : "refusé"}{" "}
-                le{" "}
+                RDV refusé le{" "}
                 {appointment.updated_at &&
                   new Date(appointment.updated_at).toLocaleDateString("fr-FR")}
               </p>
@@ -833,6 +977,14 @@ const AppointmentCard = React.memo(({ appointment, onConfirm, onReject }) => {
           )}
         </div>
       </div>
+
+      {/* Modal pour partage du dossier médical */}
+      <ShareMedicalRecordDialog
+        open={showShareModal}
+        onOpenChange={setShowShareModal}
+        appointment={appointment}
+        onShare={onShareMedicalRecord}
+      />
     </div>
   );
 });
@@ -1454,8 +1606,6 @@ const ProfilMedecin = () => {
   }, [workingHours]);
 
   // Chargement des données
-  // Dans votre composant ProfilMedecin, ligne ~130
-
   const fetchAllData = useCallback(async () => {
     if (role !== "medecin") return;
 
@@ -1725,6 +1875,66 @@ const ProfilMedecin = () => {
     }
   }, []);
 
+  // NOUVELLES FONCTIONS POUR LES ACTIONS MÉDICALES
+  const handlePrescription = useCallback(async (appointment) => {
+    try {
+      // Redirection vers la page de création d'ordonnance
+      window.location.href = `/medecin/ordonnance/${appointment.id}`;
+    } catch (error) {
+      console.error('Erreur création ordonnance:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la création de l'ordonnance",
+        variant: "destructive",
+      });
+    }
+  }, []);
+
+  const handleSickLeave = useCallback(async (appointment) => {
+    try {
+      // Redirection vers la page de création d'arrêt maladie
+      window.location.href = `/medecin/arret-maladie/${appointment.id}`;
+    } catch (error) {
+      console.error('Erreur création arrêt maladie:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la création de l'arrêt maladie",
+        variant: "destructive",
+      });
+    }
+  }, []);
+
+  const handleShareMedicalRecord = useCallback(async (appointmentId, targetDoctorId, reason) => {
+    try {
+      await api.post('/api/share-medical-record', {
+        appointmentId,
+        targetDoctorId,
+        reason,
+        sharedBy: 'medecin'
+      });
+
+      toast({
+        title: "Succès",
+        description: "Dossier médical partagé avec succès",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error('Erreur partage dossier médical:', error);
+      const errorMessage = error.response?.data?.message || "Erreur lors du partage du dossier médical";
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  }, []);
+
+  const handleViewMedicalRecord = useCallback((appointment) => {
+    // Redirection vers la page du dossier médical complet
+    window.location.href = `/medecin/dossier-medical/${appointment.patient_id}`;
+  }, []);
+
   const handlePasswordChange = useCallback(
     async (currentPassword, newPassword) => {
       try {
@@ -1846,6 +2056,10 @@ const ProfilMedecin = () => {
                 appointment={appointment}
                 onConfirm={handleConfirmAppointment}
                 onReject={handleRejectAppointment}
+                onPrescription={handlePrescription}
+                onSickLeave={handleSickLeave}
+                onShareMedicalRecord={handleShareMedicalRecord}
+                onViewMedicalRecord={handleViewMedicalRecord}
               />
             ))}
           </div>

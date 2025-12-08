@@ -45,6 +45,7 @@ import {
   Loader2,
   Globe,
   ShieldCheck,
+  Video,
 } from "lucide-react";
 import api from "@/api/axios";
 import SafeAvatar from "@/components/common/SafeAvatar";
@@ -939,6 +940,7 @@ const MedecinProfilePage = () => {
   const navigate = useNavigate();
   const { user, role, token } = useContext(AuthContext);
   const { toast } = useToast();
+  const [consultationMode, setConsultationMode] = useState('presentiel');
 
   // États principaux
   const [medecin, setMedecin] = useState(null);
@@ -1239,80 +1241,81 @@ const MedecinProfilePage = () => {
   ]);
 
   const handlePrendreRdv = useCallback(async () => {
-    if (!user) {
-      toast({
-        title: "Connexion requise",
-        description: "Vous devez être connecté pour prendre un rendez-vous",
-        variant: "default",
-      });
-      navigate("/login", { state: { from: `/profil-medecin/${id}` } });
-      return;
-    }
+  if (!user) {
+    toast({
+      title: "Connexion requise",
+      description: "Vous devez être connecté pour prendre un rendez-vous",
+      variant: "default",
+    });
+    navigate("/login", { state: { from: `/profil-medecin/${id}` } });
+    return;
+  }
 
-    if (!rdvDate || !rdvTime) {
-      setRdvMessage("Veuillez sélectionner une date et une heure");
-      toast({
-        title: "Informations manquantes",
-        description: "Veuillez sélectionner une date et une heure",
-        variant: "default",
-      });
-      return;
-    }
+  if (!rdvDate || !rdvTime) {
+    setRdvMessage("Veuillez sélectionner une date et une heure");
+    toast({
+      title: "Informations manquantes",
+      description: "Veuillez sélectionner une date et une heure",
+      variant: "default",
+    });
+    return;
+  }
 
-    setLoadingRdv(true);
-    setRdvMessage("");
+  setLoadingRdv(true);
+  setRdvMessage("");
 
-    try {
-      const response = await api.post(
-        "/appointments",
-        {
-          medecin_id: medecinData.id,
-          date: rdvDate,
-          time: rdvTime,
-          consultation_type: consultationType,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  try {
+    const response = await api.post(
+      "/appointments",
+      {
+        medecin_id: medecinData.id,
+        date: rdvDate,
+        time: rdvTime,
+        consultation_type: consultationType,
+        consultation_mode: consultationMode, // ✅ NOUVEAU
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      const successMessage =
-        response.data.message || "Rendez-vous créé avec succès !";
+    const successMessage = response.data.message || "Rendez-vous créé avec succès !";
 
-      toast({
-        title: "Rendez-vous confirmé",
-        description: successMessage,
-        variant: "default",
-      });
+    toast({
+      title: "Rendez-vous confirmé",
+      description: successMessage,
+      variant: "default",
+    });
 
-      setRdvMessage(successMessage);
-      setRdvDate("");
-      setRdvTime("");
-      setConsultationType("Consultation générale");
-    } catch (error) {
-      const errorData = error.response?.data;
-      const errorMessage =
-        errorData?.message || "Erreur lors de la prise de rendez-vous";
+    setRdvMessage(successMessage);
+    setRdvDate("");
+    setRdvTime("");
+    setConsultationType("Consultation générale");
+    setConsultationMode('presentiel'); // ✅ RESET
+  } catch (error) {
+    const errorData = error.response?.data;
+    const errorMessage = errorData?.message || "Erreur lors de la prise de rendez-vous";
 
-      toast({
-        title: "Erreur de rendez-vous",
-        description: errorMessage,
-        variant: "destructive",
-      });
+    toast({
+      title: "Erreur de rendez-vous",
+      description: errorMessage,
+      variant: "destructive",
+    });
 
-      setRdvMessage(errorMessage);
-    } finally {
-      setLoadingRdv(false);
-    }
-  }, [
-    user,
-    token,
-    id,
-    rdvDate,
-    rdvTime,
-    consultationType,
-    medecinData,
-    navigate,
-    toast,
-  ]);
+    setRdvMessage(errorMessage);
+  } finally {
+    setLoadingRdv(false);
+  }
+}, [
+  user,
+  token,
+  id,
+  rdvDate,
+  rdvTime,
+  consultationType,
+  consultationMode, // ✅ AJOUTER dans les dépendances
+  medecinData,
+  navigate,
+  toast,
+]);
 
   const handleShare = useCallback(async () => {
     const shareUrl = window.location.href;
@@ -1770,7 +1773,98 @@ const MedecinProfilePage = () => {
                   <Calendar className="w-6 h-6 text-emerald-600" />
                   Prendre rendez-vous
                 </h2>
+
                 <div className="space-y-4">
+                  {/* ✅ NOUVEAU : Choix du mode de consultation */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-3">
+                      Mode de consultation *
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setConsultationMode("presentiel")}
+                        className={`p-4 rounded-xl border-2 transition-all ${
+                          consultationMode === "presentiel"
+                            ? "border-emerald-500 bg-emerald-50"
+                            : "border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="flex flex-col items-center gap-2">
+                          <Building2
+                            className={`w-6 h-6 ${
+                              consultationMode === "presentiel"
+                                ? "text-emerald-600"
+                                : "text-slate-400"
+                            }`}
+                          />
+                          <span
+                            className={`text-sm font-semibold ${
+                              consultationMode === "presentiel"
+                                ? "text-emerald-900"
+                                : "text-slate-600"
+                            }`}
+                          >
+                            Présentiel
+                          </span>
+                          <span className="text-xs text-slate-500 text-center">
+                            Au cabinet
+                          </span>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setConsultationMode("telemedicine")}
+                        className={`p-4 rounded-xl border-2 transition-all ${
+                          consultationMode === "telemedicine"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="flex flex-col items-center gap-2">
+                          <Video
+                            className={`w-6 h-6 ${
+                              consultationMode === "telemedicine"
+                                ? "text-blue-600"
+                                : "text-slate-400"
+                            }`}
+                          />
+                          <span
+                            className={`text-sm font-semibold ${
+                              consultationMode === "telemedicine"
+                                ? "text-blue-900"
+                                : "text-slate-600"
+                            }`}
+                          >
+                            Téléconsultation
+                          </span>
+                          <span className="text-xs text-slate-500 text-center">
+                            En ligne
+                          </span>
+                        </div>
+                      </button>
+                    </div>
+
+                    {/* Info télémédecine */}
+                    {consultationMode === "telemedicine" && (
+                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                          <div className="text-xs text-blue-800">
+                            <p className="font-semibold mb-1">
+                              Consultation vidéo sécurisée
+                            </p>
+                            <ul className="space-y-1 list-disc list-inside">
+                              <li>Connexion internet stable requise</li>
+                              <li>Caméra et microphone nécessaires</li>
+                              <li>Accès 15 min avant l'heure</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-2">
                       Date *

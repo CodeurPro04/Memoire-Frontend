@@ -36,6 +36,10 @@ import BlogDetailPage from "@/pages/BlogDetailPage";
 import ContactPage from "@/pages/ContactPage";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminPage from "@/pages/AdminPage";
+import TelemedicineConsultation from "@/components/patient/TelemedicineConsultation";
+import DossierMedical from "@/components/DossierMedical";
+import ArretMaladie from "@/components/ArretMaladie";
+import Ordonnance from "@/components/Ordonnance";
 
 function Layout({ children }) {
   const location = useLocation();
@@ -98,11 +102,35 @@ function App() {
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/blog/:slug" element={<BlogDetailPage />} />
           <Route path="/contact" element={<ContactPage />} />
-
+          <Route
+            path="/medecin/dossier-medical/:patientId"
+            element={<DossierMedical />}
+          />
+          <Route
+            path="/medecin/arret-maladie/:appointmentId"
+            element={<ArretMaladie />}
+          />
+          <Route
+            path="/medecin/ordonnance/:appointmentId"
+            element={<Ordonnance />}
+          />
+          <Route
+            path="/patient/telemedicine/:appointmentId"
+            element={<TelemedicineConsultation />}
+          />
+          <Route
+            path="/medecin/telemedicine/:appointmentId"
+            element={<TelemedicineConsultation />}
+          />
           {/* Routes admin AVEC HASH obligatoire */}
-          <Route path="/admin/:hash/login" element={<AdminProtectedRoute component={AdminLogin} />} />
-          <Route path="/admin/:hash" element={<AdminProtectedRoute component={AdminPage} />} />
-
+          <Route
+            path="/admin/:hash/login"
+            element={<AdminProtectedRoute component={AdminLogin} />}
+          />
+          <Route
+            path="/admin/:hash"
+            element={<AdminProtectedRoute component={AdminPage} />}
+          />
           {/* Redirection des routes inconnues */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

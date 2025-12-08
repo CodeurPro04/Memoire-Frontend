@@ -13,7 +13,7 @@ const Chatbot = () => {
 
   const initialMessage = {
     id: Date.now(),
-    text: "Salut ! Je suis MeetMed AI, votre assistant médical intelligent. Décrivez vos symptômes et je vous orienterai vers le spécialiste idéal.",
+    text: "Salut ! Je suis Heidi AI, votre assistant médical intelligent. Décrivez vos symptômes et je vous orienterai vers le spécialiste idéal.",
     sender: "bot",
   };
 
@@ -278,7 +278,7 @@ const Chatbot = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                      MeetMed AI
+                      Heidi AI
                       <motion.div
                         animate={{ rotate: [0, 15, -15, 0] }}
                         transition={{ duration: 2, repeat: Infinity }}
@@ -327,7 +327,7 @@ const Chatbot = () => {
                         {msg.sender === "bot" && (
                           <div className="flex items-center gap-2 mb-2 text-cyan-400 text-xs font-semibold">
                             <Sparkles className="w-3 h-3" />
-                            <span>MeetMed AI</span>
+                            <span>Heidi AI</span>
                           </div>
                         )}
                         <div className="whitespace-pre-line leading-relaxed">
