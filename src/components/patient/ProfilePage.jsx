@@ -390,7 +390,8 @@ const DeleteAccountDialog = ({ open, onOpenChange, onDeleteAccount }) => {
     if (confirmText !== "SUPPRIMER MON COMPTE") {
       toast({
         title: "Erreur",
-        description: "Veuillez taper exactement 'SUPPRIMER MON COMPTE' pour confirmer",
+        description:
+          "Veuillez taper exactement 'SUPPRIMER MON COMPTE' pour confirmer",
         variant: "destructive",
       });
       return;
@@ -778,7 +779,7 @@ const ProfilPatient = () => {
   const handleSave = useCallback(async () => {
     try {
       setSaving(true);
-      
+
       // Préparer les données pour l'envoi
       const dataToSend = {
         nom: formData.nom || "",
@@ -813,17 +814,18 @@ const ProfilPatient = () => {
       await fetchAllData();
     } catch (error) {
       console.error("❌ Erreur lors de la mise à jour:", error);
-      
+
       let errorMessage = "Erreur lors de la mise à jour du profil";
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.response?.data?.errors) {
         // Gestion des erreurs de validation Laravel
         const errors = error.response.data.errors;
-        errorMessage = Object.values(errors).flat().join(', ');
+        errorMessage = Object.values(errors).flat().join(", ");
       } else if (error.response?.status === 422) {
-        errorMessage = "Données invalides. Veuillez vérifier les informations saisies.";
+        errorMessage =
+          "Données invalides. Veuillez vérifier les informations saisies.";
       }
 
       toast({
@@ -836,85 +838,88 @@ const ProfilPatient = () => {
     }
   }, [formData, fetchAllData, toast]);
 
-  const handleImageUpload = useCallback(async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleImageUpload = useCallback(
+    async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-    // Vérification côté frontend : max 5 Mo
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "Erreur",
-        description: "L'image doit faire moins de 5 Mo",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setUploadingPhoto(true);
-
-      const formDataUpload = new FormData();
-      formDataUpload.append("photo_profil", file);
-
-      const response = await api.post(
-        "/patient/profile/photo",
-        formDataUpload,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-
-      const newPhotoUrl = response.data.photo_url;
-      const newPhotoPath = response.data.photo_profil;
-
-      // Mise à jour des états
-      setPatient((prev) => ({
-        ...prev,
-        photo_profil: newPhotoPath,
-        photo_url: newPhotoUrl,
-      }));
-
-      setFormData((prev) => ({
-        ...prev,
-        photo_profil: newPhotoPath,
-      }));
-
-      toast({
-        title: "Succès",
-        description: "Photo de profil mise à jour avec succès !",
-        variant: "default",
-      });
-    } catch (error) {
-      console.error("Erreur upload photo:", error);
-
-      // Gestion précise des erreurs backend Laravel
-      if (error.response?.status === 422) {
-        const msg =
-          error.response?.data?.message ||
-          "Le fichier est invalide ou trop volumineux.";
+      // Vérification côté frontend : max 5 Mo
+      if (file.size > 5 * 1024 * 1024) {
         toast({
           title: "Erreur",
-          description: msg,
+          description: "L'image doit faire moins de 5 Mo",
           variant: "destructive",
         });
-      } else if (error.response?.status === 413) {
-        toast({
-          title: "Erreur",
-          description:
-            "Le fichier dépasse la taille maximale autorisée (5 Mo).",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Erreur",
-          description: "Erreur lors du téléchargement de la photo.",
-          variant: "destructive",
-        });
+        return;
       }
-    } finally {
-      setUploadingPhoto(false);
-    }
-  }, [toast]);
+
+      try {
+        setUploadingPhoto(true);
+
+        const formDataUpload = new FormData();
+        formDataUpload.append("photo_profil", file);
+
+        const response = await api.post(
+          "/patient/profile/photo",
+          formDataUpload,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+
+        const newPhotoUrl = response.data.photo_url;
+        const newPhotoPath = response.data.photo_profil;
+
+        // Mise à jour des états
+        setPatient((prev) => ({
+          ...prev,
+          photo_profil: newPhotoPath,
+          photo_url: newPhotoUrl,
+        }));
+
+        setFormData((prev) => ({
+          ...prev,
+          photo_profil: newPhotoPath,
+        }));
+
+        toast({
+          title: "Succès",
+          description: "Photo de profil mise à jour avec succès !",
+          variant: "default",
+        });
+      } catch (error) {
+        console.error("Erreur upload photo:", error);
+
+        // Gestion précise des erreurs backend Laravel
+        if (error.response?.status === 422) {
+          const msg =
+            error.response?.data?.message ||
+            "Le fichier est invalide ou trop volumineux.";
+          toast({
+            title: "Erreur",
+            description: msg,
+            variant: "destructive",
+          });
+        } else if (error.response?.status === 413) {
+          toast({
+            title: "Erreur",
+            description:
+              "Le fichier dépasse la taille maximale autorisée (5 Mo).",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Erreur",
+            description: "Erreur lors du téléchargement de la photo.",
+            variant: "destructive",
+          });
+        }
+      } finally {
+        setUploadingPhoto(false);
+      }
+    },
+    [toast]
+  );
 
   const triggerFileInput = useCallback(() => {
     fileInputRef.current?.click();
@@ -1231,7 +1236,7 @@ const ProfilPatient = () => {
       {/* Contenu principal */}
       <div className="max-w-7xl mx-auto px-4 py-8 -mt-16 relative z-10">
         {/* Statistiques */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <StatCard
             icon={Calendar}
             value={appointmentStats.total}
@@ -1246,13 +1251,14 @@ const ProfilPatient = () => {
             gradientFrom="from-green-500"
             gradientTo="to-emerald-500"
           />
+          {/* Statut En attente 
           <StatCard
             icon={Clock}
             value={appointmentStats.pending}
             label="En attente"
             gradientFrom="from-amber-500"
             gradientTo="to-yellow-500"
-          />
+          /> */}
           <StatCard
             icon={XCircle}
             value={appointmentStats.cancelled}
@@ -1881,13 +1887,11 @@ const ProfilPatient = () => {
                             </div>
                           )}
                         </div>
-                                                <div className="flex gap-2">
+                        <div className="flex gap-2">
                           <Button
                             size="sm"
                             className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white"
-                            onClick={() =>
-                              navigate(`/medecin/${medecin.id}`)
-                            }
+                            onClick={() => navigate(`/medecin/${medecin.id}`)}
                           >
                             Voir profil
                           </Button>
@@ -1930,9 +1934,7 @@ const ProfilPatient = () => {
                   <div className="flex items-center gap-3">
                     <Key className="w-5 h-5 text-blue-500" />
                     <div>
-                      <p className="font-medium text-slate-800">
-                        Mot de passe
-                      </p>
+                      <p className="font-medium text-slate-800">Mot de passe</p>
                       <p className="text-sm text-slate-600">
                         Dernière modification il y a 3 mois
                       </p>
@@ -1954,12 +1956,13 @@ const ProfilPatient = () => {
                       <p className="font-medium text-slate-800">
                         Adresse email
                       </p>
-                      <p className="text-sm text-slate-600">
-                        {patient.email}
-                      </p>
+                      <p className="text-sm text-slate-600">{patient.email}</p>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-green-600 border-green-300">
+                  <Badge
+                    variant="outline"
+                    className="text-green-600 border-green-300"
+                  >
                     Vérifiée
                   </Badge>
                 </div>
@@ -1985,7 +1988,8 @@ const ProfilPatient = () => {
                         Supprimer le compte
                       </p>
                       <p className="text-sm text-red-700 mb-3">
-                        Cette action est irréversible. Toutes vos données seront définitivement supprimées.
+                        Cette action est irréversible. Toutes vos données seront
+                        définitivement supprimées.
                       </p>
                       <Button
                         onClick={() => setDeleteAccountOpen(true)}
