@@ -9,7 +9,7 @@ const ProjectsList = ({ projects }) => {
   const navigate = useNavigate();
 
   const goToProject = (slug) => {
-    navigate(`/project/${slug}`); // adapte cette route si besoin
+    navigate(`/project/${slug}`);
   };
   return (
     <div className="space-y-40">
@@ -215,8 +215,8 @@ const ProjectsSection = () => {
               // exemple de champs supplémentaires, adapter selon ta source
               logo: project.logo || null,
               client: project.client || "",
-              highlights: project.highlights || [], // tableau {icon: JSX, text: string}
-              testimonial: project.testimonial || null, // objet {quote, author, position}
+              highlights: project.highlights || [], 
+              testimonial: project.testimonial || null, 
             }));
 
             setProjects(formattedProjects);

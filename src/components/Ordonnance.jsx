@@ -302,8 +302,12 @@ const Ordonnance = () => {
                       <p className="text-lg font-bold text-gray-900">
                         {appointment.patient_prenom} {appointment.patient_nom}
                       </p>
+                      {}
                       <p className="text-sm text-gray-600 mt-1">
-                        ID: {appointment.patient_id}
+                        Phone: {appointment.patient_telephone}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Adresse: {appointment.patient_address}
                       </p>
                     </div>
                   </div>

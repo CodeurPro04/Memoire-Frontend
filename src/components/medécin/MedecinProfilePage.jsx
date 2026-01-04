@@ -178,8 +178,8 @@ const getCurrentAvailability = (workingHours) => {
   const now = new Date();
   const today = now
     .toLocaleDateString("fr-FR", { weekday: "long" })
-    .toLowerCase(); // ex: "mercredi"
-  const currentTime = now.toTimeString().slice(0, 5); // "HH:MM"
+    .toLowerCase();
+  const currentTime = now.toTimeString().slice(0, 5); 
 
   // Trouver le jour correspondant dans le tableau
   const todaySchedule = workingHours.find((d) => d.day.toLowerCase() === today);
@@ -303,7 +303,7 @@ const AproposContent = React.memo(({ medecinData }) => (
               </Badge>
             </div>
           </div>
-          {/* Exemple statique, à remplacer par des données réelles si disponibles 
+          {/* Exemple statique
           <div className="space-y-3">
             <h3 className="font-semibold text-slate-800">Compétences</h3>
             <div className="flex flex-wrap gap-2">
