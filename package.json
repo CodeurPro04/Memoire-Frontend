@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.8",
+    "@heroicons/react": "^2.2.0",
+    "@inertiajs/react": "^2.3.10",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.3",
     "@radix-ui/react-checkbox": "^1.0.4",
