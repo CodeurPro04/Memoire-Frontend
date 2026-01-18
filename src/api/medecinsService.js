@@ -104,6 +104,15 @@ export const medecinService = {
     }
   },
 
+  register: async (data) => {
+        try {
+            const response = await api.post("/medecin/register", data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data?.message || "Erreur lors de l'inscription";
+        }
+  }
+
 //   getMedecinById: async (id) => {
 //     try {
 //       const response = await api.get(`${BASE_URL}/medecins/${id}`);

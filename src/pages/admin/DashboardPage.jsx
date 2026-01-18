@@ -8,11 +8,11 @@ import {
     AcademicCapIcon
 } from '@heroicons/react/24/outline';
 
-import { authService } from '../api/authService';
-import { medecinService } from '../api/medecinsService';
-import { cliniqueService } from '../api/cliniquesService';
-import { patientService } from '../api/patientsService';
-import { appointmentService } from '../api/appointmentService';
+import { authService } from '../../api/authService';
+import { medecinService } from '../../api/medecinsService';
+import { cliniqueService } from '../../api/cliniquesService';
+import { patientService } from '../../api/patientsService';
+import { appointmentService } from '../../api/appointmentService';
 
 export default function DashboardPage() {
     const [data, setData] = useState({
@@ -37,7 +37,7 @@ export default function DashboardPage() {
               ]);
 
               const admins = (resAdmins.data || resAdmins).length || 0;
-              const doctors = (resMed.data || resMed).length || 0;
+              const doctors = resMed.total !== undefined ? resMed.total : (resMed.length || 0);
               const clinics = (resClin.data || resClin).length || 0;
               const patients = (resPat.data || resPat).length || 0;
 

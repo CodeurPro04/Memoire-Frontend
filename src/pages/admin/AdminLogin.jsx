@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { authService } from "../api/authService";
+import { authService } from "../../api/authService";
 
 export default function AdminLogin() {
   const [credentials, setCredentials] = useState({ email: "", password: "" });

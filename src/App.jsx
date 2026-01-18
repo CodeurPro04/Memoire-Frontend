@@ -34,14 +34,15 @@ import StartupPage from "@/pages/StartupPage";
 import BlogPage from "@/pages/BlogPage";
 import BlogDetailPage from "@/pages/BlogDetailPage";
 import ContactPage from "@/pages/ContactPage";
-import AdminLogin from "@/pages/AdminLogin";
+import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminPage from "@/pages/AdminPage";
 import TelemedicineConsultation from "@/components/patient/TelemedicineConsultation";
 import DossierMedical from "@/components/DossierMedical";
 import ArretMaladie from "@/components/ArretMaladie";
 import Ordonnance from "@/components/Ordonnance";
-import DashboardPage from "./pages/DashboardPage";
+import DashboardPage from "./pages/admin/DashboardPage";
 import DashboardLayout from "./layouts/DashboardLayout";
+import DoctorsManagement from "./pages/admin/DoctorsManagement";
 
 function Layout({ children }) {
   const location = useLocation();
@@ -144,6 +145,17 @@ function App() {
               <AdminProtectedRoute component={() => (
                 <DashboardLayout>
                   <DashboardPage />
+                </DashboardLayout>
+              )} />
+            } 
+          />
+
+          <Route 
+            path="/admin/doctors" 
+            element={
+              <AdminProtectedRoute component={() => (
+                <DashboardLayout>
+                  <DoctorsManagement />
                 </DashboardLayout>
               )} />
             } 
