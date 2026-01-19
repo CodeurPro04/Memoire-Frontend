@@ -3,12 +3,33 @@ import {
     EnvelopeIcon, PhoneIcon, MapPinIcon, 
     AcademicCapIcon, BanknotesIcon, GlobeAltIcon,
     CheckCircleIcon, XCircleIcon, 
-    BuildingOfficeIcon
+    BuildingOfficeIcon,
+    UserIcon,
 } from '@heroicons/react/24/outline';
-import { ClockIcon, UserIcon } from 'lucide-react';
+import { ClockIcon } from 'lucide-react';
 
 export default function DoctorDetails({ doctor }) {
-    if (!doctor) return null;
+    // Sécurité si doctor est undefined
+    if (!doctor) return (
+        <div className="p-10 text-center text-gray-500 italic">
+            Chargement des informations...
+        </div>
+    );
+
+    const formatWorkingHours = (data) => {
+        if (!data) return [];
+        
+        try {
+            // Si c'est une chaîne JSON, on la transforme en tableau
+            const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            console.error("Erreur format horaires", e);
+            return [];
+        }
+    };
+
+    const hours = formatWorkingHours(doctor.working_hours);
 
     const infoGroup = (label, value, Icon) => (
         <div className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
@@ -22,116 +43,122 @@ export default function DoctorDetails({ doctor }) {
 
     return (
         <div className="space-y-6">
-            {/* Header avec Photo et Nom */}
+            {/* 1. Header avec Photo et Nom */}
             <div className="flex items-center gap-5 pb-6 border-b border-gray-100">
-                <div className="w-20 h-20 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                <div className="w-20 h-20 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg overflow-hidden">
                     {doctor.photo_profil ? (
-                        <img src={doctor.photo_profil} alt="" className="w-full h-full object-cover rounded-2xl" />
-                    ) : doctor.nom[0]}
+                        <img src={doctor.photo_profil} alt="" className="w-full h-full object-cover" />
+                    ) : (doctor.nom ? doctor.nom[0] : "?")}
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Dr. {doctor.prenom} {doctor.nom}</h2>
-                    <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wide">
-                        {doctor.specialite}
+                    <h2 className="text-2xl font-bold text-gray-800">
+                        Dr. {doctor.prenom ?? ""} {doctor.nom ?? ""}
+                    </h2>
+                    <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wide border border-blue-100">
+                        {doctor.specialite || 'Spécialité non définie'}
                     </span>
                 </div>
             </div>
 
-            {/* Grille d'infos rapides */}
+            {/* 2. Grille d'infos rapides */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {infoGroup("Email", doctor.email, EnvelopeIcon)}
                 {infoGroup("Téléphone", doctor.telephone, PhoneIcon)}
-                {infoGroup("Localisation", `${doctor.commune || ''}, ${doctor.ville || ''}`, MapPinIcon)}
-                {infoGroup("Prix Consultation", `${doctor.consultation_price ?? 'N/A'} FCFA`, BanknotesIcon)}
+                {infoGroup("Localisation", `${doctor.commune || ''} ${doctor.ville || ''}`.trim() || 'Non localisé', MapPinIcon)}
+                {infoGroup("Prix Consultation", doctor.consultation_price ? `${doctor.consultation_price} FCFA` : 'N/A', BanknotesIcon)}
             </div>
 
-            {/* Bio & Parcours */}
-            <div className="space-y-4">
-                <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100">
-                    <h4 className="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
-                        <AcademicCapIcon className="w-4 h-4" /> Biographie & Expertise
-                    </h4>
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                        {doctor.bio || doctor.professional_background || "Aucune description disponible."}
-                    </p>
-                </div>
+            {/* 3. Bio & Parcours */}
+            <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100">
+                <h4 className="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
+                    <AcademicCapIcon className="w-4 h-4" /> Biographie & Expertise
+                </h4>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                    {doctor.bio || doctor.professional_background || "Aucune description disponible pour ce profil."}
+                </p>
             </div>
 
-            {/* Langues & Assurances */}
-            <div className="grid grid-cols-2 gap-4 items-start">
-                <div className="p-4 rounded-xl border border-gray-100">
-                    <p className="text-xs font-bold text-black uppercase mb-2 flex items-center gap-2">
-                        <GlobeAltIcon className="w-4 h-4" /> Langues
+            {/* 4. Langues & Assurances (Ligne de 2 cadres) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                <div className="p-4 rounded-xl border border-gray-100 bg-white shadow-sm h-fit">
+                    <p className="text-xs font-bold text-black uppercase mb-3 flex items-center gap-2">
+                        <GlobeAltIcon className="w-4 h-4 text-blue-500" /> Langues parlées
                     </p>
                     <div className="flex flex-wrap gap-2">
                         {doctor.languages ? (
-                        (Array.isArray(doctor.languages) ? doctor.languages : doctor.languages.split(',')).map((l, index) => (
-                            <span key={index} className="text-xs bg-white border border-gray-100 px-2 py-1 rounded-md text-gray-600 shadow-sm">
-                                {l.trim()}
-                            </span>
-                        ))
-                    ) : <span className="text-xs italic text-black">Non spécifié</span>}
+                            (Array.isArray(doctor.languages) ? doctor.languages : doctor.languages.split(',')).map((l, index) => (
+                                <span key={index} className="text-xs bg-gray-50 border border-gray-100 px-2 py-1 rounded-md text-gray-600">
+                                    {l.trim()}
+                                </span>
+                            ))
+                        ) : <span className="text-xs italic text-gray-400">Non spécifié</span>}
                     </div>
                 </div>
-                <div className="p-4 rounded-xl border border-gray-100">
-                    <p className="text-xs font-bold text-black uppercase mb-2">Assurances</p>
+
+                <div className="p-4 rounded-xl border border-gray-100 bg-white shadow-sm h-fit">
+                    <p className="text-xs font-bold text-black uppercase mb-3 flex items-center gap-2">
+                        <CheckCircleIcon className="w-4 h-4 text-blue-500" /> Assurances
+                    </p>
                     <div className="flex items-center gap-2">
                         {doctor.insurance_accepted ? (
-                            <><CheckCircleIcon className="w-5 h-5 text-green-500" /> <span className="text-sm font-medium">Acceptées</span></>
+                            <span className="flex items-center gap-1.5 text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                                <CheckCircleIcon className="w-4 h-4" /> Acceptées
+                            </span>
                         ) : (
-                            <><XCircleIcon className="w-5 h-5 text-red-500" /> <span className="text-sm font-medium">Non acceptées</span></>
+                            <span className="flex items-center gap-1.5 text-sm font-medium text-red-500 bg-red-50 px-3 py-1 rounded-full">
+                                <XCircleIcon className="w-4 h-4" /> Non acceptées
+                            </span>
                         )}
                     </div>
                 </div>
+            </div>
 
-                <div className="p-5 rounded-2xl border border-gray-100 bg-white">
+            {/* 5. Lieux & Horaires (Ligne de 2 cadres) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                {/* Lieux d'intervention */}
+                <div className="p-5 rounded-2xl border border-gray-100 bg-white shadow-sm h-fit">
                     <h4 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <MapPinIcon className="w-4 h-4 text-blue-600" /> Lieux d'intervention
+                        <BuildingOfficeIcon className="w-4 h-4 text-blue-600" /> Établissements
                     </h4>
-                    
                     <div className="space-y-3">
-                        {doctor.cliniques && doctor.cliniques.length > 0 ? (
-                            doctor.cliniques.map((clinique) => (
-                                <div key={clinique.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center">
-                                            <BuildingOfficeIcon className="w-4 h-4 text-black" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-800">{clinique.nom}</p>
-                                            <p className="text-[11px] text-gray-500">{clinique.address}</p>
+                            {doctor.cliniques && doctor.cliniques.length > 0 ? (
+                                doctor.cliniques.map((clinique) => (
+                                    <div key={clinique.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                        <div className="flex items-center gap-3">
+                                            <BuildingOfficeIcon className="w-4 h-4 text-gray-400" />
+                                            <div>
+                                                <p className="text-xs font-bold text-gray-800">{clinique.nom}</p>
+                                                <p className="text-[10px] text-gray-500">{clinique.address}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                    {clinique.pivot?.fonction && (
-                                        <span className="text-[10px] font-bold px-2 py-1 bg-blue-100 text-blue-700 rounded-md uppercase">
-                                            {clinique.pivot.fonction}
-                                        </span>
-                                    )}
+                                ))
+                            ) : (
+                                <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100 text-amber-700">
+                                    <UserIcon className="w-4 h-4" />
+                                    <p className="text-xs font-medium">À son propre compte</p>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-100 text-amber-700">
-                                <UserIcon className="w-5 h-5" />
-                                <p className="text-sm font-medium">À son propre compte (Indépendant)</p>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
-                </div>
 
-                <div className="mt-6 p-5 rounded-2xl bg-gray-50 border border-gray-100">
-                    <h4 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <ClockIcon className="w-4 h-4 text-blue-600" /> Horaires de consultation
-                    </h4>
-                    <div className="grid grid-cols-2 gap-y-2">
-                        {doctor.working_hours ? Object.entries(doctor.working_hours).map(([day, hours]) => (
-                            <div key={day} className="flex justify-between text-sm pr-4">
-                                <span className="capitalize text-gray-500">{day}</span>
-                                <span className="font-medium text-gray-700">{hours}</span>
-                            </div>
-                        )) : (
-                            <p className="text-xs italic text-black">Horaires non définis</p>
-                        )}
-                    </div>
+                    {/* Horaires */}
+                    <div className="p-5 rounded-2xl bg-gray-50 border border-gray-100 shadow-sm h-fit">
+                        <h4 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <ClockIcon className="w-4 h-4 text-blue-600" /> Horaires
+                        </h4>
+                        <div className="space-y-2">
+                            {hours.length > 0 ? (
+                                hours.map((item, index) => (
+                                    <div key={index} className="flex justify-between items-center text-xs border-b border-gray-200/50 pb-1 last:border-0">
+                                        <span className="font-medium text-gray-600 capitalize">{item.day}</span>
+                                        <span className="text-blue-600 font-bold">{item.hours}</span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-xs text-gray-400 italic">Horaires non définis</p>
+                            )}
+                        </div>
                 </div>
             </div>
         </div>

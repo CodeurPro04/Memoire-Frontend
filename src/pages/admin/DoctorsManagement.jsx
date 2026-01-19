@@ -11,8 +11,10 @@ import {
 import { medecinService } from '../../api/medecinsService';
 import Modal from '../../components/admin/Modal';
 import DoctorForm from '../../components/admin/DoctorForm';
-import toast from 'react-hot-toast';
 import DoctorDetails from '../../components/admin/DoctorDetails';
+import EditDoctorForm from '../../components/admin/EditDoctorForm';
+import { useToast } from "@/components/ui/use-toast";
+
 
 export default function DoctorsManagement() {
     const [doctors, setDoctors] = useState([]);
@@ -21,6 +23,11 @@ export default function DoctorsManagement() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedDoctor, setSelectedDoctor] = useState(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [doctorToDelete, setDoctorToDelete] = useState(null);
+
+    const { toast } = useToast()
 
     const [pagination, setPagination] = useState({
         currentPage: 1,
@@ -53,6 +60,40 @@ export default function DoctorsManagement() {
         setIsDetailsModalOpen(true);
     };
 
+    const handleEditClick = (doctor) => {
+        setSelectedDoctor(doctor);
+        setIsEditModalOpen(true);
+    };
+
+    const handleUpdateDoctor = async (formData) => {
+        setLoading(true);
+        try {
+            const dataWithId = {
+                ...formData,
+                id: selectedDoctor.id
+            };
+            await medecinService.updateMedecin(dataWithId);
+            toast({
+                title: "Succès",
+                description: "Le profil du médecin a été mis à jour.",
+                variant: "default",
+            });
+            
+            setIsEditModalOpen(false);
+            setSelectedDoctor(null);
+            fetchDoctors(pagination.currentPage);
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: "Erreur",
+                description: "Impossible de mettre à jour le profil.",
+                variant: "error",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Filtrage dynamique pour la recherche
     const filteredDoctors = doctors.filter(doc => 
         doc.nom.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -70,15 +111,53 @@ export default function DoctorsManagement() {
             
             // 2. Rafraîchir la liste pour voir le nouveau médecin (page 1)
             await fetchDoctors(1);
-            
-            // Optionnel: Ajouter une notification de succès ici (ex: toast)
-            toast("Médecin ajouté avec succès !")
-            console.log("Médecin ajouté avec succès !");
+            toast({
+                title: "Médecin ajouté",
+                description: "Le nouveau profil a été créé avec succès.",
+            });
         } catch (error) {
             console.error("Erreur lors de l'ajout du médecin:", error);
-            alert(error.response?.data?.message || "Une erreur est survenue lors de l'enregistrement.");
+            toast({
+                title: "Erreur d'inscription",
+                description: errorMessage,
+                variant: "error",
+            });
         } finally {
             setLoading(false);
+        }
+    };
+
+    const openDeleteConfirm = (doctor) => {
+        setDoctorToDelete(doctor);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!doctorToDelete) return;
+
+        setLoading(true);
+        setIsDeleteModalOpen(false);
+
+        try {
+            console.log(doctorToDelete.id);
+            await medecinService.deleteMedecin(doctorToDelete.id);
+            
+            toast({
+                title: "Suppression réussie",
+                description: `Le Dr. ${doctorToDelete.nom} a été supprimé.`,
+                variant: "success"
+            });
+
+            fetchDoctors(pagination.currentPage); 
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Erreur",
+                description: "Impossible de supprimer ce médecin.",
+            });
+        } finally {
+            setLoading(false);
+            setDoctorToDelete(null);
         }
     };
 
@@ -172,10 +251,15 @@ export default function DoctorsManagement() {
                                         <button className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-gray-200 text-gray-400 hover:text-blue-600 transition-all shadow-sm">
                                             <EyeIcon className="w-4 h-4" />
                                         </button>
-                                        <button className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-gray-200 text-gray-400 hover:text-amber-600 transition-all shadow-sm">
+                                        <button onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleEditClick(doc);
+                                            }} 
+                                            className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-gray-200 text-gray-400 hover:text-amber-600 transition-all shadow-sm">
                                             <PencilSquareIcon className="w-4 h-4" />
                                         </button>
-                                        <button className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-gray-200 text-gray-400 hover:text-red-600 transition-all shadow-sm">
+                                        <button onClick={(e) => {e.stopPropagation(); openDeleteConfirm(doc);
+                                            }} className="p-2 hover:bg-white rounded-lg border border-transparent hover:border-gray-200 text-gray-400 hover:text-red-600 transition-all shadow-sm">
                                             <TrashIcon className="w-4 h-4" />
                                         </button>
                                     </div>
@@ -234,6 +318,49 @@ export default function DoctorsManagement() {
                     title="Détails du Profil Médecin"
                 >
                     <DoctorDetails doctor={selectedDoctor} />
+                </Modal>
+
+                <Modal 
+                    isOpen={isEditModalOpen} 
+                    onClose={() => setIsEditModalOpen(false)} 
+                    title="Modifier le profil complet"
+                >
+                    {selectedDoctor && (
+                        <EditDoctorForm 
+                            doctor={selectedDoctor}
+                            onSubmit={handleUpdateDoctor} 
+                            onCancel={() => setIsEditModalOpen(false)}
+                            loading={loading}
+                        />
+                    )}
+                </Modal>
+
+                <Modal 
+                    isOpen={isDeleteModalOpen} 
+                    onClose={() => setIsDeleteModalOpen(false)} 
+                    title="Confirmer la suppression"
+                >
+                    <div className="space-y-4">
+                        <p className="text-sm text-gray-600">
+                            Êtes-vous sûr de vouloir supprimer le profil du <strong>Dr. {doctorToDelete?.nom}</strong> ? 
+                            Cette action est irréversible et supprimera toutes les données associées.
+                        </p>
+                        
+                        <div className="flex justify-end gap-3 pt-4">
+                            <button 
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                            >
+                                Annuler
+                            </button>
+                            <button 
+                                onClick={handleConfirmDelete}
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 shadow-sm"
+                            >
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
                 </Modal>
             </div>
         </div>

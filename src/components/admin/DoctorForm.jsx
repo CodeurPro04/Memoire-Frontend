@@ -8,11 +8,18 @@ import {
 import { cliniqueService } from '../../api/cliniquesService';
 import { SPECIALITES } from '../../constants/specialties';
 
-export default function DoctorForm({ onSubmit, onCancel, loading }) {
+export default function DoctorForm({ onSubmit, onCancel, loading, initialData }) {
     const [formData, setFormData] = useState({
-        prenom: "", nom: "", email: "", password: "Password123!", 
-        telephone: "", specialite: "", address: "", 
-        type: "independant", clinique_id: "", fonction: ""
+        prenom: initialData?.prenom || "",
+        nom: initialData?.nom || "",
+        email: initialData?.email || "",
+        password: initialData ? "" : "Password123!",
+        telephone: initialData?.telephone || "",
+        specialite: initialData?.specialite || "",
+        address: initialData?.address || "",
+        type: initialData?.type || "independent",
+        clinique_id: initialData?.cliniques?.[0]?.id || "",
+        fonction: initialData?.fonction || ""
     });
 
     const [cliniques, setCliniques] = useState([]);
@@ -210,7 +217,7 @@ export default function DoctorForm({ onSubmit, onCancel, loading }) {
                     type="submit" disabled={loading}
                     className="px-8 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 disabled:opacity-50 transition-all"
                 >
-                    {loading ? "Création..." : "Enregistrer le médecin"}
+                    {loading ? "Chargement..." : initialData ? "Mettre à jour" : "Enregistrer le médecin"}
                 </button>
             </div>
         </form>
