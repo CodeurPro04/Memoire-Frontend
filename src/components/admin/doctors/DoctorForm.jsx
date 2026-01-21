@@ -5,8 +5,8 @@ import {
     MagnifyingGlassIcon, 
     ChevronDownIcon, 
 } from '@heroicons/react/24/outline';
-import { cliniqueService } from '../../api/cliniquesService';
-import { SPECIALITES } from '../../constants/specialties';
+import { cliniqueService } from '../../../api/cliniquesService';
+import { SPECIALITES } from '../../../constants/specialties';
 
 export default function DoctorForm({ onSubmit, onCancel, loading, initialData }) {
     const [formData, setFormData] = useState({

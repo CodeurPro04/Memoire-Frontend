@@ -28,5 +28,20 @@ export const authService = {
         return response.data; // Retourne le tableau des utilisateurs
     },
 
+    registerAdmin: async (adminData) => {
+        const response = await api.post(`/users`, adminData);
+        return response.data;
+    },
+
+    updateUser: async (adminData) => {
+        const response = await api.put(`/users/update`, adminData);
+        return response.data;
+    },
+
+    deleteUser: async (id) => {
+        const response = await api.delete(`/users/${id}`);
+        return response.data;
+    }
+
 
 };

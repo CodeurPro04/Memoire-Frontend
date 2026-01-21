@@ -10,9 +10,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { medecinService } from '../../api/medecinsService';
 import Modal from '../../components/admin/Modal';
-import DoctorForm from '../../components/admin/DoctorForm';
-import DoctorDetails from '../../components/admin/DoctorDetails';
-import EditDoctorForm from '../../components/admin/EditDoctorForm';
+import DoctorForm from '../../components/admin/doctors/DoctorForm';
+import DoctorDetails from '../../components/admin/doctors/DoctorDetails';
+import EditDoctorForm from '../../components/admin/doctors/EditDoctorForm';
 import { useToast } from "@/components/ui/use-toast";
 
 
@@ -205,11 +205,11 @@ export default function DoctorsManagement() {
                             <tr key={doc.id} className="hover:bg-gray-50/50 transition-colors group">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                                        {/* <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
                                             {doc.nom[0]}
-                                        </div>
+                                        </div> */}
                                         <div>
-                                            <p className="text-sm font-semibold text-gray-800">Dr. {doc.prenom} {doc.nom}</p>
+                                            <p className="text-sm font-semibold text-gray-800">Dr. {doc.nom} {doc.prenom}</p>
                                             <p className="text-xs text-gray-500">Inscrit le {new Date(doc.created_at).toLocaleDateString()}</p>
                                         </div>
                                     </div>

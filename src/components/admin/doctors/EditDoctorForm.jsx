@@ -5,8 +5,8 @@ import {
     GlobeAltIcon, BookOpenIcon, PhoneIcon, MapPinIcon, 
     ShieldCheckIcon, ClockIcon, PlusIcon, TrashIcon
 } from '@heroicons/react/24/outline';
-import { cliniqueService } from '../../api/cliniquesService';
-import { SPECIALITES } from '../../constants/specialties';
+import { cliniqueService } from '../../../api/cliniquesService';
+import { SPECIALITES } from '../../../constants/specialties';
 
 export default function EditDoctorForm({ doctor, onSubmit, onCancel, loading }) {
     const initialWorkingHours = () => {

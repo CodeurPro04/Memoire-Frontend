@@ -36,10 +36,10 @@ export default function DashboardPage() {
                 appointmentService.getAdminStats()
               ]);
 
-              const admins = (resAdmins.data || resAdmins).length || 0;
+              const admins = resAdmins.total !== undefined ? resAdmins.total : (resAdmins.length || 0);
               const doctors = resMed.total !== undefined ? resMed.total : (resMed.length || 0);
-              const clinics = (resClin.data || resClin).length || 0;
-              const patients = (resPat.data || resPat).length || 0;
+              const clinics = resClin.total !== undefined ? resClin.total : (resClin.length || 0);
+              const patients = resPat.total !== undefined ? resPat.total : (resPat.length || 0);
 
                 
 
@@ -51,7 +51,7 @@ export default function DashboardPage() {
                 appointments: resApptStats.total_historique || 0,
                 appointmentsToday: resApptStats.total_aujourd_hui || 0,
                 appointmentsPending: resApptStats.total_a_venir || 0,
-                prescriptions: 0 // À implémenter plus tard
+                prescriptions: 0 
               });
             } catch (error) {
                 console.error("Erreur lors du chargement des statistiques:", error);

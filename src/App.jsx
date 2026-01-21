@@ -43,6 +43,9 @@ import Ordonnance from "@/components/Ordonnance";
 import DashboardPage from "./pages/admin/DashboardPage";
 import DashboardLayout from "./layouts/DashboardLayout";
 import DoctorsManagement from "./pages/admin/DoctorsManagement";
+import PatientsManagement from "./pages/admin/PatientsManagement";
+import CliniquesManagement from "./pages/admin/CliniquesManagement";
+import AdministrateursManagement from "./pages/admin/AdminManagement";
 
 function Layout({ children }) {
   const location = useLocation();
@@ -156,6 +159,39 @@ function App() {
               <AdminProtectedRoute component={() => (
                 <DashboardLayout>
                   <DoctorsManagement />
+                </DashboardLayout>
+              )} />
+            } 
+          />
+
+          <Route 
+            path="/admin/patients" 
+            element={
+              <AdminProtectedRoute component={() => (
+                <DashboardLayout>
+                  <PatientsManagement />
+                </DashboardLayout>
+              )} />
+            } 
+          />
+
+          <Route 
+            path="/admin/cliniques" 
+            element={
+              <AdminProtectedRoute component={() => (
+                <DashboardLayout>
+                  <CliniquesManagement />
+                </DashboardLayout>
+              )} />
+            } 
+          />
+
+          <Route 
+            path="/admin/administrateurs" 
+            element={
+              <AdminProtectedRoute component={() => (
+                <DashboardLayout>
+                  <AdministrateursManagement />
                 </DashboardLayout>
               )} />
             } 

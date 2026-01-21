@@ -9,7 +9,8 @@ import {
     CalendarDaysIcon, 
     FolderIcon,
     EnvelopeIcon,
-    DocumentTextIcon
+    DocumentTextIcon,
+    BuildingOffice2Icon
 } from '@heroicons/react/24/outline';
 
 export default function Sidebar() {
@@ -58,7 +59,10 @@ export default function Sidebar() {
                         <SidebarLink to="/admin/patients" active={location.pathname === '/admin/patients'} icon={<UserGroupIcon className="w-5 h-5" />}>
                             Patients
                         </SidebarLink>
-                        <SidebarLink to="/admin/staff" active={location.pathname === '/admin/staff'} icon={<ShieldCheckIcon className="w-5 h-5" />}>
+                        <SidebarLink to="/admin/cliniques" active={location.pathname === '/admin/cliniques'} icon={<BuildingOffice2Icon className="w-5 h-5" />}>
+                            Cliniques
+                        </SidebarLink>
+                        <SidebarLink to="/admin/administrateurs" active={location.pathname === '/admin/administrateurs'} icon={<ShieldCheckIcon className="w-5 h-5" />}>
                             Administrateurs
                         </SidebarLink>
                     </div>
