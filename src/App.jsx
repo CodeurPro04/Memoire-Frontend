@@ -34,12 +34,18 @@ import StartupPage from "@/pages/StartupPage";
 import BlogPage from "@/pages/BlogPage";
 import BlogDetailPage from "@/pages/BlogDetailPage";
 import ContactPage from "@/pages/ContactPage";
-import AdminLogin from "@/pages/AdminLogin";
+import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminPage from "@/pages/AdminPage";
 import TelemedicineConsultation from "@/components/patient/TelemedicineConsultation";
 import DossierMedical from "@/components/DossierMedical";
 import ArretMaladie from "@/components/ArretMaladie";
 import Ordonnance from "@/components/Ordonnance";
+import DashboardPage from "./pages/admin/DashboardPage";
+import DashboardLayout from "./layouts/DashboardLayout";
+import DoctorsManagement from "./pages/admin/DoctorsManagement";
+import PatientsManagement from "./pages/admin/PatientsManagement";
+import CliniquesManagement from "./pages/admin/CliniquesManagement";
+import AdministrateursManagement from "./pages/admin/AdminManagement";
 
 function Layout({ children }) {
   const location = useLocation();
@@ -58,17 +64,25 @@ function Layout({ children }) {
   );
 }
 
-// Route protégée avec hash
-function AdminProtectedRoute({ component: Component }) {
-  const { hash } = useParams();
-  const validHash = import.meta.env.VITE_ADMIN_HASH;
+// Protection des routes Admin
+function AdminProtectedRoute({children, component: Component }) {
+  // 1. On récupère le token et le rôle stockés lors du login
+  const token = localStorage.getItem("token");
+  const userString = localStorage.getItem("user"); 
+  
+  // 1. On transforme le string en objet JS
+  const user = userString ? JSON.parse(userString) : null;
 
-  if (hash !== validHash) {
+  // 2. Vérification : si pas de token ou si le rôle n'est pas admin
+  if (!token || user?.role !== "admin") {
+    // On redirige vers le login admin (ou l'accueil)
     return <Navigate to="/" replace />;
   }
 
-  return <Component />;
+  // 3. Retourne soit le composant passé en prop, soit les enfants (Layout + Page)
+  return Component ? <Component /> : children;
 }
+
 
 function App() {
   const { i18n } = useTranslation();
@@ -81,7 +95,7 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          {/* Routes publiques */}
+          {/* Routes publiques */}        
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/login-medecin" element={<LoginMedcin />} />
@@ -122,13 +136,69 @@ function App() {
             path="/medecin/telemedicine/:appointmentId"
             element={<TelemedicineConsultation />}
           />
-          {/* Routes admin AVEC HASH obligatoire */}
+          {/* Routes admin */}
           <Route
-            path="/admin/:hash/login"
-            element={<AdminProtectedRoute component={AdminLogin} />}
+            path="/admin/login"
+            element={<AdminLogin/>}
           />
+
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <AdminProtectedRoute component={() => (
+                <DashboardLayout>
+                  <DashboardPage />
+                </DashboardLayout>
+              )} />
+            } 
+          />
+
+          <Route 
+            path="/admin/doctors" 
+            element={
+              <AdminProtectedRoute component={() => (
+                <DashboardLayout>
+                  <DoctorsManagement />
+                </DashboardLayout>
+              )} />
+            } 
+          />
+
+          <Route 
+            path="/admin/patients" 
+            element={
+              <AdminProtectedRoute component={() => (
+                <DashboardLayout>
+                  <PatientsManagement />
+                </DashboardLayout>
+              )} />
+            } 
+          />
+
+          <Route 
+            path="/admin/cliniques" 
+            element={
+              <AdminProtectedRoute component={() => (
+                <DashboardLayout>
+                  <CliniquesManagement />
+                </DashboardLayout>
+              )} />
+            } 
+          />
+
+          <Route 
+            path="/admin/administrateurs" 
+            element={
+              <AdminProtectedRoute component={() => (
+                <DashboardLayout>
+                  <AdministrateursManagement />
+                </DashboardLayout>
+              )} />
+            } 
+          />
+
           <Route
-            path="/admin/:hash"
+            path="/admin"
             element={<AdminProtectedRoute component={AdminPage} />}
           />
           {/* Redirection des routes inconnues */}
